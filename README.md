@@ -60,7 +60,11 @@ Visit `http://localhost:8080/register` to create a volunteer account (lands on `
 ./mvnw clean verify
 ```
 
-Requires the database above to be reachable — there's currently only a context-load smoke test (`VolunteerPortalApplicationTests`); repository/controller tests are a natural next addition.
+Requires the database above to be reachable. The suite includes:
+- A context-load smoke test (`VolunteerPortalApplicationTests`)
+- Repository tests (`@DataJpaTest`, run against the real configured MySQL DB via `@AutoConfigureTestDatabase(replace = NONE)` — there's no embedded test DB since the schema/Flyway migrations are MySQL-specific; each test rolls back its own transaction)
+- Service unit tests (Mockito, no DB) covering registration, join-request approve/reject, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, and config key-uniqueness checks
+- Web-layer tests: a `@WebMvcTest` for `AuthController`'s registration validation, and a full-context `MockMvc` test asserting the `/admin/**` access-control rule (anonymous → redirect to login, wrong role → 403, `ADMIN` → 200)
 
 ## What's implemented
 
@@ -90,4 +94,4 @@ Requires the database above to be reachable — there's currently only a context
 ## What's not implemented yet
 
 - Real email delivery (notifications are in-app only, not emailed)
-- Automated tests beyond the context-load smoke test (`VolunteerPortalApplicationTests`) — repository/controller tests are a natural next addition
+- Broader test coverage: most admin CRUD controllers and the coordinator approval flow don't have dedicated tests yet — the suite establishes the repository/service-unit/web-layer patterns to extend
