@@ -79,6 +79,7 @@ Requires the database above to be reachable — there's currently only a context
   - View initiatives you supervise and approve/reject volunteer join requests
 - **Volunteer-facing** (`/initiatives`, any authenticated user):
   - Browse enabled initiatives, view details, and submit a join request answering that initiative's questions
+  - Withdraw your own join request while it's still pending (not yet reviewed by a coordinator)
 - **Profile self-service** (`/profile`, any authenticated user):
   - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only since they're set by an admin
 - Full schema for the volunteer-management domain: `volunteer_profile`, `grade`, `office`, `initiative`, `initiative_question`, `question_lib` / `question_lib_cat`, `volunteer_initiative`, `volunteer_initiative_answer`, `event`, `attend`, `configset`
@@ -86,6 +87,5 @@ Requires the database above to be reachable — there's currently only a context
 
 ## What's not implemented yet
 
-- Volunteers withdrawing/cancelling their own join request
 - Notifications/emails (e.g. on join approval, or when a volunteer is awarded points)
 - Automated tests beyond the context-load smoke test (`VolunteerPortalApplicationTests`) — repository/controller tests are a natural next addition
