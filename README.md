@@ -63,10 +63,11 @@ Visit `http://localhost:8080/register` to create a volunteer account (lands on `
 Requires the database above to be reachable. The suite includes:
 - A context-load smoke test (`VolunteerPortalApplicationTests`)
 - Repository tests (`@DataJpaTest`, run against the real configured MySQL DB via `@AutoConfigureTestDatabase(replace = NONE)` — there's no embedded test DB since the schema/Flyway migrations are MySQL-specific; each test rolls back its own transaction)
-- Service unit tests (Mockito, no DB) covering registration, join-request approve/reject/find-managed-initiatives, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, and config key-uniqueness checks
+- Service unit tests (Mockito, no DB) covering registration, join-request approve/reject/find-managed-initiatives, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, config key-uniqueness checks, and notification creation/ownership-checked mark-read/mark-all-read
 - Web-layer tests (`@WebMvcTest`), covering **every controller in the app**:
   - `AuthController` — registration validation (duplicate username, password mismatch, happy path)
   - `CoordinatorController` — supervisor-scoped authorization (a coordinator can only manage initiatives they supervise; an admin can manage any) and the check that a join request being approved/rejected actually belongs to the initiative in the URL. Uses `SecurityMockMvcRequestPostProcessors.user(UserDetails)` to inject a real `UserPrincipal`, since `@WithMockUser`'s generic principal doesn't satisfy code that dereferences it
+  - `NotificationController` — same real-`UserPrincipal` technique, asserting list/mark-read/mark-all-read are scoped to the current user's id
   - `InitiativeController` / `OfficeController` / `EventController` / `AttendController` / `QuestionLibCatController` / `QuestionLibController` / `GradeController` — the canonical list/create/edit/update/delete CRUD pattern, plus `@Valid` field-error rendering
   - `InitiativeQuestionController` — that CRUD pattern plus the "copy from library" pre-fill (`?fromLibrary=<id>`)
   - `ConfigSetController` — the duplicate-key rejection path (surfaces as a form error, not a raw SQL constraint violation)
