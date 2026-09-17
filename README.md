@@ -49,7 +49,7 @@ Set them to match whatever you used above (or just use the defaults).
 ```
 
 On startup:
-1. Flyway applies `src/main/resources/db/migration/V1__init_schema.sql` (full schema) and `V2__seed_roles.sql` (default roles: `ADMIN`, `COORDINATOR`, `VOLUNTEER`).
+1. Flyway applies `src/main/resources/db/migration/V1__init_schema.sql` (full schema), `V2__seed_roles.sql` (default roles: `ADMIN`, `COORDINATOR`, `VOLUNTEER`), and `V3__add_notifications.sql` (the `notification` table).
 2. `DataInitializer` seeds a default `admin` user with the `ADMIN` role (unless `SEED_ADMIN=false`) — **change its password immediately in any non-local environment.**
 
 Visit `http://localhost:8080/register` to create a volunteer account (lands on `/home`, `/initiatives`, `/profile`), or log in as `admin`/`admin123` (default) to reach `/admin`.
@@ -82,10 +82,12 @@ Requires the database above to be reachable — there's currently only a context
   - Withdraw your own join request while it's still pending (not yet reviewed by a coordinator)
 - **Profile self-service** (`/profile`, any authenticated user):
   - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only since they're set by an admin
-- Full schema for the volunteer-management domain: `volunteer_profile`, `grade`, `office`, `initiative`, `initiative_question`, `question_lib` / `question_lib_cat`, `volunteer_initiative`, `volunteer_initiative_answer`, `event`, `attend`, `configset`
+- **In-app notifications** (`/notifications`, any authenticated user):
+  - Notified on join-request approval/rejection and when an admin updates your grade/points, with a link back to the relevant page; navbar shows an unread-count badge on every page
+- Full schema for the volunteer-management domain: `volunteer_profile`, `grade`, `office`, `initiative`, `initiative_question`, `question_lib` / `question_lib_cat`, `volunteer_initiative`, `volunteer_initiative_answer`, `event`, `attend`, `configset`, `notification`
 - JPA entities + Spring Data repositories for every table above
 
 ## What's not implemented yet
 
-- Notifications/emails (e.g. on join approval, or when a volunteer is awarded points)
+- Real email delivery (notifications are in-app only, not emailed)
 - Automated tests beyond the context-load smoke test (`VolunteerPortalApplicationTests`) — repository/controller tests are a natural next addition
