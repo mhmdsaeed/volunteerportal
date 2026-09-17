@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Initiative Events')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <p><a th:href="@{/admin/initiatives}">&laquo; Back to Initiatives</a></p>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 th:text="'Events - ' + ${initiative.name}">Events</h2>
+            <a class="btn btn-primary" th:href="@{/admin/initiatives/{id}/events/new(id=${initiative.id})}">New Event</a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Location</th>
+                    <th>Enabled</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="event : ${events}">
+                    <td th:text="${event.name}"></td>
+                    <td th:text="${event.fromDttm != null ? #temporals.format(event.fromDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                    <td th:text="${event.toDttm != null ? #temporals.format(event.toDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                    <td>
+                        <a th:if="${event.locUrl != null and !event.locUrl.isEmpty()}" th:href="${event.locUrl}" target="_blank">Map</a>
+                        <span th:unless="${event.locUrl != null and !event.locUrl.isEmpty()}">-</span>
+                    </td>
+                    <td th:text="${event.enabled != null and event.enabled ? 'Yes' : 'No'}"></td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           th:href="@{/admin/initiatives/{initiativeId}/events/{id}/edit(initiativeId=${initiative.id},id=${event.id})}">Edit</a>
+                        <form th:action="@{/admin/initiatives/{initiativeId}/events/{id}/delete(initiativeId=${initiative.id},id=${event.id})}"
+                              method="post" class="d-inline" onsubmit="return confirm('Delete this event?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(events)}">
+                    <td colspan="6" class="text-muted">No events yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
