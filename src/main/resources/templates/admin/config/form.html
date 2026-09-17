@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${configId} != null ? 'Edit Config' : 'New Config')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container" style="max-width: 480px;">
+        <h2 class="mb-4" th:text="${configId} != null ? 'Edit Config' : 'New Config'">Config</h2>
+
+        <form th:action="${configId} != null ? @{/admin/config/{id}(id=${configId})} : @{/admin/config}"
+              th:object="${configForm}" method="post">
+
+            <div class="mb-3">
+                <label for="configsetKey" class="form-label">Key</label>
+                <input type="text" class="form-control" id="configsetKey" th:field="*{configsetKey}">
+                <div class="text-danger" th:if="${#fields.hasErrors('configsetKey')}" th:errors="*{configsetKey}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="configsetValue" class="form-label">Value</label>
+                <input type="text" class="form-control" id="configsetValue" th:field="*{configsetValue}">
+                <div class="text-danger" th:if="${#fields.hasErrors('configsetValue')}" th:errors="*{configsetValue}"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/config}">Cancel</a>
+        </form>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
