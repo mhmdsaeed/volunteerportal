@@ -12,6 +12,7 @@
             <a class="navbar-brand" th:href="@{/}">Volunteer Portal</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" th:href="@{/home}" sec:authorize="isAuthenticated()">Home</a>
+                <a class="nav-link" th:href="@{/initiatives}" sec:authorize="isAuthenticated()">Initiatives</a>
                 <a class="nav-link" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">Admin</a>
                 <span class="navbar-text text-white me-3" sec:authorize="isAuthenticated()">
                     Signed in as <span sec:authentication="name"></span>
