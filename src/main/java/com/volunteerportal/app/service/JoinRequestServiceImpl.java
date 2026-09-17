@@ -18,11 +18,13 @@ public class JoinRequestServiceImpl implements JoinRequestService {
 
     private final VolunteerInitiativeRepository volunteerInitiativeRepository;
     private final InitiativeRepository initiativeRepository;
+    private final NotificationService notificationService;
 
     public JoinRequestServiceImpl(VolunteerInitiativeRepository volunteerInitiativeRepository,
-            InitiativeRepository initiativeRepository) {
+            InitiativeRepository initiativeRepository, NotificationService notificationService) {
         this.volunteerInitiativeRepository = volunteerInitiativeRepository;
         this.initiativeRepository = initiativeRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -48,7 +50,12 @@ public class JoinRequestServiceImpl implements JoinRequestService {
         VolunteerInitiative request = findById(id);
         request.setResponseJoinDttm(LocalDateTime.now());
         request.setEnabled(true);
-        return volunteerInitiativeRepository.save(request);
+        VolunteerInitiative saved = volunteerInitiativeRepository.save(request);
+
+        notificationService.notify(saved.getUser(),
+                "Your request to join '" + saved.getInitiative().getName() + "' was approved.",
+                "/initiatives/" + saved.getInitiative().getId());
+        return saved;
     }
 
     @Override
@@ -57,6 +64,11 @@ public class JoinRequestServiceImpl implements JoinRequestService {
         VolunteerInitiative request = findById(id);
         request.setResponseJoinDttm(LocalDateTime.now());
         request.setEnabled(false);
-        return volunteerInitiativeRepository.save(request);
+        VolunteerInitiative saved = volunteerInitiativeRepository.save(request);
+
+        notificationService.notify(saved.getUser(),
+                "Your request to join '" + saved.getInitiative().getName() + "' was not approved.",
+                "/initiatives/" + saved.getInitiative().getId());
+        return saved;
     }
 }

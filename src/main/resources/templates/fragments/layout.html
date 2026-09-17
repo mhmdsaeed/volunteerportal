@@ -16,6 +16,11 @@
                 <a class="nav-link" th:href="@{/profile}" sec:authorize="isAuthenticated()">My Profile</a>
                 <a class="nav-link" th:href="@{/coordinator/initiatives}" sec:authorize="hasAnyRole('COORDINATOR','ADMIN')">Coordinator</a>
                 <a class="nav-link" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">Admin</a>
+                <a class="nav-link" th:href="@{/notifications}" sec:authorize="isAuthenticated()">
+                    Notifications
+                    <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
+                          class="badge rounded-pill text-bg-danger" th:text="${unreadNotificationCount}"></span>
+                </a>
                 <span class="navbar-text text-white me-3" sec:authorize="isAuthenticated()">
                     Signed in as <span sec:authentication="name"></span>
                 </span>

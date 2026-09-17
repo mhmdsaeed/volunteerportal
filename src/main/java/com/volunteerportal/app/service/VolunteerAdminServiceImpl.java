@@ -25,14 +25,16 @@ public class VolunteerAdminServiceImpl implements VolunteerAdminService {
     private final VolunteerProfileRepository volunteerProfileRepository;
     private final GradeRepository gradeRepository;
     private final ProfileService profileService;
+    private final NotificationService notificationService;
 
     public VolunteerAdminServiceImpl(UserRepository userRepository,
             VolunteerProfileRepository volunteerProfileRepository, GradeRepository gradeRepository,
-            ProfileService profileService) {
+            ProfileService profileService, NotificationService notificationService) {
         this.userRepository = userRepository;
         this.volunteerProfileRepository = volunteerProfileRepository;
         this.gradeRepository = gradeRepository;
         this.profileService = profileService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -66,6 +68,13 @@ public class VolunteerAdminServiceImpl implements VolunteerAdminService {
         }
         profile.setPoints(form.getPoints());
 
-        return volunteerProfileRepository.save(profile);
+        VolunteerProfile saved = volunteerProfileRepository.save(profile);
+
+        String gradeName = saved.getGrade() != null ? saved.getGrade().getName() : "Unranked";
+        notificationService.notify(user,
+                "Your volunteer profile was updated: grade is now " + gradeName + ", points: " + saved.getPoints() + ".",
+                "/profile");
+
+        return saved;
     }
 }
