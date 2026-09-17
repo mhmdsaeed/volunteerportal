@@ -1,5 +1,6 @@
 package com.volunteerportal.app.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
@@ -10,10 +11,14 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.volunteerportal.app.dto.InitiativeQuestionForm;
+import com.volunteerportal.app.model.QuestionLib;
+import com.volunteerportal.app.repository.QuestionLibRepository;
 import com.volunteerportal.app.service.InitiativeQuestionService;
 import com.volunteerportal.app.service.InitiativeService;
+import com.volunteerportal.app.service.QuestionLibCatService;
 
 @Controller
 @RequestMapping("/admin/initiatives/{initiativeId}/questions")
@@ -21,11 +26,16 @@ public class InitiativeQuestionController {
 
     private final InitiativeQuestionService initiativeQuestionService;
     private final InitiativeService initiativeService;
+    private final QuestionLibCatService questionLibCatService;
+    private final QuestionLibRepository questionLibRepository;
 
     public InitiativeQuestionController(InitiativeQuestionService initiativeQuestionService,
-            InitiativeService initiativeService) {
+            InitiativeService initiativeService, QuestionLibCatService questionLibCatService,
+            QuestionLibRepository questionLibRepository) {
         this.initiativeQuestionService = initiativeQuestionService;
         this.initiativeService = initiativeService;
+        this.questionLibCatService = questionLibCatService;
+        this.questionLibRepository = questionLibRepository;
     }
 
     @GetMapping
@@ -36,9 +46,11 @@ public class InitiativeQuestionController {
     }
 
     @GetMapping("/new")
-    public String newForm(@PathVariable Long initiativeId, Model model) {
+    public String newForm(@PathVariable Long initiativeId,
+            @RequestParam(required = false) Long fromLibrary, Model model) {
         model.addAttribute("initiative", initiativeService.findById(initiativeId));
-        model.addAttribute("questionForm", new InitiativeQuestionForm());
+        model.addAttribute("questionForm", fromLibrary != null ? formFromLibrary(fromLibrary) : new InitiativeQuestionForm());
+        addLibraryReferenceData(model);
         return "admin/initiatives/questions/form";
     }
 
@@ -48,10 +60,29 @@ public class InitiativeQuestionController {
             Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("initiative", initiativeService.findById(initiativeId));
+            addLibraryReferenceData(model);
             return "admin/initiatives/questions/form";
         }
         initiativeQuestionService.create(initiativeId, form);
         return "redirect:/admin/initiatives/{initiativeId}/questions";
+    }
+
+    private InitiativeQuestionForm formFromLibrary(Long libraryQuestionId) {
+        QuestionLib libraryQuestion = questionLibRepository.findById(libraryQuestionId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Question library entry not found: " + libraryQuestionId));
+
+        InitiativeQuestionForm form = new InitiativeQuestionForm();
+        form.setQuestionText(libraryQuestion.getQuestionText());
+        form.setQuestionTypeId(libraryQuestion.getQuestionType());
+        form.setQuestionChoicesCount(libraryQuestion.getQuestionChoicesCount());
+        form.setQuestionChoicesText(libraryQuestion.getQuestionChoices());
+        return form;
+    }
+
+    private void addLibraryReferenceData(Model model) {
+        model.addAttribute("libraryCategories", questionLibCatService.findAll());
+        model.addAttribute("libraryQuestions", questionLibRepository.findAll());
     }
 
     @GetMapping("/{id}/edit")
