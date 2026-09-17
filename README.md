@@ -52,7 +52,7 @@ On startup:
 1. Flyway applies `src/main/resources/db/migration/V1__init_schema.sql` (full schema) and `V2__seed_roles.sql` (default roles: `ADMIN`, `COORDINATOR`, `VOLUNTEER`).
 2. `DataInitializer` seeds a default `admin` user with the `ADMIN` role (unless `SEED_ADMIN=false`) — **change its password immediately in any non-local environment.**
 
-Visit `http://localhost:8080/register` to create a volunteer account, or log in as `admin`/`admin123` (default) to reach `/admin`.
+Visit `http://localhost:8080/register` to create a volunteer account (lands on `/home`, `/initiatives`, `/profile`), or log in as `admin`/`admin123` (default) to reach `/admin`.
 
 ## Build / test
 
@@ -64,11 +64,27 @@ Requires the database above to be reachable — there's currently only a context
 
 ## What's implemented
 
-- Auth: registration, login, logout, BCrypt password hashing, role-based access control (`users` / `roles` / `user_roles`)
+- **Auth**: registration, login, logout, BCrypt password hashing, role-based access control (`users` / `roles` / `user_roles`), roles seeded as `ADMIN`, `COORDINATOR`, `VOLUNTEER`
+- **Admin** (`/admin/**`, `ADMIN` role):
+  - Initiatives CRUD (`/admin/initiatives`)
+  - Initiative questions CRUD, nested per initiative (`/admin/initiatives/{id}/questions`) — true/false, single-choice, multi-choice, and free-text question types
+  - Offices CRUD (`/admin/offices`)
+  - Events CRUD, nested per initiative (`/admin/initiatives/{id}/events`)
+  - Attendance (check-in/check-out) CRUD, nested per event (`/admin/initiatives/{id}/events/{eventId}/attendance`)
+- **Coordinator** (`/coordinator/**`, `COORDINATOR` or `ADMIN` role):
+  - View initiatives you supervise and approve/reject volunteer join requests
+- **Volunteer-facing** (`/initiatives`, any authenticated user):
+  - Browse enabled initiatives, view details, and submit a join request answering that initiative's questions
+- **Profile self-service** (`/profile`, any authenticated user):
+  - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only as they're system-assigned
 - Full schema for the volunteer-management domain: `volunteer_profile`, `grade`, `office`, `initiative`, `initiative_question`, `question_lib` / `question_lib_cat`, `volunteer_initiative`, `volunteer_initiative_answer`, `event`, `attend`, `configset`
 - JPA entities + Spring Data repositories for every table above
-- A role-protected `/admin` page proving the authorization wiring works
 
 ## What's not implemented yet
 
-Everything domain-specific beyond the schema/entities/repositories: no controllers or UI yet for offices, initiatives, events, attendance, or the question library — just the data layer and the auth scaffold.
+- A reusable question library UI (`question_lib` / `question_lib_cat` exist in the schema but initiative questions are authored directly per initiative, not pulled from a shared bank)
+- Grade assignment and points-awarding UI (fields exist on `volunteer_profile` but nothing sets them yet)
+- An admin UI for `configset` (only a read-only `ConfigService.getValue()` helper exists)
+- Volunteers withdrawing/cancelling their own join request
+- Notifications/emails (e.g. on join approval)
+- Automated tests beyond the context-load smoke test (`VolunteerPortalApplicationTests`) — repository/controller tests are a natural next addition
