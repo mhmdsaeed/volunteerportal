@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${gradeId} != null ? 'Edit Grade' : 'New Grade')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container" style="max-width: 480px;">
+        <h2 class="mb-4" th:text="${gradeId} != null ? 'Edit Grade' : 'New Grade'">Grade</h2>
+
+        <form th:action="${gradeId} != null ? @{/admin/grades/{id}(id=${gradeId})} : @{/admin/grades}"
+              th:object="${gradeForm}" method="post">
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" th:field="*{name}">
+                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/grades}">Cancel</a>
+        </form>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

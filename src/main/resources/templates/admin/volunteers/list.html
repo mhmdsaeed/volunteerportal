@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Volunteers')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <h2 class="mb-4">Volunteers</h2>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Grade</th>
+                    <th>Points</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="volunteer : ${volunteers}" th:with="profile=${profiles.get(volunteer.id)}">
+                    <td th:text="${volunteer.username}"></td>
+                    <td th:text="${volunteer.email}"></td>
+                    <td th:text="${profile != null and profile.grade != null ? profile.grade.name : 'Unranked'}"></td>
+                    <td th:text="${profile != null and profile.points != null ? profile.points : 0}"></td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/volunteers/{id}/edit(id=${volunteer.id})}">Edit</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(volunteers)}">
+                    <td colspan="5" class="text-muted">No volunteers yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
