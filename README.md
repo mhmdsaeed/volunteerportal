@@ -71,20 +71,21 @@ Requires the database above to be reachable — there's currently only a context
   - Offices CRUD (`/admin/offices`)
   - Events CRUD, nested per initiative (`/admin/initiatives/{id}/events`)
   - Attendance (check-in/check-out) CRUD, nested per event (`/admin/initiatives/{id}/events/{eventId}/attendance`)
+  - Question library CRUD — categories and reusable questions (`/admin/question-library`), wired into initiative-question creation via a "copy from library" picker (one-time copy, no persistent link back to the library entry)
+  - Grades CRUD (`/admin/grades`)
+  - Volunteer grade/points management (`/admin/volunteers`) — assign a grade and set points on any volunteer's profile, lazily creating the profile row if the volunteer hasn't visited `/profile` yet
 - **Coordinator** (`/coordinator/**`, `COORDINATOR` or `ADMIN` role):
   - View initiatives you supervise and approve/reject volunteer join requests
 - **Volunteer-facing** (`/initiatives`, any authenticated user):
   - Browse enabled initiatives, view details, and submit a join request answering that initiative's questions
 - **Profile self-service** (`/profile`, any authenticated user):
-  - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only as they're system-assigned
+  - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only since they're set by an admin
 - Full schema for the volunteer-management domain: `volunteer_profile`, `grade`, `office`, `initiative`, `initiative_question`, `question_lib` / `question_lib_cat`, `volunteer_initiative`, `volunteer_initiative_answer`, `event`, `attend`, `configset`
 - JPA entities + Spring Data repositories for every table above
 
 ## What's not implemented yet
 
-- A reusable question library UI (`question_lib` / `question_lib_cat` exist in the schema but initiative questions are authored directly per initiative, not pulled from a shared bank)
-- Grade assignment and points-awarding UI (fields exist on `volunteer_profile` but nothing sets them yet)
 - An admin UI for `configset` (only a read-only `ConfigService.getValue()` helper exists)
 - Volunteers withdrawing/cancelling their own join request
-- Notifications/emails (e.g. on join approval)
+- Notifications/emails (e.g. on join approval, or when a volunteer is awarded points)
 - Automated tests beyond the context-load smoke test (`VolunteerPortalApplicationTests`) — repository/controller tests are a natural next addition
