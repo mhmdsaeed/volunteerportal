@@ -27,6 +27,7 @@ public class InitiativeQuestion {
     @Column(name = "question_text")
     private String questionText;
 
+    /** 1: true_false, 2: one_of_n, 3: multi_of_n, 4: free_text */
     @Column(name = "question_type_id")
     private Integer questionTypeId;
 
