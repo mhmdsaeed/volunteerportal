@@ -9,4 +9,6 @@ import com.volunteerportal.app.model.Initiative;
 public interface InitiativeRepository extends JpaRepository<Initiative, Long> {
 
     List<Initiative> findByEnabledTrue();
+
+    List<Initiative> findBySupervisorId(Long supervisorId);
 }
