@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Attendance')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <p><a th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}">&laquo; Back to Events</a></p>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 th:text="'Attendance - ' + ${event.name}">Attendance</h2>
+            <a class="btn btn-primary"
+               th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/new(initiativeId=${initiative.id},eventId=${event.id})}">Record Attendance</a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Volunteer</th>
+                    <th>Type</th>
+                    <th>When</th>
+                    <th>Note</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="attend : ${attendances}">
+                    <td th:text="${attend.volunteerInitiative != null and attend.volunteerInitiative.user != null ? attend.volunteerInitiative.user.username : '-'}"></td>
+                    <td th:switch="${attend.attendInOut}">
+                        <span th:case="1">Check-in</span>
+                        <span th:case="2">Check-out</span>
+                        <span th:case="*">-</span>
+                    </td>
+                    <td th:text="${attend.attendDttm != null ? #temporals.format(attend.attendDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                    <td th:text="${attend.note != null ? attend.note : '-'}"></td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/{id}/edit(initiativeId=${initiative.id},eventId=${event.id},id=${attend.id})}">Edit</a>
+                        <form th:action="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/{id}/delete(initiativeId=${initiative.id},eventId=${event.id},id=${attend.id})}"
+                              method="post" class="d-inline" onsubmit="return confirm('Delete this attendance record?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(attendances)}">
+                    <td colspan="5" class="text-muted">No attendance recorded yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

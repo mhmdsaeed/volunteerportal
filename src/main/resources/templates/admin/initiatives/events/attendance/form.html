@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title=${attendId} != null ? 'Edit Attendance' : 'Record Attendance')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container" style="max-width: 560px;">
+        <p><a th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance(initiativeId=${initiative.id},eventId=${event.id})}">&laquo; Back to Attendance</a></p>
+
+        <h2 class="mb-4" th:text="(${attendId} != null ? 'Edit Attendance' : 'Record Attendance') + ' - ' + ${event.name}">Attendance</h2>
+
+        <form th:action="${attendId} != null
+                    ? @{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/{id}(initiativeId=${initiative.id},eventId=${event.id},id=${attendId})}
+                    : @{/admin/initiatives/{initiativeId}/events/{eventId}/attendance(initiativeId=${initiative.id},eventId=${event.id})}"
+              th:object="${attendForm}" method="post">
+
+            <div class="mb-3">
+                <label for="volunteerInitiativeId" class="form-label">Volunteer</label>
+                <select class="form-select" id="volunteerInitiativeId" th:field="*{volunteerInitiativeId}">
+                    <option value="">-- Select --</option>
+                    <option th:each="vi : ${volunteerInitiatives}" th:value="${vi.id}"
+                            th:text="${vi.user != null ? vi.user.username : 'Volunteer #' + vi.id}"></option>
+                </select>
+                <div class="text-danger" th:if="${#fields.hasErrors('volunteerInitiativeId')}" th:errors="*{volunteerInitiativeId}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="attendInOut" class="form-label">Type</label>
+                <select class="form-select" id="attendInOut" th:field="*{attendInOut}">
+                    <option value="1">Check-in</option>
+                    <option value="2">Check-out</option>
+                </select>
+                <div class="text-danger" th:if="${#fields.hasErrors('attendInOut')}" th:errors="*{attendInOut}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="attendDttm" class="form-label">When</label>
+                <input type="datetime-local" class="form-control" id="attendDttm" th:field="*{attendDttm}">
+            </div>
+
+            <div class="mb-3">
+                <label for="note" class="form-label">Note</label>
+                <input type="text" class="form-control" id="note" th:field="*{note}">
+                <div class="text-danger" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a class="btn btn-outline-secondary"
+               th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance(initiativeId=${initiative.id},eventId=${event.id})}">Cancel</a>
+        </form>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -35,6 +35,8 @@
                     <td th:text="${event.enabled != null and event.enabled ? 'Yes' : 'No'}"></td>
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-secondary"
+                           th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance(initiativeId=${initiative.id},eventId=${event.id})}">Attendance</a>
+                        <a class="btn btn-sm btn-outline-secondary"
                            th:href="@{/admin/initiatives/{initiativeId}/events/{id}/edit(initiativeId=${initiative.id},id=${event.id})}">Edit</a>
                         <form th:action="@{/admin/initiatives/{initiativeId}/events/{id}/delete(initiativeId=${initiative.id},id=${event.id})}"
                               method="post" class="d-inline" onsubmit="return confirm('Delete this event?');">

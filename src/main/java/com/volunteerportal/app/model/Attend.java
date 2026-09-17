@@ -26,6 +26,7 @@ public class Attend {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 1: check-in, 2: check-out */
     @Column(name = "attend_in_out")
     private Integer attendInOut;
 
