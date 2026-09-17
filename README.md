@@ -63,8 +63,8 @@ Visit `http://localhost:8080/register` to create a volunteer account (lands on `
 Requires the database above to be reachable. The suite includes:
 - A context-load smoke test (`VolunteerPortalApplicationTests`)
 - Repository tests (`@DataJpaTest`, run against the real configured MySQL DB via `@AutoConfigureTestDatabase(replace = NONE)` — there's no embedded test DB since the schema/Flyway migrations are MySQL-specific; each test rolls back its own transaction)
-- Service unit tests (Mockito, no DB) covering registration, join-request approve/reject, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, and config key-uniqueness checks
-- Web-layer tests: a `@WebMvcTest` for `AuthController`'s registration validation, and a full-context `MockMvc` test asserting the `/admin/**` access-control rule (anonymous → redirect to login, wrong role → 403, `ADMIN` → 200)
+- Service unit tests (Mockito, no DB) covering registration, join-request approve/reject/find-managed-initiatives, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, and config key-uniqueness checks
+- Web-layer tests: a `@WebMvcTest` for `AuthController`'s registration validation; a full-context `MockMvc` test asserting the `/admin/**` and `/coordinator/**` access-control rules (anonymous → redirect to login, wrong role → 403); and a `@WebMvcTest` for `CoordinatorController` covering the supervisor-scoped authorization (a coordinator can only manage initiatives they supervise; an admin can manage any) and the check that a join request being approved/rejected actually belongs to the initiative in the URL — these use `SecurityMockMvcRequestPostProcessors.user(UserDetails)` to inject a real `UserPrincipal`, since `@WithMockUser`'s generic principal doesn't satisfy code that dereferences it
 
 ## What's implemented
 
@@ -94,4 +94,4 @@ Requires the database above to be reachable. The suite includes:
 ## What's not implemented yet
 
 - Real email delivery (notifications are in-app only, not emailed)
-- Broader test coverage: most admin CRUD controllers and the coordinator approval flow don't have dedicated tests yet — the suite establishes the repository/service-unit/web-layer patterns to extend
+- Broader test coverage: the admin CRUD controllers (initiatives, offices, events, attendance, question library, grades, config) don't have dedicated tests yet — the suite establishes the repository/service-unit/web-layer patterns to extend

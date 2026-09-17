@@ -1,5 +1,6 @@
 package com.volunteerportal.app.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,9 +19,11 @@ import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,5 +95,40 @@ class JoinRequestServiceImplTest {
 
         assertThatThrownBy(() -> joinRequestService.findById(99L))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void findManagedInitiatives_nullSupervisorId_returnsAllInitiatives() {
+        Initiative initiative = new Initiative();
+        initiative.setId(1L);
+        given(initiativeRepository.findAll()).willReturn(List.of(initiative));
+
+        List<Initiative> result = joinRequestService.findManagedInitiatives(null);
+
+        assertThat(result).containsExactly(initiative);
+        verify(initiativeRepository, never()).findBySupervisorId(anyLong());
+    }
+
+    @Test
+    void findManagedInitiatives_withSupervisorId_returnsOnlyThatSupervisorsInitiatives() {
+        Initiative initiative = new Initiative();
+        initiative.setId(2L);
+        given(initiativeRepository.findBySupervisorId(7L)).willReturn(List.of(initiative));
+
+        List<Initiative> result = joinRequestService.findManagedInitiatives(7L);
+
+        assertThat(result).containsExactly(initiative);
+        verify(initiativeRepository, never()).findAll();
+    }
+
+    @Test
+    void findRequestsForInitiative_delegatesToVolunteerInitiativeRepository() {
+        VolunteerInitiative request = new VolunteerInitiative();
+        request.setId(5L);
+        given(volunteerInitiativeRepository.findByInitiativeId(3L)).willReturn(List.of(request));
+
+        List<VolunteerInitiative> result = joinRequestService.findRequestsForInitiative(3L);
+
+        assertThat(result).containsExactly(request);
     }
 }

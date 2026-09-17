@@ -50,4 +50,21 @@ class SecurityAccessControlTest {
     void adminArea_adminRole_isAccessible() throws Exception {
         mockMvc.perform(get("/admin")).andExpect(status().isOk());
     }
+
+    @Test
+    void coordinatorArea_anonymous_redirectsToLogin() throws Exception {
+        mockMvc.perform(get("/coordinator/initiatives"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    @WithMockUser(roles = "VOLUNTEER")
+    void coordinatorArea_wrongRole_isForbidden() throws Exception {
+        mockMvc.perform(get("/coordinator/initiatives")).andExpect(status().isForbidden());
+    }
+
+    // COORDINATOR/ADMIN-role "happy path" access to /coordinator/initiatives is covered by
+    // CoordinatorControllerTest, which supplies a real UserPrincipal (the controller
+    // dereferences it) rather than the generic principal @WithMockUser produces here.
 }
