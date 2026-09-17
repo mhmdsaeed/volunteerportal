@@ -27,6 +27,7 @@
                     <td th:text="${initiative.supervisor != null ? initiative.supervisor.username : '-'}"></td>
                     <td th:text="${initiative.enabled != null and initiative.enabled ? 'Yes' : 'No'}"></td>
                     <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}">Questions</a>
                         <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/edit(id=${initiative.id})}">Edit</a>
                         <form th:action="@{/admin/initiatives/{id}/delete(id=${initiative.id})}" method="post" class="d-inline"
                               onsubmit="return confirm('Delete this initiative?');">
