@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Question Library')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <p><a th:href="@{/admin/question-library}">&laquo; Back to Categories</a></p>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 th:text="'Questions - ' + ${category.name}">Questions</h2>
+            <a class="btn btn-primary" th:href="@{/admin/question-library/{id}/questions/new(id=${category.id})}">New Question</a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Type</th>
+                    <th>Choices</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="question : ${questions}">
+                    <td th:text="${question.questionText}"></td>
+                    <td th:switch="${question.questionType}">
+                        <span th:case="1">True / False</span>
+                        <span th:case="2">Single choice</span>
+                        <span th:case="3">Multiple choice</span>
+                        <span th:case="4">Free text</span>
+                        <span th:case="*">-</span>
+                    </td>
+                    <td th:text="${question.questionChoices != null ? question.questionChoices : '-'}"></td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           th:href="@{/admin/question-library/{categoryId}/questions/{id}/edit(categoryId=${category.id},id=${question.id})}">Edit</a>
+                        <form th:action="@{/admin/question-library/{categoryId}/questions/{id}/delete(categoryId=${category.id},id=${question.id})}"
+                              method="post" class="d-inline" onsubmit="return confirm('Delete this question?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(questions)}">
+                    <td colspan="4" class="text-muted">No questions yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
