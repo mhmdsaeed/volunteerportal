@@ -74,6 +74,7 @@ Requires the database above to be reachable — there's currently only a context
   - Question library CRUD — categories and reusable questions (`/admin/question-library`), wired into initiative-question creation via a "copy from library" picker (one-time copy, no persistent link back to the library entry)
   - Grades CRUD (`/admin/grades`)
   - Volunteer grade/points management (`/admin/volunteers`) — assign a grade and set points on any volunteer's profile, lazily creating the profile row if the volunteer hasn't visited `/profile` yet
+  - Config CRUD (`/admin/config`) for the `configset` key/value table, with a duplicate-key check surfaced as a form error
 - **Coordinator** (`/coordinator/**`, `COORDINATOR` or `ADMIN` role):
   - View initiatives you supervise and approve/reject volunteer join requests
 - **Volunteer-facing** (`/initiatives`, any authenticated user):
@@ -85,7 +86,6 @@ Requires the database above to be reachable — there's currently only a context
 
 ## What's not implemented yet
 
-- An admin UI for `configset` (only a read-only `ConfigService.getValue()` helper exists)
 - Volunteers withdrawing/cancelling their own join request
 - Notifications/emails (e.g. on join approval, or when a volunteer is awarded points)
 - Automated tests beyond the context-load smoke test (`VolunteerPortalApplicationTests`) — repository/controller tests are a natural next addition
