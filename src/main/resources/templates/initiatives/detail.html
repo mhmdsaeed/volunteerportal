@@ -19,6 +19,12 @@
             <p class="mb-0" th:if="${membership.responseJoinDttm != null and membership.enabled == false}">Status: <strong>Not approved</strong></p>
         </div>
 
+        <form th:if="${membership != null and membership.responseJoinDttm == null}"
+              th:action="@{/initiatives/{id}/withdraw(id=${initiative.id})}" method="post"
+              onsubmit="return confirm('Withdraw your request to join this initiative?');">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Withdraw Request</button>
+        </form>
+
         <form th:if="${membership == null}" th:action="@{/initiatives/{id}/join(id=${initiative.id})}" method="post">
             <div class="mb-4" th:each="question : ${questions}"
                  th:with="choices=${question.questionChoicesText != null ? #strings.arraySplit(question.questionChoicesText, ',') : {}}">

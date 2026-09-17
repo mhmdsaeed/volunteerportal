@@ -93,6 +93,21 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
         return volunteerInitiativeRepository.save(membership);
     }
 
+    @Override
+    @Transactional
+    public void withdraw(Long initiativeId, Long userId) {
+        VolunteerInitiative membership = volunteerInitiativeRepository.findByUserIdAndInitiativeId(userId, initiativeId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No join request for initiative " + initiativeId + " by user " + userId));
+
+        if (membership.getResponseJoinDttm() != null) {
+            throw new IllegalStateException("Cannot withdraw a request that has already been reviewed");
+        }
+
+        volunteerInitiativeAnswerRepository.deleteByVolunteerInitiativeId(membership.getId());
+        volunteerInitiativeRepository.delete(membership);
+    }
+
     private int saveAnswers(VolunteerInitiative membership, List<InitiativeQuestion> questions,
             MultiValueMap<String, String> answers) {
         int answeredCount = 0;

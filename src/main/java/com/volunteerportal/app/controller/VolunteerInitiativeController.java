@@ -45,4 +45,10 @@ public class VolunteerInitiativeController {
         volunteerInitiativeService.join(id, principal.getUser(), formParams);
         return "redirect:/initiatives/{id}";
     }
+
+    @PostMapping("/{id}/withdraw")
+    public String withdraw(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+        volunteerInitiativeService.withdraw(id, principal.getUser().getId());
+        return "redirect:/initiatives/{id}";
+    }
 }

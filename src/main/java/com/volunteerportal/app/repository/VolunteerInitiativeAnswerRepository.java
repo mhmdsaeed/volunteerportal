@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
 
 public interface VolunteerInitiativeAnswerRepository extends JpaRepository<VolunteerInitiativeAnswer, Long> {
+
+    void deleteByVolunteerInitiativeId(Long volunteerInitiativeId);
 }

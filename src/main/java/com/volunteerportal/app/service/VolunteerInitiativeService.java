@@ -24,4 +24,7 @@ public interface VolunteerInitiativeService {
     Map<Long, VolunteerInitiative> findMembershipsForUser(Long userId);
 
     VolunteerInitiative join(Long initiativeId, User user, MultiValueMap<String, String> answers);
+
+    /** Only allowed while the request is still pending (no coordinator response yet). */
+    void withdraw(Long initiativeId, Long userId);
 }
