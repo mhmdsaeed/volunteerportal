@@ -31,6 +31,9 @@
                         <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}">Questions</a>
                         <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/export(id=${initiative.id})}">Export CSV</a>
                         <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/edit(id=${initiative.id})}">Edit</a>
+                        <form th:action="@{/admin/initiatives/{id}/duplicate(id=${initiative.id})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Duplicate</button>
+                        </form>
                         <form th:action="@{/admin/initiatives/{id}/delete(id=${initiative.id})}" method="post" class="d-inline"
                               onsubmit="return confirm('Delete this initiative?');">
                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>

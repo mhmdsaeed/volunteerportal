@@ -63,7 +63,7 @@ Visit `http://localhost:8080/register` to create a volunteer account (lands on `
 Requires the database above to be reachable. The suite includes:
 - A context-load smoke test (`VolunteerPortalApplicationTests`)
 - Repository tests (`@DataJpaTest`, run against the real configured MySQL DB via `@AutoConfigureTestDatabase(replace = NONE)` — there's no embedded test DB since the schema/Flyway migrations are MySQL-specific; each test rolls back its own transaction)
-- Service unit tests (Mockito, no DB) covering registration, join-request approve/reject/find-managed-initiatives, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, config key-uniqueness checks, notification creation/ownership-checked mark-read/mark-all-read, the report aggregation logic in `ReportServiceImpl` (participation counts by status, attendance counts by check-in/out, leaderboard sorting and its no-profile-yet case), and the CSV rendering (header, per-status rows, comma/quote escaping) in `InitiativeExportServiceImpl`
+- Service unit tests (Mockito, no DB) covering registration, join-request approve/reject/find-managed-initiatives, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, config key-uniqueness checks, notification creation/ownership-checked mark-read/mark-all-read, the report aggregation logic in `ReportServiceImpl` (participation counts by status, attendance counts by check-in/out, leaderboard sorting and its no-profile-yet case), the CSV rendering (header, per-status rows, comma/quote escaping) in `InitiativeExportServiceImpl`, and the copy semantics (name suffix, disabled by default, question cloning, question count) in `InitiativeDuplicateServiceImpl`
 - Web-layer tests (`@WebMvcTest`), covering **every controller in the app**:
   - `AuthController` — registration validation (duplicate username, password mismatch, happy path)
   - `CoordinatorController` — supervisor-scoped authorization (a coordinator can only manage initiatives they supervise; an admin can manage any) and the check that a join request being approved/rejected actually belongs to the initiative in the URL. Uses `SecurityMockMvcRequestPostProcessors.user(UserDetails)` to inject a real `UserPrincipal`, since `@WithMockUser`'s generic principal doesn't satisfy code that dereferences it
@@ -74,6 +74,7 @@ Requires the database above to be reachable. The suite includes:
   - `VolunteerAdminController` — grade/points update, including when the volunteer has no profile row yet
   - `ReportsController` — each report view renders the rows returned by the (mocked) `ReportService`
   - `InitiativeExportController` — the CSV download's `Content-Type`, `Content-Disposition` filename, and body come from the (mocked) `InitiativeExportService`
+  - `InitiativeDuplicateController` — redirects to the edit page of the newly created (mocked) copy
 - A full-context `MockMvc` test asserting the `/admin/**` and `/coordinator/**` access-control rules from `SecurityConfig` (anonymous → redirect to login, wrong role → 403)
 - `LazyAssociationRenderingTest` (full context, real repositories, no test-level `@Transactional`) — regression tests for a `LazyInitializationException` bug where a view rendered a lazy `@ManyToOne` association's name/username after the request's Hibernate session had already closed (`open-in-view` is disabled). Unlike the `@WebMvcTest`s above, which mock the service layer, this persists real data with the association populated and hits the actual page, so it exercises Hibernate's real session lifecycle — covering the offices list, initiatives list, the volunteer-facing initiative detail page, the admin volunteers list, `/profile`, the coordinator's join-requests list, the attendance list, and the event attendance report
 
@@ -92,6 +93,7 @@ Requires the database above to be reachable. The suite includes:
   - Config CRUD (`/admin/config`) for the `configset` key/value table, with a duplicate-key check surfaced as a form error
   - Reports (`/admin/reports`) — read-only: initiative participation (approved/pending/rejected join-request counts per initiative), event attendance (check-in/check-out counts per event), and a volunteer leaderboard sorted by points
   - Initiative volunteer export (`/admin/initiatives/{id}/export`) — downloads a CSV of every join request for an initiative (username, email, status, request/response dates, answer count)
+  - Initiative duplication (`/admin/initiatives/{id}/duplicate`) — creates a disabled copy of an initiative (name suffixed "(Copy)") along with copies of all its questions, so a recurring initiative doesn't need to be rebuilt from scratch; join requests, events, and attendance are not carried over
 - **Coordinator** (`/coordinator/**`, `COORDINATOR` or `ADMIN` role):
   - View initiatives you supervise and approve/reject volunteer join requests
 - **Volunteer-facing** (`/initiatives`, any authenticated user):
