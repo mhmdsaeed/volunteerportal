@@ -82,9 +82,9 @@ Requires the database above to be reachable. The suite includes:
 
 - **Auth**: registration, login, logout, BCrypt password hashing, role-based access control (`users` / `roles` / `user_roles`), roles seeded as `ADMIN`, `COORDINATOR`, `VOLUNTEER`
 - **Admin** (`/admin/**`, `ADMIN` role):
+  - Offices CRUD (`/admin/offices`) — an office has many initiatives
   - Initiatives CRUD (`/admin/initiatives`)
   - Initiative questions CRUD, nested per initiative (`/admin/initiatives/{id}/questions`) — true/false, single-choice, multi-choice, and free-text question types
-  - Offices CRUD (`/admin/offices`)
   - Events CRUD, nested per initiative (`/admin/initiatives/{id}/events`)
   - Attendance (check-in/check-out) CRUD, nested per event (`/admin/initiatives/{id}/events/{eventId}/attendance`)
   - Question library CRUD — categories and reusable questions (`/admin/question-library`), wired into initiative-question creation via a "copy from library" picker (one-time copy, no persistent link back to the library entry)
