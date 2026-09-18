@@ -281,6 +281,29 @@ class LazyAssociationRenderingTest {
         }
     }
 
+    @Test
+    void eventAttendanceReport_withInitiativeAssigned_rendersWithoutError() throws Exception {
+        Initiative initiative = new Initiative();
+        initiative.setName("Lazy Test Report Initiative " + System.nanoTime());
+        initiative.setEnabled(true);
+        initiative = initiativeRepository.save(initiative);
+
+        Event event = new Event();
+        event.setName("Lazy Test Report Event " + System.nanoTime());
+        event.setInitiative(initiative);
+        event = eventRepository.save(event);
+
+        try {
+            mockMvc.perform(get("/admin/reports/attendance").with(user(adminPrincipal())))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(initiative.getName())))
+                    .andExpect(content().string(containsString(event.getName())));
+        } finally {
+            eventRepository.delete(event);
+            initiativeRepository.delete(initiative);
+        }
+    }
+
     private Grade newGrade(String name) {
         Grade grade = new Grade();
         grade.setName(name);

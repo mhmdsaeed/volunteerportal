@@ -21,4 +21,12 @@ public interface VolunteerInitiativeRepository extends JpaRepository<VolunteerIn
     List<VolunteerInitiative> findByUserId(Long userId);
 
     Optional<VolunteerInitiative> findByUserIdAndInitiativeId(Long userId, Long initiativeId);
+
+    long countByInitiativeId(Long initiativeId);
+
+    long countByInitiativeIdAndEnabledTrue(Long initiativeId);
+
+    long countByInitiativeIdAndEnabledFalse(Long initiativeId);
+
+    long countByInitiativeIdAndEnabledIsNull(Long initiativeId);
 }

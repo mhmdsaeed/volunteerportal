@@ -16,4 +16,6 @@ public interface AttendRepository extends JpaRepository<Attend, Long> {
      */
     @EntityGraph(attributePaths = {"volunteerInitiative", "volunteerInitiative.user"})
     List<Attend> findByEventId(Long eventId);
+
+    long countByEventIdAndAttendInOut(Long eventId, Integer attendInOut);
 }

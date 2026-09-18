@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Initiative Participation')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <p><a th:href="@{/admin/reports}">&laquo; Back to Reports</a></p>
+        <h2 class="mb-4">Initiative Participation</h2>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Initiative</th>
+                    <th>Office</th>
+                    <th>Supervisor</th>
+                    <th>Approved</th>
+                    <th>Pending</th>
+                    <th>Rejected</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${rows}">
+                    <td th:text="${row.initiativeName}"></td>
+                    <td th:text="${row.officeName != null ? row.officeName : '-'}"></td>
+                    <td th:text="${row.supervisorUsername != null ? row.supervisorUsername : '-'}"></td>
+                    <td th:text="${row.approvedCount}"></td>
+                    <td th:text="${row.pendingCount}"></td>
+                    <td th:text="${row.rejectedCount}"></td>
+                    <td th:text="${row.totalCount}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(rows)}">
+                    <td colspan="7" class="text-muted">No initiatives yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

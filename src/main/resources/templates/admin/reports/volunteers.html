@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Volunteer Leaderboard')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <p><a th:href="@{/admin/reports}">&laquo; Back to Reports</a></p>
+        <h2 class="mb-4">Volunteer Leaderboard</h2>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Volunteer</th>
+                    <th>Grade</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row, iter : ${rows}">
+                    <td th:text="${iter.count}"></td>
+                    <td th:text="${row.username}"></td>
+                    <td th:text="${row.gradeName}"></td>
+                    <td th:text="${row.points}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(rows)}">
+                    <td colspan="4" class="text-muted">No volunteers yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Reports')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <h2 class="mb-4">Reports</h2>
+
+        <a class="btn btn-outline-primary" th:href="@{/admin/reports/initiatives}">Initiative Participation</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/reports/attendance}">Event Attendance</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/reports/volunteers}">Volunteer Leaderboard</a>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

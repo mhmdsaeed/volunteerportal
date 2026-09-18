@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(title='Event Attendance')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <p><a th:href="@{/admin/reports}">&laquo; Back to Reports</a></p>
+        <h2 class="mb-4">Event Attendance</h2>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Initiative</th>
+                    <th>Event</th>
+                    <th>From</th>
+                    <th>Checked In</th>
+                    <th>Checked Out</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${rows}">
+                    <td th:text="${row.initiativeName != null ? row.initiativeName : '-'}"></td>
+                    <td th:text="${row.eventName}"></td>
+                    <td th:text="${row.fromDttm != null ? #temporals.format(row.fromDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                    <td th:text="${row.checkInCount}"></td>
+                    <td th:text="${row.checkOutCount}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(rows)}">
+                    <td colspan="5" class="text-muted">No events yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
