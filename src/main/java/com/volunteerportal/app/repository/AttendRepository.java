@@ -20,4 +20,8 @@ public interface AttendRepository extends JpaRepository<Attend, Long> {
     long countByEventIdAndAttendInOut(Long eventId, Integer attendInOut);
 
     List<Attend> findByEventIdAndVolunteerInitiativeId(Long eventId, Long volunteerInitiativeId);
+
+    /** A volunteer's attendance across all events, newest first. */
+    @EntityGraph(attributePaths = {"event", "event.initiative"})
+    List<Attend> findByVolunteerInitiative_User_IdOrderByAttendDttmDesc(Long userId);
 }

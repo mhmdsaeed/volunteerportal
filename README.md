@@ -76,6 +76,30 @@ SPRING_PROFILES_ACTIVE=dev,https ./mvnw spring-boot:run      # PowerShell: $env:
 
 The phone warns about the self-signed certificate once; continue anyway (or install `dev-certs/dev-cert.crt`, exported with `keytool -exportcert -rfc`, as a trusted certificate). If the phone can't connect, allow Java through Windows Firewall on private networks.
 
+## Mobile app API
+
+JSON API for the volunteer mobile app under `/api`. Log in once for a **bearer token** (valid 30 days, `app.api.token-validity`), then send it on every request as `Authorization: Bearer <token>`. Tokens are random and stored only as a SHA-256 hash (`api_token` table); logging out deletes the token, so it stops working immediately. The API ignores the website's session cookie (it has its own stateless security chain, `ApiSecurityConfig`), so CSRF tokens aren't needed. Messages come back in the phone's language from `Accept-Language` (`en` or `ar`). Errors are JSON: `{"error": "...", "message": "..."}`.
+
+| Method & path | Body | Returns |
+|---|---|---|
+| `POST /api/auth/login` | `{"username", "password", "deviceName"?}` | `{"token", "expiresAt", "user"}`, or `401 invalid_credentials` |
+| `POST /api/auth/logout` | — | `204`; the token is revoked |
+| `GET /api/me` | — | `{"id", "username", "email", "roles", "grade", "points"}` |
+| `GET /api/initiatives` | — | open initiatives with `membership`: `NONE` / `PENDING` / `APPROVED` / `REJECTED` |
+| `GET /api/events` | — | upcoming events of initiatives I'm an approved member of, with `requiresLocation` and `myStatus`: `NOT_CHECKED_IN` / `CHECKED_IN` / `CHECKED_OUT` |
+| `POST /api/checkin` | `{"qr": "<scanned text>", "latitude"?, "longitude"?}` | `{"result", "success", "eventId", "event", "message"}` — checks in, or out if already in; same rules as the web check-in. `400 invalid_qr` if it isn't an event check-in QR |
+| `GET /api/attendance` | — | my check-ins/outs, newest first |
+| `GET /api/notifications` | — | my notifications, newest first, in the phone's language |
+| `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all` | — | `204` |
+
+`result` values: `CHECKED_IN`, `CHECKED_OUT`, `ALREADY_DONE`, `INVALID_CODE`, `NOT_MEMBER`, `EVENT_CLOSED`, `LOCATION_REQUIRED`, `TOO_FAR`. The app sends the QR text as scanned; the server reads the event id and code from the check-in link.
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' \
+  -d '{"username":"demo_volunteer","password":"demo12345"}' | sed 's/.*"token":"\([^"]*\)".*/\1/')
+curl -s http://localhost:8080/api/events -H "Authorization: Bearer $TOKEN"
+```
+
 ## Build / test
 
 ```bash

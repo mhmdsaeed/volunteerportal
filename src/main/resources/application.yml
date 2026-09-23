@@ -32,6 +32,9 @@ server:
   port: ${SERVER_PORT:8080}
 
 app:
+  api:
+    # How long a mobile app login (bearer token) lasts; logging out revokes it sooner
+    token-validity: 30d
   checkin:
     # Signs the rotating QR check-in codes. Set CHECKIN_SECRET in any real deployment (and the same
     # value on every instance); if empty, a random secret is generated at startup.
