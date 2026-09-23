@@ -15,6 +15,9 @@ import com.volunteerportal.app.repository.InitiativeRepository;
 @Service
 public class InitiativeDuplicateServiceImpl implements InitiativeDuplicateService {
 
+    static final int MAX_NAME_LENGTH = 255;
+    private static final String COPY_SUFFIX = " (Copy)";
+
     private final InitiativeRepository initiativeRepository;
     private final InitiativeQuestionRepository initiativeQuestionRepository;
 
@@ -31,7 +34,7 @@ public class InitiativeDuplicateServiceImpl implements InitiativeDuplicateServic
                 .orElseThrow(() -> new EntityNotFoundException("Initiative not found: " + initiativeId));
 
         Initiative copy = new Initiative();
-        copy.setName(source.getName() + " (Copy)");
+        copy.setName(copyName(source.getName()));
         copy.setDescription(source.getDescription());
         copy.setOffice(source.getOffice());
         copy.setSupervisor(source.getSupervisor());
@@ -51,5 +54,15 @@ public class InitiativeDuplicateServiceImpl implements InitiativeDuplicateServic
 
         copy.setQuestionCount(sourceQuestions.size());
         return initiativeRepository.save(copy);
+    }
+
+    // Truncates the source name so the suffixed copy still fits initiative.name (varchar(255))
+    private String copyName(String sourceName) {
+        String base = sourceName != null ? sourceName : "";
+        int maxBaseLength = MAX_NAME_LENGTH - COPY_SUFFIX.length();
+        if (base.length() > maxBaseLength) {
+            base = base.substring(0, maxBaseLength);
+        }
+        return base + COPY_SUFFIX;
     }
 }

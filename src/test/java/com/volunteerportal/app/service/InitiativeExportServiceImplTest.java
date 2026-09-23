@@ -71,6 +71,34 @@ class InitiativeExportServiceImplTest {
         assertThat(csv).contains("\"last, first\",quoted@example.com,Approved");
     }
 
+    @Test
+    void exportVolunteersCsv_formulaLikeValues_arePrefixedWithApostrophe() {
+        given(initiativeRepository.existsById(1L)).willReturn(true);
+        given(volunteerInitiativeRepository.findByInitiativeId(1L)).willReturn(List.of(
+                request("=1+1", "plain@example.com", true, 1),
+                request("+cmd", "@evil.example.com", true, 1),
+                request("-2", "tab@example.com", true, 1),
+                request("=HYPERLINK(\"http://evil\",\"x\")", "link@example.com", true, 1)));
+
+        String csv = initiativeExportService.exportVolunteersCsv(1L);
+
+        assertThat(csv).contains("\r\n'=1+1,plain@example.com,Approved");
+        assertThat(csv).contains("\r\n'+cmd,'@evil.example.com,Approved");
+        assertThat(csv).contains("\r\n'-2,tab@example.com,Approved");
+        assertThat(csv).contains("\r\n\"'=HYPERLINK(\"\"http://evil\"\",\"\"x\"\")\",link@example.com,Approved");
+    }
+
+    @Test
+    void exportVolunteersCsv_valueContainingCarriageReturn_isQuoted() {
+        given(initiativeRepository.existsById(1L)).willReturn(true);
+        given(volunteerInitiativeRepository.findByInitiativeId(1L)).willReturn(List.of(
+                request("line\rbreak", "cr@example.com", true, 1)));
+
+        String csv = initiativeExportService.exportVolunteersCsv(1L);
+
+        assertThat(csv).contains("\r\n\"line\rbreak\",cr@example.com,Approved");
+    }
+
     private VolunteerInitiative request(String username, String email, Boolean enabled, int answerCount) {
         User user = new User();
         user.setUsername(username);

@@ -111,6 +111,36 @@ class InitiativeDuplicateServiceImplTest {
     }
 
     @Test
+    void duplicate_nameAtMaxLength_isTruncatedSoSuffixFits() {
+        String longName = "A".repeat(InitiativeDuplicateServiceImpl.MAX_NAME_LENGTH);
+        Initiative result = duplicateWithName(longName);
+
+        assertThat(result.getName()).hasSize(InitiativeDuplicateServiceImpl.MAX_NAME_LENGTH);
+        assertThat(result.getName()).isEqualTo("A".repeat(248) + " (Copy)");
+    }
+
+    @Test
+    void duplicate_nameThatExactlyFitsWithSuffix_isNotTruncated() {
+        String name = "B".repeat(248);
+        Initiative result = duplicateWithName(name);
+
+        assertThat(result.getName()).isEqualTo(name + " (Copy)");
+        assertThat(result.getName()).hasSize(InitiativeDuplicateServiceImpl.MAX_NAME_LENGTH);
+    }
+
+    private Initiative duplicateWithName(String name) {
+        Initiative source = new Initiative();
+        source.setId(1L);
+        source.setName(name);
+
+        given(initiativeRepository.findById(1L)).willReturn(Optional.of(source));
+        given(initiativeRepository.save(any(Initiative.class))).willAnswer(invocation -> invocation.getArgument(0));
+        given(initiativeQuestionRepository.findByInitiativeId(1L)).willReturn(List.of());
+
+        return initiativeDuplicateService.duplicate(1L);
+    }
+
+    @Test
     void duplicate_sourceWithNoOfficeOrSupervisor_copiesNulls() {
         Initiative source = new Initiative();
         source.setId(1L);
