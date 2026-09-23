@@ -110,20 +110,11 @@ public class CoordinatorController {
     }
 
     private Long managerIdFor(UserPrincipal principal) {
-        return isAdmin(principal) ? null : principal.getUser().getId();
-    }
-
-    private boolean isAdmin(UserPrincipal principal) {
-        return principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return CoordinatorAccess.managerIdFor(principal);
     }
 
     private void assertCanManage(Initiative initiative, UserPrincipal principal) {
-        if (isAdmin(principal)) {
-            return;
-        }
-        if (!joinRequestService.canManage(initiative, principal.getUser().getId())) {
-            throw new AccessDeniedException("Not a manager of initiative " + initiative.getId());
-        }
+        CoordinatorAccess.assertCanManage(initiative, principal, joinRequestService);
     }
 
     private void assertBelongsToInitiative(VolunteerInitiative request, Initiative initiative) {

@@ -4,14 +4,14 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}">&laquo; <span th:text="#{events.back}">Back to Events</span></a></p>
+    <!-- Shared by the admin area and the coordinator pages: eventsPath is the events list URL (defaults to the admin one) -->
+    <div class="container" style="max-width: 560px;"
+         th:with="eventsPath=${eventsPath != null ? eventsPath : '/admin/initiatives/' + initiative.id + '/events'}">
+        <p><a th:href="@{${eventsPath}}">&laquo; <span th:text="#{events.back}">Back to Events</span></a></p>
 
         <h2 class="mb-4" th:text="${eventId} != null ? #{events.editHeading(${initiative.name})} : #{events.newHeading(${initiative.name})}">Event</h2>
 
-        <form th:action="${eventId} != null
-                    ? @{/admin/initiatives/{initiativeId}/events/{id}(initiativeId=${initiative.id},id=${eventId})}
-                    : @{/admin/initiatives/{initiativeId}/events(initiativeId=${initiative.id})}"
+        <form th:action="${eventId} != null ? @{|${eventsPath}/${eventId}|} : @{${eventsPath}}"
               th:object="${eventForm}" method="post">
 
             <div class="mb-3">
@@ -54,7 +54,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
-            <a class="btn btn-outline-secondary" th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}" th:text="#{common.cancel}">Cancel</a>
+            <a class="btn btn-outline-secondary" th:href="@{${eventsPath}}" th:text="#{common.cancel}">Cancel</a>
         </form>
     </div>
 

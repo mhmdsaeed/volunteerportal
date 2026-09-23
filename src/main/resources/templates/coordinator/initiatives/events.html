@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{events.title})}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <p><a th:href="@{/coordinator/initiatives}">&laquo; <span th:text="#{initiatives.back}">Back to Initiatives</span></a></p>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 th:text="#{events.heading(${initiative.name})}">Events</h2>
+            <a class="btn btn-primary" th:href="@{/coordinator/initiatives/{id}/events/new(id=${initiative.id})}" th:text="#{events.new}">New Event</a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th th:text="#{common.name}">Name</th>
+                    <th th:text="#{common.from}">From</th>
+                    <th th:text="#{common.to}">To</th>
+                    <th th:text="#{events.location}">Location</th>
+                    <th th:text="#{common.enabled}">Enabled</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="event : ${events}">
+                    <td th:text="${event.name}"></td>
+                    <td th:text="${event.fromDttm != null ? #temporals.format(event.fromDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                    <td th:text="${event.toDttm != null ? #temporals.format(event.toDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                    <td>
+                        <a th:if="${event.locUrl != null and !event.locUrl.isEmpty()}" th:href="${event.locUrl}" target="_blank" rel="noopener" th:text="#{events.map}">Map</a>
+                        <span th:unless="${event.locUrl != null and !event.locUrl.isEmpty()}">-</span>
+                    </td>
+                    <td th:text="${event.enabled != null and event.enabled} ? #{common.yes} : #{common.no}"></td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           th:href="@{/coordinator/initiatives/{initiativeId}/events/{id}/edit(initiativeId=${initiative.id},id=${event.id})}" th:text="#{common.edit}">Edit</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(events)}">
+                    <td colspan="6" class="text-muted" th:text="#{events.empty}">No events yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

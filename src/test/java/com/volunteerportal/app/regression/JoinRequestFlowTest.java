@@ -193,6 +193,39 @@ class JoinRequestFlowTest {
                 .andExpect(content().string(containsString("text-bg-warning\">1</span>")));
     }
 
+    @Test
+    void officeCoordinator_addsAndEditsAnEventForTheirInitiative() throws Exception {
+        setUpPendingRequest();
+        String newName = "Coordinator Event " + suffix;
+
+        mockMvc.perform(post("/coordinator/initiatives/{id}/events", initiative.getId())
+                        .with(user(principal(officeCoordinator))).with(csrf())
+                        .param("name", newName)
+                        .param("enabled", "true"))
+                .andExpect(redirectedUrl("/coordinator/initiatives/" + initiative.getId() + "/events"));
+
+        Event created = eventRepository.findByInitiativeId(initiative.getId()).stream()
+                .filter(e -> newName.equals(e.getName())).findFirst().orElseThrow();
+        try {
+            mockMvc.perform(get("/coordinator/initiatives/{id}/events", initiative.getId()).with(user(principal(officeCoordinator))))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(newName)));
+
+            // Edit loads the event outside any session and checks it belongs to the initiative
+            mockMvc.perform(get("/coordinator/initiatives/{id}/events/{eventId}/edit", initiative.getId(), created.getId())
+                            .with(user(principal(officeCoordinator))))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(newName)));
+
+            mockMvc.perform(post("/coordinator/initiatives/{id}/events", initiative.getId())
+                            .with(user(principal(otherCoordinator))).with(csrf())
+                            .param("name", "Not allowed"))
+                    .andExpect(status().isForbidden());
+        } finally {
+            eventRepository.delete(created);
+        }
+    }
+
     private UserPrincipal principal(User user) {
         return new UserPrincipal(userRepository.findByUsername(user.getUsername()).orElseThrow());
     }

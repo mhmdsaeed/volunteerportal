@@ -22,6 +22,7 @@
                     <td th:text="${initiative.office != null ? initiative.office.name : '-'}"></td>
                     <td th:text="${initiative.enabled != null and initiative.enabled} ? #{common.yes} : #{common.no}"></td>
                     <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/coordinator/initiatives/{id}/events(id=${initiative.id})}" th:text="#{adminInitiatives.events}">Events</a>
                         <a class="btn btn-sm btn-outline-primary" th:href="@{/coordinator/initiatives/{id}/requests(id=${initiative.id})}" th:text="#{coordinator.joinRequests}">Join Requests</a>
                     </td>
                 </tr>
