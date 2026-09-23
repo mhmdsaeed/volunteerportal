@@ -78,7 +78,7 @@ The phone warns about the self-signed certificate once; continue anyway (or inst
 
 ## Mobile app API
 
-JSON API for the volunteer mobile app under `/api`. Log in once for a **bearer token** (valid 30 days, `app.api.token-validity`), then send it on every request as `Authorization: Bearer <token>`. Tokens are random and stored only as a SHA-256 hash (`api_token` table); logging out deletes the token, so it stops working immediately. The API ignores the website's session cookie (it has its own stateless security chain, `ApiSecurityConfig`), so CSRF tokens aren't needed. Messages come back in the phone's language from `Accept-Language` (`en` or `ar`). Errors are JSON: `{"error": "...", "message": "..."}`.
+JSON API for the volunteer mobile app under `/api` (the Flutter app itself is in [`mobile/`](mobile/README.md)). Log in once for a **bearer token** (valid 30 days, `app.api.token-validity`), then send it on every request as `Authorization: Bearer <token>`. Tokens are random and stored only as a SHA-256 hash (`api_token` table); logging out deletes the token, so it stops working immediately. The API ignores the website's session cookie (it has its own stateless security chain, `ApiSecurityConfig`), so CSRF tokens aren't needed. Messages come back in the phone's language from `Accept-Language` (`en` or `ar`). Errors are JSON: `{"error": "...", "message": "..."}`.
 
 | Method & path | Body | Returns |
 |---|---|---|
@@ -91,6 +91,8 @@ JSON API for the volunteer mobile app under `/api`. Log in once for a **bearer t
 | `GET /api/attendance` | — | my check-ins/outs, newest first |
 | `GET /api/notifications` | — | my notifications, newest first, in the phone's language |
 | `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all` | — | `204` |
+
+Browsers may call the API only from the origins in `app.api.cors-allowed-origin-patterns` (empty by default; the `dev` profile allows `http://localhost:*` so the app can run with `flutter run -d web-server`). Native phone apps don't need CORS.
 
 `result` values: `CHECKED_IN`, `CHECKED_OUT`, `ALREADY_DONE`, `INVALID_CODE`, `NOT_MEMBER`, `EVENT_CLOSED`, `LOCATION_REQUIRED`, `TOO_FAR`. The app sends the QR text as scanned; the server reads the event id and code from the check-in link.
 

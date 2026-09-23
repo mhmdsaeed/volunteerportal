@@ -1,6 +1,9 @@
 # Local development/testing helpers. Enable with: SPRING_PROFILES_ACTIVE=dev
 # Never enable this profile on a real server.
 app:
+  api:
+    # Let the mobile app run in a browser on this PC during development (flutter run -d web-server)
+    cors-allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*
   checkin:
     # Show the check-in link (with copy/open buttons) under the QR code, to test without a phone
     show-link: true
