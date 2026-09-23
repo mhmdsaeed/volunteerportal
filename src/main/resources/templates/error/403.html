@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Access Denied')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{error403.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
         <div class="alert alert-danger">
-            <h2>Access Denied</h2>
-            <p>You don't have permission to view this page.</p>
-            <a th:href="@{/home}" class="btn btn-secondary">Back to Home</a>
+            <h2 th:text="#{error403.title}">Access Denied</h2>
+            <p th:text="#{error403.message}">You don't have permission to view this page.</p>
+            <a th:href="@{/home}" class="btn btn-secondary" th:text="#{error403.back}">Back to Home</a>
         </div>
     </div>
 

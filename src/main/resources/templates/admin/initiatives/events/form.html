@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title=${eventId} != null ? 'Edit Event' : 'New Event')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=${eventId} != null ? #{events.edit} : #{events.new})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}">&laquo; Back to Events</a></p>
+        <p><a th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}">&laquo; <span th:text="#{events.back}">Back to Events</span></a></p>
 
-        <h2 class="mb-4" th:text="(${eventId} != null ? 'Edit Event' : 'New Event') + ' - ' + ${initiative.name}">Event</h2>
+        <h2 class="mb-4" th:text="${eventId} != null ? #{events.editHeading(${initiative.name})} : #{events.newHeading(${initiative.name})}">Event</h2>
 
         <form th:action="${eventId} != null
                     ? @{/admin/initiatives/{initiativeId}/events/{id}(initiativeId=${initiative.id},id=${eventId})}
@@ -15,46 +15,46 @@
               th:object="${eventForm}" method="post">
 
             <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
+                <label for="name" class="form-label" th:text="#{common.name}">Name</label>
                 <input type="text" class="form-control" id="name" th:field="*{name}">
                 <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
             </div>
 
             <div class="row mb-3">
                 <div class="col">
-                    <label for="fromDttm" class="form-label">From</label>
+                    <label for="fromDttm" class="form-label" th:text="#{common.from}">From</label>
                     <input type="datetime-local" class="form-control" id="fromDttm" th:field="*{fromDttm}">
                 </div>
                 <div class="col">
-                    <label for="toDttm" class="form-label">To</label>
+                    <label for="toDttm" class="form-label" th:text="#{common.to}">To</label>
                     <input type="datetime-local" class="form-control" id="toDttm" th:field="*{toDttm}">
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="locUrl" class="form-label">Location URL</label>
-                <input type="text" class="form-control" id="locUrl" th:field="*{locUrl}" placeholder="https://maps.example.com/...">
+                <label for="locUrl" class="form-label" th:text="#{events.locationUrl}">Location URL</label>
+                <input type="text" class="form-control" id="locUrl" th:field="*{locUrl}" placeholder="https://maps.example.com/..." dir="ltr">
                 <div class="text-danger" th:if="${#fields.hasErrors('locUrl')}" th:errors="*{locUrl}"></div>
             </div>
 
             <div class="row mb-3">
                 <div class="col">
-                    <label for="locLatitude" class="form-label">Latitude</label>
+                    <label for="locLatitude" class="form-label" th:text="#{events.latitude}">Latitude</label>
                     <input type="number" step="any" class="form-control" id="locLatitude" th:field="*{locLatitude}">
                 </div>
                 <div class="col">
-                    <label for="locLongitude" class="form-label">Longitude</label>
+                    <label for="locLongitude" class="form-label" th:text="#{events.longitude}">Longitude</label>
                     <input type="number" step="any" class="form-control" id="locLongitude" th:field="*{locLongitude}">
                 </div>
             </div>
 
             <div class="form-check mb-3">
                 <input type="checkbox" class="form-check-input" id="enabled" th:field="*{enabled}">
-                <label class="form-check-label" for="enabled">Enabled</label>
+                <label class="form-check-label" for="enabled" th:text="#{common.enabled}">Enabled</label>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a class="btn btn-outline-secondary" th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}">Cancel</a>
+            <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}" th:text="#{common.cancel}">Cancel</a>
         </form>
     </div>
 

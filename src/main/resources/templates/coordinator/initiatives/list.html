@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Coordinator')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{coordinator.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <h2 class="mb-4">Your Initiatives</h2>
+        <h2 class="mb-4" th:text="#{coordinator.heading}">Your Initiatives</h2>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Office</th>
-                    <th>Enabled</th>
+                    <th th:text="#{common.name}">Name</th>
+                    <th th:text="#{common.office}">Office</th>
+                    <th th:text="#{common.enabled}">Enabled</th>
                     <th></th>
                 </tr>
             </thead>
@@ -20,13 +20,13 @@
                 <tr th:each="initiative : ${initiatives}">
                     <td th:text="${initiative.name}"></td>
                     <td th:text="${initiative.office != null ? initiative.office.name : '-'}"></td>
-                    <td th:text="${initiative.enabled != null and initiative.enabled ? 'Yes' : 'No'}"></td>
+                    <td th:text="${initiative.enabled != null and initiative.enabled} ? #{common.yes} : #{common.no}"></td>
                     <td class="text-end">
-                        <a class="btn btn-sm btn-outline-primary" th:href="@{/coordinator/initiatives/{id}/requests(id=${initiative.id})}">Join Requests</a>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/coordinator/initiatives/{id}/requests(id=${initiative.id})}" th:text="#{coordinator.joinRequests}">Join Requests</a>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(initiatives)}">
-                    <td colspan="4" class="text-muted">No initiatives assigned to you.</td>
+                    <td colspan="4" class="text-muted" th:text="#{coordinator.empty}">No initiatives assigned to you.</td>
                 </tr>
             </tbody>
         </table>

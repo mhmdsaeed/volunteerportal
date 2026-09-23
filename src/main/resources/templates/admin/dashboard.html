@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Admin')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{admin.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
         <div class="alert alert-primary">
-            <h2>Admin Area</h2>
-            <p>This page is only reachable by users with the <code>ADMIN</code> role.</p>
+            <h2 th:text="#{admin.heading}">Admin Area</h2>
+            <p th:utext="#{admin.intro}">This page is only reachable by users with the <code>ADMIN</code> role.</p>
         </div>
 
-        <a class="btn btn-outline-primary" th:href="@{/admin/offices}">Manage Offices</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/initiatives}">Manage Initiatives</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/question-library}">Question Library</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/grades}">Manage Grades</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/volunteers}">Manage Volunteers</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/config}">Config</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/reports}">Reports</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/offices}" th:text="#{admin.offices}">Manage Offices</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/initiatives}" th:text="#{admin.initiatives}">Manage Initiatives</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/question-library}" th:text="#{admin.questionLibrary}">Question Library</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/grades}" th:text="#{admin.grades}">Manage Grades</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/volunteers}" th:text="#{admin.volunteers}">Manage Volunteers</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/config}" th:text="#{admin.config}">Config</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/reports}" th:text="#{admin.reports}">Reports</a>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

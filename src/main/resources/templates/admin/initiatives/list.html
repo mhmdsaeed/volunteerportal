@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Initiatives')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{initiatives.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>Initiatives</h2>
-            <a class="btn btn-primary" th:href="@{/admin/initiatives/new}">New Initiative</a>
+            <h2 th:text="#{initiatives.title}">Initiatives</h2>
+            <a class="btn btn-primary" th:href="@{/admin/initiatives/new}" th:text="#{adminInitiatives.new}">New Initiative</a>
         </div>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Office</th>
-                    <th>Supervisor</th>
-                    <th>Enabled</th>
+                    <th th:text="#{common.name}">Name</th>
+                    <th th:text="#{common.office}">Office</th>
+                    <th th:text="#{common.supervisor}">Supervisor</th>
+                    <th th:text="#{common.enabled}">Enabled</th>
                     <th></th>
                 </tr>
             </thead>
@@ -25,23 +25,23 @@
                     <td th:text="${initiative.name}"></td>
                     <td th:text="${initiative.office != null ? initiative.office.name : '-'}"></td>
                     <td th:text="${initiative.supervisor != null ? initiative.supervisor.username : '-'}"></td>
-                    <td th:text="${initiative.enabled != null and initiative.enabled ? 'Yes' : 'No'}"></td>
+                    <td th:text="${initiative.enabled != null and initiative.enabled} ? #{common.yes} : #{common.no}"></td>
                     <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}">Events</a>
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}">Questions</a>
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/export(id=${initiative.id})}">Export CSV</a>
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/edit(id=${initiative.id})}">Edit</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}" th:text="#{adminInitiatives.events}">Events</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}" th:text="#{common.questions}">Questions</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/export(id=${initiative.id})}" th:text="#{adminInitiatives.exportCsv}">Export CSV</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/initiatives/{id}/edit(id=${initiative.id})}" th:text="#{common.edit}">Edit</a>
                         <form th:action="@{/admin/initiatives/{id}/duplicate(id=${initiative.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-secondary">Duplicate</button>
+                            <button type="submit" class="btn btn-sm btn-outline-secondary" th:text="#{adminInitiatives.duplicate}">Duplicate</button>
                         </form>
                         <form th:action="@{/admin/initiatives/{id}/delete(id=${initiative.id})}" method="post" class="d-inline"
-                              onsubmit="return confirm('Delete this initiative?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                              th:data-confirm="#{adminInitiatives.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
                         </form>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(initiatives)}">
-                    <td colspan="5" class="text-muted">No initiatives yet.</td>
+                    <td colspan="5" class="text-muted" th:text="#{adminInitiatives.empty}">No initiatives yet.</td>
                 </tr>
             </tbody>
         </table>

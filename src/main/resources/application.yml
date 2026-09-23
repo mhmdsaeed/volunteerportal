@@ -18,6 +18,11 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+  messages:
+    basename: messages
+    encoding: UTF-8
+    # Otherwise an English request could fall back to messages_ar on an Arabic-locale server
+    fallback-to-system-locale: false
   thymeleaf:
     cache: false
     mode: HTML

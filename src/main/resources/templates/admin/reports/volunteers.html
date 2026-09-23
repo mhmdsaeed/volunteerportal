@@ -1,31 +1,31 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Volunteer Leaderboard')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{reports.volunteers})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <p><a th:href="@{/admin/reports}">&laquo; Back to Reports</a></p>
-        <h2 class="mb-4">Volunteer Leaderboard</h2>
+        <p><a th:href="@{/admin/reports}">&laquo; <span th:text="#{reports.back}">Back to Reports</span></a></p>
+        <h2 class="mb-4" th:text="#{reports.volunteers}">Volunteer Leaderboard</h2>
 
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Volunteer</th>
-                    <th>Grade</th>
-                    <th>Points</th>
+                    <th th:text="#{common.volunteer}">Volunteer</th>
+                    <th th:text="#{common.grade}">Grade</th>
+                    <th th:text="#{common.points}">Points</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="row, iter : ${rows}">
                     <td th:text="${iter.count}"></td>
                     <td th:text="${row.username}"></td>
-                    <td th:text="${row.gradeName}"></td>
+                    <td th:text="${row.gradeName != null ? row.gradeName : #messages.msg('grade.unranked')}"></td>
                     <td th:text="${row.points}"></td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="4" class="text-muted">No volunteers yet.</td>
+                    <td colspan="4" class="text-muted" th:text="#{reports.noVolunteers}">No volunteers yet.</td>
                 </tr>
             </tbody>
         </table>

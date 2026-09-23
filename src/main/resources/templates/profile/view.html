@@ -1,54 +1,54 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='My Profile')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{profile.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
-        <h2 class="mb-4">My Profile</h2>
+        <h2 class="mb-4" th:text="#{profile.title}">My Profile</h2>
 
-        <div class="alert alert-success" th:if="${param.saved != null}">
+        <div class="alert alert-success" th:if="${param.saved != null}" th:text="#{profile.saved}">
             Profile saved.
         </div>
 
         <p>
-            <strong>Grade:</strong> <span th:text="${profile.grade != null ? profile.grade.name : 'Unranked'}"></span>
+            <strong th:text="#{common.grade} + ':'">Grade:</strong> <span th:text="${profile.grade != null ? profile.grade.name : #messages.msg('grade.unranked')}"></span>
             &nbsp;|&nbsp;
-            <strong>Points:</strong> <span th:text="${profile.points != null ? profile.points : 0}"></span>
+            <strong th:text="#{common.points} + ':'">Points:</strong> <span th:text="${profile.points != null ? profile.points : 0}"></span>
         </p>
 
         <form th:action="@{/profile}" th:object="${profileForm}" method="post">
             <div class="mb-3">
-                <label for="firstName" class="form-label">First Name</label>
+                <label for="firstName" class="form-label" th:text="#{profile.firstName}">First Name</label>
                 <input type="text" class="form-control" id="firstName" th:field="*{firstName}">
                 <div class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="lastName" class="form-label">Last Name</label>
+                <label for="lastName" class="form-label" th:text="#{profile.lastName}">Last Name</label>
                 <input type="text" class="form-control" id="lastName" th:field="*{lastName}">
                 <div class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="mobile" class="form-label">Mobile</label>
-                <input type="text" class="form-control" id="mobile" th:field="*{mobile}">
+                <label for="mobile" class="form-label" th:text="#{profile.mobile}">Mobile</label>
+                <input type="text" class="form-control" id="mobile" th:field="*{mobile}" dir="ltr">
                 <div class="text-danger" th:if="${#fields.hasErrors('mobile')}" th:errors="*{mobile}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="city" class="form-label">City</label>
+                <label for="city" class="form-label" th:text="#{profile.city}">City</label>
                 <input type="text" class="form-control" id="city" th:field="*{city}">
                 <div class="text-danger" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
+                <label for="address" class="form-label" th:text="#{profile.address}">Address</label>
                 <input type="text" class="form-control" id="address" th:field="*{address}">
                 <div class="text-danger" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
         </form>
     </div>
 

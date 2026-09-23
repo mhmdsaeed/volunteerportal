@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Offices')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{offices.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>Offices</h2>
-            <a class="btn btn-primary" th:href="@{/admin/offices/new}">New Office</a>
+            <h2 th:text="#{offices.title}">Offices</h2>
+            <a class="btn btn-primary" th:href="@{/admin/offices/new}" th:text="#{offices.new}">New Office</a>
         </div>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Role</th>
-                    <th>User</th>
+                    <th th:text="#{common.name}">Name</th>
+                    <th th:text="#{common.role}">Role</th>
+                    <th th:text="#{common.user}">User</th>
                     <th></th>
                 </tr>
             </thead>
@@ -25,15 +25,15 @@
                     <td th:text="${office.role != null ? office.role.name : '-'}"></td>
                     <td th:text="${office.user != null ? office.user.username : '-'}"></td>
                     <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/offices/{id}/edit(id=${office.id})}">Edit</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/offices/{id}/edit(id=${office.id})}" th:text="#{common.edit}">Edit</a>
                         <form th:action="@{/admin/offices/{id}/delete(id=${office.id})}" method="post" class="d-inline"
-                              onsubmit="return confirm('Delete this office?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                              th:data-confirm="#{offices.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
                         </form>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(offices)}">
-                    <td colspan="4" class="text-muted">No offices yet.</td>
+                    <td colspan="4" class="text-muted" th:text="#{offices.empty}">No offices yet.</td>
                 </tr>
             </tbody>
         </table>

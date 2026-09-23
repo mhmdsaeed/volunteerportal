@@ -1,36 +1,37 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Login')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{login.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 420px;">
-        <h2 class="mb-4">Login</h2>
+        <h2 class="mb-4" th:text="#{login.title}">Login</h2>
 
-        <div class="alert alert-success" th:if="${param.registered}">
+        <div class="alert alert-success" th:if="${param.registered}" th:text="#{login.registered}">
             Registration successful. Please log in.
         </div>
-        <div class="alert alert-danger" th:if="${param.error}">
+        <div class="alert alert-danger" th:if="${param.error}" th:text="#{login.error}">
             Invalid username or password.
         </div>
-        <div class="alert alert-info" th:if="${param.logout}">
+        <div class="alert alert-info" th:if="${param.logout}" th:text="#{login.loggedOut}">
             You have been logged out.
         </div>
 
         <form th:action="@{/login}" method="post">
             <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
+                <label for="username" class="form-label" th:text="#{common.username}">Username</label>
                 <input type="text" class="form-control" id="username" name="username" required autofocus>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label" th:text="#{common.password}">Password</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-primary w-100" th:text="#{login.submit}">Login</button>
         </form>
 
         <p class="mt-3">
-            Don't have an account? <a th:href="@{/register}">Register here</a>
+            <span th:text="#{login.noAccount}">Don't have an account?</span>
+            <a th:href="@{/register}" th:text="#{login.registerLink}">Register here</a>
         </p>
     </div>
 

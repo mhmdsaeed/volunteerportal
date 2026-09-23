@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Edit Volunteer')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{volunteers.edit})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 480px;">
-        <p><a th:href="@{/admin/volunteers}">&laquo; Back to Volunteers</a></p>
+        <p><a th:href="@{/admin/volunteers}">&laquo; <span th:text="#{volunteers.back}">Back to Volunteers</span></a></p>
 
-        <h2 class="mb-4" th:text="'Edit Volunteer - ' + ${volunteer.username}">Edit Volunteer</h2>
+        <h2 class="mb-4" th:text="#{volunteers.editHeading(${volunteer.username})}">Edit Volunteer</h2>
 
         <form th:action="@{/admin/volunteers/{id}(id=${volunteer.id})}" th:object="${gradeForm}" method="post">
 
             <div class="mb-3">
-                <label for="gradeId" class="form-label">Grade</label>
+                <label for="gradeId" class="form-label" th:text="#{common.grade}">Grade</label>
                 <select class="form-select" id="gradeId" th:field="*{gradeId}">
-                    <option value="">-- Unranked --</option>
+                    <option value="" th:text="#{grade.unrankedOption}">-- Unranked --</option>
                     <option th:each="grade : ${grades}" th:value="${grade.id}" th:text="${grade.name}"></option>
                 </select>
             </div>
 
             <div class="mb-3">
-                <label for="points" class="form-label">Points</label>
+                <label for="points" class="form-label" th:text="#{common.points}">Points</label>
                 <input type="number" min="0" class="form-control" id="points" th:field="*{points}">
                 <div class="text-danger" th:if="${#fields.hasErrors('points')}" th:errors="*{points}"></div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a class="btn btn-outline-secondary" th:href="@{/admin/volunteers}">Cancel</a>
+            <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/volunteers}" th:text="#{common.cancel}">Cancel</a>
         </form>
     </div>
 

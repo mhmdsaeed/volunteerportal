@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:lang="#{app.lang}" th:dir="#{app.dir}">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${title} + ' - Volunteer Portal'">Volunteer Portal</title>
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <title th:text="#{app.title(${title})}">Volunteer Portal</title>
+    <link rel="stylesheet" th:href="#{app.dir} == 'rtl' ? @{/webjars/bootstrap/css/bootstrap.rtl.min.css} : @{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
@@ -23,54 +24,61 @@
     </script>
 </head>
 <body>
-    <nav th:fragment="navbar" class="sidebar bg-dark" data-bs-theme="dark" aria-label="Main menu">
+    <nav th:fragment="navbar" class="sidebar bg-dark" data-bs-theme="dark" th:aria-label="#{nav.menu}">
         <div class="sidebar-header">
-            <a class="sidebar-brand" th:href="@{/}">Volunteer Portal</a>
+            <a class="sidebar-brand" th:href="@{/}" th:text="#{app.name}">Volunteer Portal</a>
             <button type="button" class="btn btn-sm btn-outline-light sidebar-toggle" id="sidebarToggle"
-                    aria-label="Toggle menu" title="Toggle menu">
+                    th:aria-label="#{nav.toggle}" th:title="#{nav.toggle}">
                 <i class="bi bi-list"></i>
             </button>
         </div>
 
         <div class="nav flex-column py-2">
-            <a class="nav-link" th:href="@{/home}" sec:authorize="isAuthenticated()" title="Home">
-                <i class="bi bi-house"></i><span class="sidebar-label">Home</span>
+            <a class="nav-link" th:href="@{/home}" sec:authorize="isAuthenticated()" th:title="#{nav.home}">
+                <i class="bi bi-house"></i><span class="sidebar-label" th:text="#{nav.home}">Home</span>
             </a>
-            <a class="nav-link" th:href="@{/initiatives}" sec:authorize="isAuthenticated()" title="Initiatives">
-                <i class="bi bi-flag"></i><span class="sidebar-label">Initiatives</span>
+            <a class="nav-link" th:href="@{/initiatives}" sec:authorize="isAuthenticated()" th:title="#{nav.initiatives}">
+                <i class="bi bi-flag"></i><span class="sidebar-label" th:text="#{nav.initiatives}">Initiatives</span>
             </a>
-            <a class="nav-link" th:href="@{/profile}" sec:authorize="isAuthenticated()" title="My Profile">
-                <i class="bi bi-person"></i><span class="sidebar-label">My Profile</span>
+            <a class="nav-link" th:href="@{/profile}" sec:authorize="isAuthenticated()" th:title="#{nav.profile}">
+                <i class="bi bi-person"></i><span class="sidebar-label" th:text="#{nav.profile}">My Profile</span>
             </a>
-            <a class="nav-link" th:href="@{/coordinator/initiatives}" sec:authorize="hasAnyRole('COORDINATOR','ADMIN')" title="Coordinator">
-                <i class="bi bi-people"></i><span class="sidebar-label">Coordinator</span>
+            <a class="nav-link" th:href="@{/coordinator/initiatives}" sec:authorize="hasAnyRole('COORDINATOR','ADMIN')" th:title="#{nav.coordinator}">
+                <i class="bi bi-people"></i><span class="sidebar-label" th:text="#{nav.coordinator}">Coordinator</span>
             </a>
-            <a class="nav-link" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')" title="Admin">
-                <i class="bi bi-gear"></i><span class="sidebar-label">Admin</span>
+            <a class="nav-link" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')" th:title="#{nav.admin}">
+                <i class="bi bi-gear"></i><span class="sidebar-label" th:text="#{nav.admin}">Admin</span>
             </a>
-            <a class="nav-link" th:href="@{/notifications}" sec:authorize="isAuthenticated()" title="Notifications">
-                <i class="bi bi-bell"></i><span class="sidebar-label">Notifications</span>
+            <a class="nav-link" th:href="@{/notifications}" sec:authorize="isAuthenticated()" th:title="#{nav.notifications}">
+                <i class="bi bi-bell"></i><span class="sidebar-label" th:text="#{nav.notifications}">Notifications</span>
                 <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
                       class="badge rounded-pill text-bg-danger" th:text="${unreadNotificationCount}"></span>
             </a>
-            <a class="nav-link" th:href="@{/login}" sec:authorize="isAnonymous()" title="Login">
-                <i class="bi bi-box-arrow-in-right"></i><span class="sidebar-label">Login</span>
+            <a class="nav-link" th:href="@{/login}" sec:authorize="isAnonymous()" th:title="#{nav.login}">
+                <i class="bi bi-box-arrow-in-right bi-flip-rtl"></i><span class="sidebar-label" th:text="#{nav.login}">Login</span>
             </a>
-            <a class="nav-link" th:href="@{/register}" sec:authorize="isAnonymous()" title="Register">
-                <i class="bi bi-person-plus"></i><span class="sidebar-label">Register</span>
+            <a class="nav-link" th:href="@{/register}" sec:authorize="isAnonymous()" th:title="#{nav.register}">
+                <i class="bi bi-person-plus"></i><span class="sidebar-label" th:text="#{nav.register}">Register</span>
             </a>
         </div>
 
-        <div class="sidebar-footer" sec:authorize="isAuthenticated()">
-            <div class="sidebar-user" th:title="'Signed in as ' + ${#authentication.name}">
-                <i class="bi bi-person-circle"></i>
-                <span class="sidebar-label text-truncate">Signed in as <span sec:authentication="name"></span></span>
-            </div>
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="btn btn-outline-light btn-sm sidebar-logout" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i><span class="sidebar-label">Logout</span>
-                </button>
-            </form>
+        <div class="sidebar-footer">
+            <a class="nav-link sidebar-language" id="languageSwitch"
+               th:href="'?lang=' + #{nav.switchLanguageCode}" th:lang="#{nav.switchLanguageCode}"
+               th:data-lang="#{nav.switchLanguageCode}" th:title="#{nav.switchLanguage}">
+                <i class="bi bi-translate"></i><span class="sidebar-label" th:text="#{nav.switchLanguage}">العربية</span>
+            </a>
+            <th:block sec:authorize="isAuthenticated()">
+                <div class="sidebar-user" th:title="#{nav.signedInAs(${#authentication.name})}">
+                    <i class="bi bi-person-circle"></i>
+                    <span class="sidebar-label text-truncate" th:text="#{nav.signedInAs(${#authentication.name})}">Signed in as</span>
+                </div>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-outline-light btn-sm sidebar-logout" th:title="#{nav.logout}">
+                        <i class="bi bi-box-arrow-right bi-flip-rtl"></i><span class="sidebar-label" th:text="#{nav.logout}">Logout</span>
+                    </button>
+                </form>
+            </th:block>
         </div>
 
         <script>
@@ -86,10 +94,16 @@
                     }
                 });
 
+                // Switch language on the current page, keeping any other query parameters
+                var languageSwitch = document.getElementById('languageSwitch');
+                var target = new URL(window.location.href);
+                target.searchParams.set('lang', languageSwitch.dataset.lang);
+                languageSwitch.href = target.toString();
+
                 // Highlight the menu item whose path is the longest prefix of the current URL
                 var path = window.location.pathname;
                 var best = null;
-                document.querySelectorAll('.sidebar .nav-link').forEach(function (link) {
+                document.querySelectorAll('.sidebar .nav-link:not(.sidebar-language)').forEach(function (link) {
                     var href = new URL(link.href).pathname;
                     if ((path === href || path.startsWith(href + '/'))
                             && (!best || href.length > new URL(best.href).pathname.length)) {

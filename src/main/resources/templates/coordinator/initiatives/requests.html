@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Join Requests')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{joinRequests.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <p><a th:href="@{/coordinator/initiatives}">&laquo; Back to Initiatives</a></p>
+        <p><a th:href="@{/coordinator/initiatives}">&laquo; <span th:text="#{initiatives.back}">Back to Initiatives</span></a></p>
 
-        <h2 class="mb-4" th:text="'Join Requests - ' + ${initiative.name}">Join Requests</h2>
+        <h2 class="mb-4" th:text="#{joinRequests.heading(${initiative.name})}">Join Requests</h2>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Volunteer</th>
-                    <th>Requested</th>
-                    <th>Status</th>
-                    <th>Answers</th>
+                    <th th:text="#{common.volunteer}">Volunteer</th>
+                    <th th:text="#{common.requested}">Requested</th>
+                    <th th:text="#{common.status}">Status</th>
+                    <th th:text="#{common.answers}">Answers</th>
                     <th></th>
                 </tr>
             </thead>
@@ -24,25 +24,25 @@
                     <td th:text="${request.user != null ? request.user.username : '-'}"></td>
                     <td th:text="${request.requestJoinDttm != null ? #temporals.format(request.requestJoinDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
                     <td>
-                        <span th:if="${request.responseJoinDttm == null}" class="badge text-bg-warning">Pending</span>
-                        <span th:if="${request.responseJoinDttm != null and request.enabled == true}" class="badge text-bg-success">Approved</span>
-                        <span th:if="${request.responseJoinDttm != null and request.enabled == false}" class="badge text-bg-danger">Not approved</span>
+                        <span th:if="${request.responseJoinDttm == null}" class="badge text-bg-warning" th:text="#{status.pending}">Pending</span>
+                        <span th:if="${request.responseJoinDttm != null and request.enabled == true}" class="badge text-bg-success" th:text="#{status.approved}">Approved</span>
+                        <span th:if="${request.responseJoinDttm != null and request.enabled == false}" class="badge text-bg-danger" th:text="#{status.notApproved}">Not approved</span>
                     </td>
                     <td th:text="${request.answerCount != null ? request.answerCount : 0}"></td>
                     <td class="text-end" th:if="${request.responseJoinDttm == null}">
                         <form th:action="@{/coordinator/initiatives/{initiativeId}/requests/{requestId}/approve(initiativeId=${initiative.id},requestId=${request.id})}"
                               method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            <button type="submit" class="btn btn-sm btn-success" th:text="#{joinRequests.approve}">Approve</button>
                         </form>
                         <form th:action="@{/coordinator/initiatives/{initiativeId}/requests/{requestId}/reject(initiativeId=${initiative.id},requestId=${request.id})}"
                               method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                            <button type="submit" class="btn btn-sm btn-danger" th:text="#{joinRequests.reject}">Reject</button>
                         </form>
                     </td>
                     <td class="text-end" th:if="${request.responseJoinDttm != null}">-</td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(requests)}">
-                    <td colspan="5" class="text-muted">No join requests yet.</td>
+                    <td colspan="5" class="text-muted" th:text="#{joinRequests.empty}">No join requests yet.</td>
                 </tr>
             </tbody>
         </table>

@@ -1,4 +1,5 @@
-/* Collapsible left sidebar (see fragments/layout.html :: navbar) */
+/* Collapsible sidebar (see fragments/layout.html :: navbar).
+   Uses logical properties (inline-start/end) so it sits on the left in LTR and on the right in RTL. */
 :root {
     --sidebar-width: 240px;
     --sidebar-collapsed-width: 64px;
@@ -6,16 +7,16 @@
 }
 
 body {
-    padding-left: var(--sidebar-width);
+    padding-inline-start: var(--sidebar-width);
     padding-top: 1.5rem;
-    transition: padding-left var(--sidebar-transition);
+    transition: padding-inline-start var(--sidebar-transition);
 }
 
 .sidebar {
     position: fixed;
     top: 0;
     bottom: 0;
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1030;
     width: var(--sidebar-width);
     display: flex;
@@ -29,7 +30,8 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 0.75rem 0.75rem 1rem;
+    padding-block: 0.75rem;
+    padding-inline: 1rem 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     min-height: 3.5rem;
 }
@@ -58,10 +60,11 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.6rem 1.25rem;
+    padding-block: 0.6rem;
+    padding-inline: 1.25rem;
     color: rgba(255, 255, 255, 0.75);
     white-space: nowrap;
-    border-left: 3px solid transparent;
+    border-inline-start: 3px solid transparent;
 }
 
 .sidebar .nav-link:hover {
@@ -72,14 +75,20 @@ body {
 .sidebar .nav-link.active {
     color: #fff;
     background-color: rgba(255, 255, 255, 0.12);
-    border-left-color: var(--bs-primary);
+    border-inline-start-color: var(--bs-primary);
 }
 
-.sidebar .nav-link .bi {
+.sidebar .nav-link .bi,
+.sidebar-user .bi {
     font-size: 1.15rem;
     flex-shrink: 0;
     width: 1.25rem;
     text-align: center;
+}
+
+/* Directional icons (arrows) point the other way in RTL */
+[dir="rtl"] .bi-flip-rtl::before {
+    transform: scaleX(-1);
 }
 
 .sidebar-footer {
@@ -87,6 +96,11 @@ body {
     padding: 0.75rem 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     white-space: nowrap;
+}
+
+.sidebar-footer .sidebar-language {
+    margin-inline: -1rem;
+    margin-bottom: 0.5rem;
 }
 
 .sidebar-user {
@@ -99,13 +113,6 @@ body {
     overflow: hidden;
 }
 
-.sidebar-user .bi {
-    font-size: 1.15rem;
-    flex-shrink: 0;
-    width: 1.25rem;
-    text-align: center;
-}
-
 .sidebar-logout {
     display: flex;
     align-items: center;
@@ -116,7 +123,7 @@ body {
 
 /* Collapsed: icon-only rail */
 html.sidebar-collapsed body {
-    padding-left: var(--sidebar-collapsed-width);
+    padding-inline-start: var(--sidebar-collapsed-width);
 }
 
 html.sidebar-collapsed .sidebar {
@@ -130,18 +137,20 @@ html.sidebar-collapsed .sidebar-brand {
 
 html.sidebar-collapsed .sidebar-header {
     justify-content: center;
-    padding-left: 0.75rem;
+    padding-inline: 0.75rem;
 }
 
 html.sidebar-collapsed .sidebar .nav-link {
     justify-content: center;
-    padding-left: 0;
-    padding-right: 0;
+    padding-inline: 0;
 }
 
 html.sidebar-collapsed .sidebar-footer {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-inline: 0.5rem;
+}
+
+html.sidebar-collapsed .sidebar-footer .sidebar-language {
+    margin-inline: -0.5rem;
 }
 
 html.sidebar-collapsed .sidebar-user {
@@ -152,7 +161,7 @@ html.sidebar-collapsed .sidebar-user {
 html.sidebar-collapsed .sidebar .nav-link .badge {
     position: absolute;
     top: 0.35rem;
-    left: calc(50% + 0.35rem);
+    inset-inline-start: calc(50% + 0.35rem);
     font-size: 0.6rem;
     padding: 0.2em 0.45em;
 }
@@ -161,7 +170,7 @@ html.sidebar-collapsed .sidebar .nav-link .badge {
 @media (max-width: 767.98px) {
     body,
     html.sidebar-collapsed body {
-        padding-left: var(--sidebar-collapsed-width);
+        padding-inline-start: var(--sidebar-collapsed-width);
     }
 
     html:not(.sidebar-collapsed) .sidebar {

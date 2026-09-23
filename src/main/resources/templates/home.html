@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Home')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{home.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
         <div class="card">
             <div class="card-body">
-                <h2 class="card-title">Welcome, <span th:text="${user.username}">username</span></h2>
-                <p class="card-text">Email: <span th:text="${user.email}"></span></p>
-                <p class="card-text">Roles:</p>
+                <h2 class="card-title" th:text="#{home.welcome(${user.username})}">Welcome, username</h2>
+                <p class="card-text" th:text="#{home.email(${user.email})}">Email:</p>
+                <p class="card-text" th:text="#{home.roles}">Roles:</p>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item" th:each="role : ${user.roles}" th:text="${role.name}"></li>
                 </ul>

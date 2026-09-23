@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title=${questionId} != null ? 'Edit Question' : 'New Question')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=${questionId} != null ? #{initiativeQuestions.edit} : #{initiativeQuestions.new})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/question-library/{id}/questions(id=${category.id})}">&laquo; Back to Questions</a></p>
+        <p><a th:href="@{/admin/question-library/{id}/questions(id=${category.id})}">&laquo; <span th:text="#{initiativeQuestions.back}">Back to Questions</span></a></p>
 
-        <h2 class="mb-4" th:text="(${questionId} != null ? 'Edit Question' : 'New Question') + ' - ' + ${category.name}">Question</h2>
+        <h2 class="mb-4" th:text="${questionId} != null ? #{questionLibrary.editQuestionHeading(${category.name})} : #{questionLibrary.newQuestionHeading(${category.name})}">Question</h2>
 
         <form th:action="${questionId} != null
                     ? @{/admin/question-library/{categoryId}/questions/{id}(categoryId=${category.id},id=${questionId})}
@@ -15,37 +15,37 @@
               th:object="${questionForm}" method="post">
 
             <div class="mb-3">
-                <label for="questionText" class="form-label">Question</label>
+                <label for="questionText" class="form-label" th:text="#{common.question}">Question</label>
                 <textarea class="form-control" id="questionText" rows="2" th:field="*{questionText}"></textarea>
                 <div class="text-danger" th:if="${#fields.hasErrors('questionText')}" th:errors="*{questionText}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="questionType" class="form-label">Type</label>
+                <label for="questionType" class="form-label" th:text="#{common.type}">Type</label>
                 <select class="form-select" id="questionType" th:field="*{questionType}">
-                    <option value="1">True / False</option>
-                    <option value="2">Single choice</option>
-                    <option value="3">Multiple choice</option>
-                    <option value="4">Free text</option>
+                    <option value="1" th:text="#{questionType.1}">True / False</option>
+                    <option value="2" th:text="#{questionType.2}">Single choice</option>
+                    <option value="3" th:text="#{questionType.3}">Multiple choice</option>
+                    <option value="4" th:text="#{questionType.4}">Free text</option>
                 </select>
                 <div class="text-danger" th:if="${#fields.hasErrors('questionType')}" th:errors="*{questionType}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="questionChoicesCount" class="form-label">Number of choices</label>
+                <label for="questionChoicesCount" class="form-label" th:text="#{question.choicesCount}">Number of choices</label>
                 <input type="number" class="form-control" id="questionChoicesCount" th:field="*{questionChoicesCount}">
-                <div class="form-text">Only relevant for single/multiple choice questions.</div>
+                <div class="form-text" th:text="#{question.choicesCountHelp}">Only relevant for single/multiple choice questions.</div>
             </div>
 
             <div class="mb-3">
-                <label for="questionChoices" class="form-label">Choices</label>
+                <label for="questionChoices" class="form-label" th:text="#{common.choices}">Choices</label>
                 <input type="text" class="form-control" id="questionChoices" th:field="*{questionChoices}"
-                       placeholder="Comma-separated, e.g. Red,Green,Blue">
+                       th:placeholder="#{question.choicesPlaceholder}">
                 <div class="text-danger" th:if="${#fields.hasErrors('questionChoices')}" th:errors="*{questionChoices}"></div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a class="btn btn-outline-secondary" th:href="@{/admin/question-library/{id}/questions(id=${category.id})}">Cancel</a>
+            <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/question-library/{id}/questions(id=${category.id})}" th:text="#{common.cancel}">Cancel</a>
         </form>
     </div>
 

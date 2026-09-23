@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Event Attendance')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{reports.attendance})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <p><a th:href="@{/admin/reports}">&laquo; Back to Reports</a></p>
-        <h2 class="mb-4">Event Attendance</h2>
+        <p><a th:href="@{/admin/reports}">&laquo; <span th:text="#{reports.back}">Back to Reports</span></a></p>
+        <h2 class="mb-4" th:text="#{reports.attendance}">Event Attendance</h2>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Initiative</th>
-                    <th>Event</th>
-                    <th>From</th>
-                    <th>Checked In</th>
-                    <th>Checked Out</th>
+                    <th th:text="#{common.initiative}">Initiative</th>
+                    <th th:text="#{common.event}">Event</th>
+                    <th th:text="#{common.from}">From</th>
+                    <th th:text="#{reports.checkedIn}">Checked In</th>
+                    <th th:text="#{reports.checkedOut}">Checked Out</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,7 +27,7 @@
                     <td th:text="${row.checkOutCount}"></td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="5" class="text-muted">No events yet.</td>
+                    <td colspan="5" class="text-muted" th:text="#{reports.noEvents}">No events yet.</td>
                 </tr>
             </tbody>
         </table>

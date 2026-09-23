@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title=${configId} != null ? 'Edit Config' : 'New Config')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=${configId} != null ? #{config.edit} : #{config.new})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 480px;">
-        <h2 class="mb-4" th:text="${configId} != null ? 'Edit Config' : 'New Config'">Config</h2>
+        <h2 class="mb-4" th:text="${configId} != null ? #{config.edit} : #{config.new}">Config</h2>
 
         <form th:action="${configId} != null ? @{/admin/config/{id}(id=${configId})} : @{/admin/config}"
               th:object="${configForm}" method="post">
 
             <div class="mb-3">
-                <label for="configsetKey" class="form-label">Key</label>
-                <input type="text" class="form-control" id="configsetKey" th:field="*{configsetKey}">
+                <label for="configsetKey" class="form-label" th:text="#{common.key}">Key</label>
+                <input type="text" class="form-control" id="configsetKey" th:field="*{configsetKey}" dir="ltr">
                 <div class="text-danger" th:if="${#fields.hasErrors('configsetKey')}" th:errors="*{configsetKey}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="configsetValue" class="form-label">Value</label>
-                <input type="text" class="form-control" id="configsetValue" th:field="*{configsetValue}">
+                <label for="configsetValue" class="form-label" th:text="#{common.value}">Value</label>
+                <input type="text" class="form-control" id="configsetValue" th:field="*{configsetValue}" dir="auto">
                 <div class="text-danger" th:if="${#fields.hasErrors('configsetValue')}" th:errors="*{configsetValue}"></div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a class="btn btn-outline-secondary" th:href="@{/admin/config}">Cancel</a>
+            <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/config}" th:text="#{common.cancel}">Cancel</a>
         </form>
     </div>
 

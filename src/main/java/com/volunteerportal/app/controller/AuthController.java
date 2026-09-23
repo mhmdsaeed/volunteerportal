@@ -37,13 +37,13 @@ public class AuthController {
             BindingResult bindingResult) {
 
         if (userService.usernameExists(form.getUsername())) {
-            bindingResult.rejectValue("username", "duplicate", "Username is already taken");
+            bindingResult.rejectValue("username", "error.username.taken", "Username is already taken");
         }
         if (userService.emailExists(form.getEmail())) {
-            bindingResult.rejectValue("email", "duplicate", "Email is already registered");
+            bindingResult.rejectValue("email", "error.email.taken", "Email is already registered");
         }
         if (!form.getPassword().equals(form.getConfirmPassword())) {
-            bindingResult.rejectValue("confirmPassword", "mismatch", "Passwords do not match");
+            bindingResult.rejectValue("confirmPassword", "error.password.mismatch", "Passwords do not match");
         }
 
         if (bindingResult.hasErrors()) {

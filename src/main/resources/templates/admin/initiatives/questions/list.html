@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Initiative Questions')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{initiativeQuestions.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <p><a th:href="@{/admin/initiatives}">&laquo; Back to Initiatives</a></p>
+        <p><a th:href="@{/admin/initiatives}">&laquo; <span th:text="#{initiatives.back}">Back to Initiatives</span></a></p>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 th:text="'Questions - ' + ${initiative.name}">Questions</h2>
-            <a class="btn btn-primary" th:href="@{/admin/initiatives/{id}/questions/new(id=${initiative.id})}">New Question</a>
+            <h2 th:text="#{initiativeQuestions.heading(${initiative.name})}">Questions</h2>
+            <a class="btn btn-primary" th:href="@{/admin/initiatives/{id}/questions/new(id=${initiative.id})}" th:text="#{initiativeQuestions.new}">New Question</a>
         </div>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Question</th>
-                    <th>Type</th>
-                    <th>Choices</th>
+                    <th th:text="#{common.question}">Question</th>
+                    <th th:text="#{common.type}">Type</th>
+                    <th th:text="#{common.choices}">Choices</th>
                     <th></th>
                 </tr>
             </thead>
@@ -25,24 +25,24 @@
                 <tr th:each="question : ${questions}">
                     <td th:text="${question.questionText}"></td>
                     <td th:switch="${question.questionTypeId}">
-                        <span th:case="1">True / False</span>
-                        <span th:case="2">Single choice</span>
-                        <span th:case="3">Multiple choice</span>
-                        <span th:case="4">Free text</span>
+                        <span th:case="1" th:text="#{questionType.1}">True / False</span>
+                        <span th:case="2" th:text="#{questionType.2}">Single choice</span>
+                        <span th:case="3" th:text="#{questionType.3}">Multiple choice</span>
+                        <span th:case="4" th:text="#{questionType.4}">Free text</span>
                         <span th:case="*">-</span>
                     </td>
                     <td th:text="${question.questionChoicesText != null ? question.questionChoicesText : '-'}"></td>
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-secondary"
-                           th:href="@{/admin/initiatives/{initiativeId}/questions/{id}/edit(initiativeId=${initiative.id},id=${question.id})}">Edit</a>
+                           th:href="@{/admin/initiatives/{initiativeId}/questions/{id}/edit(initiativeId=${initiative.id},id=${question.id})}" th:text="#{common.edit}">Edit</a>
                         <form th:action="@{/admin/initiatives/{initiativeId}/questions/{id}/delete(initiativeId=${initiative.id},id=${question.id})}"
-                              method="post" class="d-inline" onsubmit="return confirm('Delete this question?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                              method="post" class="d-inline" th:data-confirm="#{initiativeQuestions.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
                         </form>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(questions)}">
-                    <td colspan="4" class="text-muted">No questions yet.</td>
+                    <td colspan="4" class="text-muted" th:text="#{initiativeQuestions.empty}">No questions yet.</td>
                 </tr>
             </tbody>
         </table>

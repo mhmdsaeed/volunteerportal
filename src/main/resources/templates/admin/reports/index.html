@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Reports')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{reports.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <h2 class="mb-4">Reports</h2>
+        <h2 class="mb-4" th:text="#{reports.title}">Reports</h2>
 
-        <a class="btn btn-outline-primary" th:href="@{/admin/reports/initiatives}">Initiative Participation</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/reports/attendance}">Event Attendance</a>
-        <a class="btn btn-outline-primary" th:href="@{/admin/reports/volunteers}">Volunteer Leaderboard</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/reports/initiatives}" th:text="#{reports.initiatives}">Initiative Participation</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/reports/attendance}" th:text="#{reports.attendance}">Event Attendance</a>
+        <a class="btn btn-outline-primary" th:href="@{/admin/reports/volunteers}" th:text="#{reports.volunteers}">Volunteer Leaderboard</a>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

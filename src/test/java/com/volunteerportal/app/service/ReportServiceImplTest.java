@@ -145,7 +145,7 @@ class ReportServiceImplTest {
 
         assertThat(result).containsExactly(
                 new VolunteerLeaderboardRow(2L, "high", "Gold", 50L),
-                new VolunteerLeaderboardRow(1L, "low", "Unranked", 10L));
+                new VolunteerLeaderboardRow(1L, "low", null, 10L));
     }
 
     @Test
@@ -159,6 +159,6 @@ class ReportServiceImplTest {
 
         List<VolunteerLeaderboardRow> result = reportService.volunteerLeaderboard();
 
-        assertThat(result).containsExactly(new VolunteerLeaderboardRow(3L, "newbie", "Unranked", 0L));
+        assertThat(result).containsExactly(new VolunteerLeaderboardRow(3L, "newbie", null, 0L));
     }
 }

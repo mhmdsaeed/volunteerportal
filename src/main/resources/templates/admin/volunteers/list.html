@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Volunteers')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{volunteers.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <h2 class="mb-4">Volunteers</h2>
+        <h2 class="mb-4" th:text="#{volunteers.title}">Volunteers</h2>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Grade</th>
-                    <th>Points</th>
+                    <th th:text="#{common.username}">Username</th>
+                    <th th:text="#{common.email}">Email</th>
+                    <th th:text="#{common.grade}">Grade</th>
+                    <th th:text="#{common.points}">Points</th>
                     <th></th>
                 </tr>
             </thead>
@@ -21,14 +21,14 @@
                 <tr th:each="volunteer : ${volunteers}" th:with="profile=${profiles.get(volunteer.id)}">
                     <td th:text="${volunteer.username}"></td>
                     <td th:text="${volunteer.email}"></td>
-                    <td th:text="${profile != null and profile.grade != null ? profile.grade.name : 'Unranked'}"></td>
+                    <td th:text="${profile != null and profile.grade != null ? profile.grade.name : #messages.msg('grade.unranked')}"></td>
                     <td th:text="${profile != null and profile.points != null ? profile.points : 0}"></td>
                     <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/volunteers/{id}/edit(id=${volunteer.id})}">Edit</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/volunteers/{id}/edit(id=${volunteer.id})}" th:text="#{common.edit}">Edit</a>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(volunteers)}">
-                    <td colspan="5" class="text-muted">No volunteers yet.</td>
+                    <td colspan="5" class="text-muted" th:text="#{volunteers.empty}">No volunteers yet.</td>
                 </tr>
             </tbody>
         </table>

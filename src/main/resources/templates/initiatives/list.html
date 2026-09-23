@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Initiatives')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{initiatives.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <h2 class="mb-4">Initiatives</h2>
+        <h2 class="mb-4" th:text="#{initiatives.title}">Initiatives</h2>
 
         <div class="row row-cols-1 row-cols-md-2 g-3">
             <div class="col" th:each="initiative : ${initiatives}">
@@ -15,18 +15,18 @@
                         <p class="card-text" th:text="${initiative.description}"></p>
 
                         <p th:with="membership=${memberships.get(initiative.id)}">
-                            <span th:if="${membership == null}" class="badge text-bg-secondary">Not joined</span>
-                            <span th:if="${membership != null and membership.responseJoinDttm == null}" class="badge text-bg-warning">Pending</span>
-                            <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == true}" class="badge text-bg-success">Approved</span>
-                            <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == false}" class="badge text-bg-danger">Not approved</span>
+                            <span th:if="${membership == null}" class="badge text-bg-secondary" th:text="#{status.notJoined}">Not joined</span>
+                            <span th:if="${membership != null and membership.responseJoinDttm == null}" class="badge text-bg-warning" th:text="#{status.pending}">Pending</span>
+                            <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == true}" class="badge text-bg-success" th:text="#{status.approved}">Approved</span>
+                            <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == false}" class="badge text-bg-danger" th:text="#{status.notApproved}">Not approved</span>
                         </p>
 
-                        <a class="btn btn-primary btn-sm" th:href="@{/initiatives/{id}(id=${initiative.id})}">View</a>
+                        <a class="btn btn-primary btn-sm" th:href="@{/initiatives/{id}(id=${initiative.id})}" th:text="#{common.view}">View</a>
                     </div>
                 </div>
             </div>
             <div class="col" th:if="${#lists.isEmpty(initiatives)}">
-                <p class="text-muted">No initiatives are open right now.</p>
+                <p class="text-muted" th:text="#{initiatives.empty}">No initiatives are open right now.</p>
             </div>
         </div>
     </div>

@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Notifications')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{notifications.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 640px;">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>Notifications</h2>
+            <h2 th:text="#{notifications.title}">Notifications</h2>
             <form th:if="${!#lists.isEmpty(notifications)}" th:action="@{/notifications/read-all}" method="post">
-                <button type="submit" class="btn btn-outline-secondary btn-sm">Mark all as read</button>
+                <button type="submit" class="btn btn-outline-secondary btn-sm" th:text="#{notifications.markAllRead}">Mark all as read</button>
             </form>
         </div>
 
@@ -17,16 +17,16 @@
                  th:classappend="${notification.read} ? '' : 'list-group-item-light border-start border-4 border-primary'">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <p class="mb-1" th:text="${notification.message}"></p>
-                        <a th:if="${notification.link != null}" th:href="${notification.link}" class="small">View</a>
+                        <p class="mb-1" th:text="${notification.message}" dir="auto"></p>
+                        <a th:if="${notification.link != null}" th:href="${notification.link}" class="small" th:text="#{common.view}">View</a>
                         <p class="mb-0 text-muted small" th:text="${#temporals.format(notification.createdDttm, 'yyyy-MM-dd HH:mm')}"></p>
                     </div>
                     <form th:if="${!notification.read}" th:action="@{/notifications/{id}/read(id=${notification.id})}" method="post">
-                        <button type="submit" class="btn btn-sm btn-outline-secondary">Mark read</button>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary" th:text="#{notifications.markRead}">Mark read</button>
                     </form>
                 </div>
             </div>
-            <p th:if="${#lists.isEmpty(notifications)}" class="text-muted">No notifications yet.</p>
+            <p th:if="${#lists.isEmpty(notifications)}" class="text-muted" th:text="#{notifications.empty}">No notifications yet.</p>
         </div>
     </div>
 

@@ -1,37 +1,37 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Config')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{config.title})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>Config</h2>
-            <a class="btn btn-primary" th:href="@{/admin/config/new}">New Entry</a>
+            <h2 th:text="#{config.title}">Config</h2>
+            <a class="btn btn-primary" th:href="@{/admin/config/new}" th:text="#{config.newEntry}">New Entry</a>
         </div>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Key</th>
-                    <th>Value</th>
+                    <th th:text="#{common.key}">Key</th>
+                    <th th:text="#{common.value}">Value</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="config : ${configs}">
-                    <td th:text="${config.configsetKey}"></td>
-                    <td th:text="${config.configsetValue}"></td>
+                    <td th:text="${config.configsetKey}" dir="ltr"></td>
+                    <td th:text="${config.configsetValue}" dir="auto"></td>
                     <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/config/{id}/edit(id=${config.id})}">Edit</a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/config/{id}/edit(id=${config.id})}" th:text="#{common.edit}">Edit</a>
                         <form th:action="@{/admin/config/{id}/delete(id=${config.id})}" method="post" class="d-inline"
-                              onsubmit="return confirm('Delete this config entry?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                              th:data-confirm="#{config.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
                         </form>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(configs)}">
-                    <td colspan="3" class="text-muted">No config entries yet.</td>
+                    <td colspan="3" class="text-muted" th:text="#{config.empty}">No config entries yet.</td>
                 </tr>
             </tbody>
         </table>

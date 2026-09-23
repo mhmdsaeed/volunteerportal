@@ -39,7 +39,7 @@ public class ConfigSetController {
     @PostMapping
     public String create(@Valid @ModelAttribute("configForm") ConfigSetForm form, BindingResult bindingResult) {
         if (configSetAdminService.keyTaken(form.getConfigsetKey(), null)) {
-            bindingResult.rejectValue("configsetKey", "duplicate", "Key already exists");
+            bindingResult.rejectValue("configsetKey", "error.configKey.taken", "Key already exists");
         }
         if (bindingResult.hasErrors()) {
             return "admin/config/form";
@@ -65,7 +65,7 @@ public class ConfigSetController {
     public String update(@PathVariable Long id, @Valid @ModelAttribute("configForm") ConfigSetForm form,
             BindingResult bindingResult, Model model) {
         if (configSetAdminService.keyTaken(form.getConfigsetKey(), id)) {
-            bindingResult.rejectValue("configsetKey", "duplicate", "Key already exists");
+            bindingResult.rejectValue("configsetKey", "error.configKey.taken", "Key already exists");
         }
         if (bindingResult.hasErrors()) {
             model.addAttribute("configId", id);

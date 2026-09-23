@@ -103,8 +103,8 @@ public class ReportServiceImpl implements ReportService {
                 .map(profile -> new VolunteerLeaderboardRow(
                         volunteer.getId(),
                         volunteer.getUsername(),
-                        profile.getGrade() != null ? profile.getGrade().getName() : "Unranked",
+                        profile.getGrade() != null ? profile.getGrade().getName() : null,
                         profile.getPoints() != null ? profile.getPoints() : 0L))
-                .orElseGet(() -> new VolunteerLeaderboardRow(volunteer.getId(), volunteer.getUsername(), "Unranked", 0L));
+                .orElseGet(() -> new VolunteerLeaderboardRow(volunteer.getId(), volunteer.getUsername(), null, 0L));
     }
 }

@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title=${questionId} != null ? 'Edit Question' : 'New Question')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=${questionId} != null ? #{initiativeQuestions.edit} : #{initiativeQuestions.new})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}">&laquo; Back to Questions</a></p>
+        <p><a th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}">&laquo; <span th:text="#{initiativeQuestions.back}">Back to Questions</span></a></p>
 
-        <h2 class="mb-4" th:text="(${questionId} != null ? 'Edit Question' : 'New Question') + ' - ' + ${initiative.name}">Question</h2>
+        <h2 class="mb-4" th:text="${questionId} != null ? #{initiativeQuestions.editHeading(${initiative.name})} : #{initiativeQuestions.newHeading(${initiative.name})}">Question</h2>
 
         <div class="card mb-4" th:if="${questionId == null and libraryCategories != null}">
             <div class="card-body">
-                <h6 class="card-title">Copy from Question Library</h6>
+                <h6 class="card-title" th:text="#{initiativeQuestions.copyFromLibrary}">Copy from Question Library</h6>
                 <form th:action="@{/admin/initiatives/{id}/questions/new(id=${initiative.id})}" method="get" class="row g-2 align-items-center">
                     <div class="col-auto">
                         <select class="form-select" name="fromLibrary">
-                            <option value="">-- Select a library question --</option>
+                            <option value="" th:text="#{initiativeQuestions.selectLibraryQuestion}">-- Select a library question --</option>
                             <optgroup th:each="category : ${libraryCategories}" th:label="${category.name}">
                                 <option th:each="question : ${libraryQuestions}" th:if="${question.questionLibCat != null and question.questionLibCat.id == category.id}"
                                         th:value="${question.id}" th:text="${question.questionText}"></option>
@@ -23,7 +23,7 @@
                         </select>
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">Load</button>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" th:text="#{common.load}">Load</button>
                     </div>
                 </form>
             </div>
@@ -35,37 +35,37 @@
               th:object="${questionForm}" method="post">
 
             <div class="mb-3">
-                <label for="questionText" class="form-label">Question</label>
+                <label for="questionText" class="form-label" th:text="#{common.question}">Question</label>
                 <textarea class="form-control" id="questionText" rows="2" th:field="*{questionText}"></textarea>
                 <div class="text-danger" th:if="${#fields.hasErrors('questionText')}" th:errors="*{questionText}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="questionTypeId" class="form-label">Type</label>
+                <label for="questionTypeId" class="form-label" th:text="#{common.type}">Type</label>
                 <select class="form-select" id="questionTypeId" th:field="*{questionTypeId}">
-                    <option value="1">True / False</option>
-                    <option value="2">Single choice</option>
-                    <option value="3">Multiple choice</option>
-                    <option value="4">Free text</option>
+                    <option value="1" th:text="#{questionType.1}">True / False</option>
+                    <option value="2" th:text="#{questionType.2}">Single choice</option>
+                    <option value="3" th:text="#{questionType.3}">Multiple choice</option>
+                    <option value="4" th:text="#{questionType.4}">Free text</option>
                 </select>
                 <div class="text-danger" th:if="${#fields.hasErrors('questionTypeId')}" th:errors="*{questionTypeId}"></div>
             </div>
 
             <div class="mb-3">
-                <label for="questionChoicesCount" class="form-label">Number of choices</label>
+                <label for="questionChoicesCount" class="form-label" th:text="#{question.choicesCount}">Number of choices</label>
                 <input type="number" class="form-control" id="questionChoicesCount" th:field="*{questionChoicesCount}">
-                <div class="form-text">Only relevant for single/multiple choice questions.</div>
+                <div class="form-text" th:text="#{question.choicesCountHelp}">Only relevant for single/multiple choice questions.</div>
             </div>
 
             <div class="mb-3">
-                <label for="questionChoicesText" class="form-label">Choices</label>
+                <label for="questionChoicesText" class="form-label" th:text="#{common.choices}">Choices</label>
                 <input type="text" class="form-control" id="questionChoicesText" th:field="*{questionChoicesText}"
-                       placeholder="Comma-separated, e.g. Red,Green,Blue">
+                       th:placeholder="#{question.choicesPlaceholder}">
                 <div class="text-danger" th:if="${#fields.hasErrors('questionChoicesText')}" th:errors="*{questionChoicesText}"></div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a class="btn btn-outline-secondary" th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}">Cancel</a>
+            <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}" th:text="#{common.cancel}">Cancel</a>
         </form>
     </div>
 

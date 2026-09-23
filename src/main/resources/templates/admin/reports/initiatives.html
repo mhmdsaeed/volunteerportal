@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(title='Initiative Participation')}"></head>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{reports.initiatives})}"></head>
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <p><a th:href="@{/admin/reports}">&laquo; Back to Reports</a></p>
-        <h2 class="mb-4">Initiative Participation</h2>
+        <p><a th:href="@{/admin/reports}">&laquo; <span th:text="#{reports.back}">Back to Reports</span></a></p>
+        <h2 class="mb-4" th:text="#{reports.initiatives}">Initiative Participation</h2>
 
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Initiative</th>
-                    <th>Office</th>
-                    <th>Supervisor</th>
-                    <th>Approved</th>
-                    <th>Pending</th>
-                    <th>Rejected</th>
-                    <th>Total</th>
+                    <th th:text="#{common.initiative}">Initiative</th>
+                    <th th:text="#{common.office}">Office</th>
+                    <th th:text="#{common.supervisor}">Supervisor</th>
+                    <th th:text="#{status.approved}">Approved</th>
+                    <th th:text="#{status.pending}">Pending</th>
+                    <th th:text="#{status.rejected}">Rejected</th>
+                    <th th:text="#{common.total}">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
                     <td th:text="${row.totalCount}"></td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="7" class="text-muted">No initiatives yet.</td>
+                    <td colspan="7" class="text-muted" th:text="#{reports.noInitiatives}">No initiatives yet.</td>
                 </tr>
             </tbody>
         </table>
