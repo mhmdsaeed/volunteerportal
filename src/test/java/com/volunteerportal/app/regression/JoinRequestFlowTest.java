@@ -11,12 +11,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.volunteerportal.app.model.Attend;
 import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.Office;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
+import com.volunteerportal.app.repository.AttendRepository;
 import com.volunteerportal.app.repository.EventRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
 import com.volunteerportal.app.repository.NotificationRepository;
@@ -70,6 +72,9 @@ class JoinRequestFlowTest {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private AttendRepository attendRepository;
 
     private final String suffix = String.valueOf(System.nanoTime());
     private User volunteer;
@@ -223,6 +228,51 @@ class JoinRequestFlowTest {
                     .andExpect(status().isForbidden());
         } finally {
             eventRepository.delete(created);
+        }
+    }
+
+    @Test
+    void officeCoordinator_recordsViewsEditsAndDeletesAttendanceOfAnApprovedMember() throws Exception {
+        setUpPendingRequest();
+        String attendancePath = "/coordinator/initiatives/" + initiative.getId() + "/events/" + event.getId() + "/attendance";
+
+        // Not a member yet: the pending volunteer can't be recorded
+        mockMvc.perform(post(attendancePath).with(user(principal(officeCoordinator))).with(csrf())
+                        .param("volunteerInitiativeId", request.getId().toString())
+                        .param("attendInOut", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Only approved members of this initiative can attend its events")));
+
+        mockMvc.perform(post("/coordinator/requests/{id}/approve", request.getId())
+                        .with(user(principal(officeCoordinator))).with(csrf()))
+                .andExpect(redirectedUrl("/coordinator/requests"));
+
+        try {
+            mockMvc.perform(post(attendancePath).with(user(principal(officeCoordinator))).with(csrf())
+                            .param("volunteerInitiativeId", request.getId().toString())
+                            .param("attendInOut", "1")
+                            .param("note", "On time " + suffix))
+                    .andExpect(redirectedUrl(attendancePath));
+
+            Attend recorded = attendRepository.findByEventId(event.getId()).get(0);
+
+            // The list and the edit form render lazy associations after the session has closed
+            mockMvc.perform(get(attendancePath).with(user(principal(officeCoordinator))))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(volunteer.getUsername())))
+                    .andExpect(content().string(containsString("On time " + suffix)));
+            mockMvc.perform(get(attendancePath + "/{id}/edit", recorded.getId()).with(user(principal(officeCoordinator))))
+                    .andExpect(status().isOk());
+
+            mockMvc.perform(get(attendancePath).with(user(principal(otherCoordinator))))
+                    .andExpect(status().isForbidden());
+
+            mockMvc.perform(post(attendancePath + "/{id}/delete", recorded.getId())
+                            .with(user(principal(officeCoordinator))).with(csrf()))
+                    .andExpect(redirectedUrl(attendancePath));
+            assertThat(attendRepository.findByEventId(event.getId())).isEmpty();
+        } finally {
+            attendRepository.deleteAll(attendRepository.findByEventId(event.getId()));
         }
     }
 

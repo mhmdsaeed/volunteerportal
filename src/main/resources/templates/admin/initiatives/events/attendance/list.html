@@ -4,13 +4,16 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container">
-        <p><a th:href="@{/admin/initiatives/{id}/events(id=${initiative.id})}">&laquo; <span th:text="#{events.back}">Back to Events</span></a></p>
+    <!-- Shared by the admin area and the coordinator pages: attendancePath/eventsPath default to the admin URLs -->
+    <div class="container"
+         th:with="eventsPath=${eventsPath != null ? eventsPath : '/admin/initiatives/' + initiative.id + '/events'},
+                  attendancePath=${attendancePath != null ? attendancePath : eventsPath + '/' + event.id + '/attendance'}">
+        <p><a th:href="@{${eventsPath}}">&laquo; <span th:text="#{events.back}">Back to Events</span></a></p>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 th:text="#{attendance.heading(${event.name})}">Attendance</h2>
             <a class="btn btn-primary"
-               th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/new(initiativeId=${initiative.id},eventId=${event.id})}" th:text="#{attendance.record}">Record Attendance</a>
+               th:href="@{|${attendancePath}/new|}" th:text="#{attendance.record}">Record Attendance</a>
         </div>
 
         <table class="table table-striped">
@@ -35,8 +38,8 @@
                     <td th:text="${attend.note != null ? attend.note : '-'}"></td>
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-secondary"
-                           th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/{id}/edit(initiativeId=${initiative.id},eventId=${event.id},id=${attend.id})}" th:text="#{common.edit}">Edit</a>
-                        <form th:action="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/{id}/delete(initiativeId=${initiative.id},eventId=${event.id},id=${attend.id})}"
+                           th:href="@{|${attendancePath}/${attend.id}/edit|}" th:text="#{common.edit}">Edit</a>
+                        <form th:action="@{|${attendancePath}/${attend.id}/delete|}"
                               method="post" class="d-inline" th:data-confirm="#{attendance.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
                             <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
                         </form>

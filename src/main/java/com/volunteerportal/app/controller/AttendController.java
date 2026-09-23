@@ -111,18 +111,7 @@ public class AttendController {
         model.addAttribute("volunteerInitiatives", volunteerInitiativeRepository.findByInitiativeIdAndEnabledTrue(initiativeId));
     }
 
-    /** Attendance can only be recorded for volunteers whose request to join this initiative was approved. */
     private void rejectIfNotApprovedMember(AttendForm form, Long initiativeId, BindingResult bindingResult) {
-        if (form.getVolunteerInitiativeId() == null) {
-            return; // @NotNull reports this one
-        }
-        boolean approvedMember = volunteerInitiativeRepository.findById(form.getVolunteerInitiativeId())
-                .filter(vi -> Boolean.TRUE.equals(vi.getEnabled()))
-                .filter(vi -> vi.getInitiative() != null && initiativeId.equals(vi.getInitiative().getId()))
-                .isPresent();
-        if (!approvedMember) {
-            bindingResult.rejectValue("volunteerInitiativeId", "error.attend.notApprovedMember",
-                    "Only approved members of this initiative can attend its events");
-        }
+        AttendanceRules.rejectIfNotApprovedMember(form, initiativeId, bindingResult, volunteerInitiativeRepository);
     }
 }

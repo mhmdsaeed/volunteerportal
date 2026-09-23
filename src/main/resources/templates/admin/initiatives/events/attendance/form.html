@@ -4,14 +4,15 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance(initiativeId=${initiative.id},eventId=${event.id})}">&laquo; <span th:text="#{attendance.back}">Back to Attendance</span></a></p>
+    <!-- Shared by the admin area and the coordinator pages: attendancePath/eventsPath default to the admin URLs -->
+    <div class="container" style="max-width: 560px;"
+         th:with="eventsPath=${eventsPath != null ? eventsPath : '/admin/initiatives/' + initiative.id + '/events'},
+                  attendancePath=${attendancePath != null ? attendancePath : eventsPath + '/' + event.id + '/attendance'}">
+        <p><a th:href="@{${attendancePath}}">&laquo; <span th:text="#{attendance.back}">Back to Attendance</span></a></p>
 
         <h2 class="mb-4" th:text="${attendId} != null ? #{attendance.editHeading(${event.name})} : #{attendance.recordHeading(${event.name})}">Attendance</h2>
 
-        <form th:action="${attendId} != null
-                    ? @{/admin/initiatives/{initiativeId}/events/{eventId}/attendance/{id}(initiativeId=${initiative.id},eventId=${event.id},id=${attendId})}
-                    : @{/admin/initiatives/{initiativeId}/events/{eventId}/attendance(initiativeId=${initiative.id},eventId=${event.id})}"
+        <form th:action="${attendId} != null ? @{|${attendancePath}/${attendId}|} : @{${attendancePath}}"
               th:object="${attendForm}" method="post">
 
             <div class="mb-3">
@@ -47,7 +48,7 @@
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary"
-               th:href="@{/admin/initiatives/{initiativeId}/events/{eventId}/attendance(initiativeId=${initiative.id},eventId=${event.id})}" th:text="#{common.cancel}">Cancel</a>
+               th:href="@{${attendancePath}}" th:text="#{common.cancel}">Cancel</a>
         </form>
     </div>
 

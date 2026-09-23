@@ -35,6 +35,8 @@
                     <td th:text="${event.enabled != null and event.enabled} ? #{common.yes} : #{common.no}"></td>
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-secondary"
+                           th:href="@{/coordinator/initiatives/{initiativeId}/events/{id}/attendance(initiativeId=${initiative.id},id=${event.id})}" th:text="#{events.attendance}">Attendance</a>
+                        <a class="btn btn-sm btn-outline-secondary"
                            th:href="@{/coordinator/initiatives/{initiativeId}/events/{id}/edit(initiativeId=${initiative.id},id=${event.id})}" th:text="#{common.edit}">Edit</a>
                     </td>
                 </tr>
