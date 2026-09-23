@@ -17,6 +17,18 @@
         <img id="qr" class="img-fluid border rounded p-2 bg-white mb-3" style="width: min(100%, 420px);"
              th:src="@{|${basePath}/qr.svg|}" th:data-src="@{|${basePath}/qr.svg|}" th:alt="#{checkinQr.title}">
 
+        <!-- Dev/testing only (app.checkin.show-link): the link inside the QR, to try check-in without a phone -->
+        <div th:if="${showLink}" class="alert alert-secondary text-start small mb-3" id="testLink"
+             th:data-url="@{|${basePath}/link|}">
+            <div class="fw-semibold mb-1" th:text="#{checkinQr.testLinkTitle}">Test link</div>
+            <div class="input-group input-group-sm mb-1" dir="ltr">
+                <input type="text" class="form-control" id="testLinkValue" readonly>
+                <button type="button" class="btn btn-outline-secondary" id="testLinkCopy" th:text="#{checkinQr.copy}">Copy</button>
+                <a class="btn btn-outline-primary" id="testLinkOpen" target="_blank" rel="noopener" th:text="#{checkinQr.openLink}">Open</a>
+            </div>
+            <div class="text-muted" th:text="#{checkinQr.testLinkHelp}">Open it in another browser logged in as a volunteer.</div>
+        </div>
+
         <div class="d-flex justify-content-center gap-4 fs-5">
             <div><span class="fw-bold" id="checkedIn" th:text="${counts.checkedIn}">0</span> <span th:text="#{reports.checkedIn}">Checked in</span></div>
             <div><span class="fw-bold" id="checkedOut" th:text="${counts.checkedOut}">0</span> <span th:text="#{reports.checkedOut}">Checked out</span></div>
@@ -36,8 +48,38 @@
         (function () {
             var img = document.getElementById('qr');
             var countsUrl = document.getElementById('countsUrl').dataset.url;
+            var testLink = document.getElementById('testLink');
+
+            function refreshTestLink() {
+                if (!testLink) {
+                    return;
+                }
+                fetch(testLink.dataset.url + '?t=' + Date.now())
+                    .then(function (r) { return r.ok ? r.text() : null; })
+                    .then(function (url) {
+                        if (url) {
+                            document.getElementById('testLinkValue').value = url;
+                            document.getElementById('testLinkOpen').href = url;
+                        }
+                    })
+                    .catch(function () { /* keep the last link */ });
+            }
+            if (testLink) {
+                refreshTestLink();
+                document.getElementById('testLinkCopy').addEventListener('click', function () {
+                    var input = document.getElementById('testLinkValue');
+                    input.select();
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(input.value).catch(function () { document.execCommand('copy'); });
+                    } else {
+                        document.execCommand('copy');
+                    }
+                });
+            }
+
             setInterval(function () {
                 img.src = img.dataset.src + '?t=' + Date.now();
+                refreshTestLink();
                 fetch(countsUrl, { headers: { 'Accept': 'application/json' } })
                     .then(function (r) { return r.ok ? r.json() : null; })
                     .then(function (c) {

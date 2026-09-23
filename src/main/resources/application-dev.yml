@@ -1,0 +1,13 @@
+# Local development/testing helpers. Enable with: SPRING_PROFILES_ACTIVE=dev
+# Never enable this profile on a real server.
+app:
+  checkin:
+    # Show the check-in link (with copy/open buttons) under the QR code, to test without a phone
+    show-link: true
+  demo-data:
+    # Create demo users, an initiative and events on startup (see DemoDataInitializer)
+    enabled: true
+    password: ${DEMO_PASSWORD:demo12345}
+    # Optional: set both to also create an event that checks the phone's location (needs HTTPS on phones)
+    event-latitude: ${DEMO_EVENT_LATITUDE:}
+    event-longitude: ${DEMO_EVENT_LONGITUDE:}

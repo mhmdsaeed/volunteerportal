@@ -2,6 +2,7 @@ package com.volunteerportal.app.controller;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +42,12 @@ public class CoordinatorCheckInController {
     private final CheckInCodes checkInCodes;
     private final QrCodeRenderer qrCodeRenderer;
     private final AttendRepository attendRepository;
+    private final boolean showLink;
 
     public CoordinatorCheckInController(InitiativeService initiativeService, EventService eventService,
             JoinRequestService joinRequestService, CheckInService checkInService, CheckInCodes checkInCodes,
-            QrCodeRenderer qrCodeRenderer, AttendRepository attendRepository) {
+            QrCodeRenderer qrCodeRenderer, AttendRepository attendRepository,
+            @Value("${app.checkin.show-link:false}") boolean showLink) {
         this.initiativeService = initiativeService;
         this.eventService = eventService;
         this.joinRequestService = joinRequestService;
@@ -52,6 +55,7 @@ public class CoordinatorCheckInController {
         this.checkInCodes = checkInCodes;
         this.qrCodeRenderer = qrCodeRenderer;
         this.attendRepository = attendRepository;
+        this.showLink = showLink;
     }
 
     @GetMapping
@@ -64,6 +68,7 @@ public class CoordinatorCheckInController {
         model.addAttribute("periodSeconds", checkInCodes.periodSeconds());
         model.addAttribute("requiresLocation", checkInService.requiresLocation(event));
         model.addAttribute("counts", counts(eventId));
+        model.addAttribute("showLink", showLink);
         return "coordinator/initiatives/checkin";
     }
 
@@ -72,15 +77,32 @@ public class CoordinatorCheckInController {
     public ResponseEntity<String> qr(@PathVariable Long initiativeId, @PathVariable Long eventId,
             @AuthenticationPrincipal UserPrincipal principal) {
         eventOf(managedInitiative(initiativeId, principal), eventId);
-        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+        return ResponseEntity.ok()
+                .contentType(MediaType.valueOf("image/svg+xml"))
+                .cacheControl(CacheControl.noStore())
+                .body(qrCodeRenderer.toSvg(currentLink(eventId)));
+    }
+
+    /**
+     * The link inside the current QR code, for testing without a phone. Only when
+     * app.checkin.show-link is on (the dev profile), since a copied link bypasses "be at the venue".
+     */
+    @GetMapping(value = "/link", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> link(@PathVariable Long initiativeId, @PathVariable Long eventId,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        eventOf(managedInitiative(initiativeId, principal), eventId);
+        if (!showLink) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(currentLink(eventId));
+    }
+
+    private String currentLink(Long eventId) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/checkin/{eventId}")
                 .queryParam("code", checkInCodes.currentCode(eventId))
                 .buildAndExpand(eventId)
                 .toUriString();
-        return ResponseEntity.ok()
-                .contentType(MediaType.valueOf("image/svg+xml"))
-                .cacheControl(CacheControl.noStore())
-                .body(qrCodeRenderer.toSvg(url));
     }
 
     @GetMapping("/counts")

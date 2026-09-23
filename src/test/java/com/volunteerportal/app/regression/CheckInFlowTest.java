@@ -33,6 +33,7 @@ import com.volunteerportal.app.service.CheckInCodes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -205,7 +206,12 @@ class CheckInFlowTest {
 
         mockMvc.perform(get(base).with(user(principal(supervisor))))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString(base + "/qr.svg")));
+                .andExpect(content().string(containsString(base + "/qr.svg")))
+                .andExpect(content().string(not(containsString("id=\"testLink\""))));
+
+        // The copyable test link is off unless app.checkin.show-link (the dev profile) turns it on
+        mockMvc.perform(get(base + "/link").with(user(principal(supervisor))))
+                .andExpect(status().isNotFound());
 
         mockMvc.perform(get(base + "/qr.svg").with(user(principal(supervisor))))
                 .andExpect(status().isOk())

@@ -1,0 +1,11 @@
+# Local HTTPS with a self-signed certificate, so phones on your network can test check-in with
+# location (phone browsers only share location over HTTPS). Enable with: SPRING_PROFILES_ACTIVE=dev,https
+# Create the keystore first - see "Testing QR check-in" in README.md. dev-certs/ is git-ignored.
+server:
+  port: ${SERVER_PORT:8443}
+  ssl:
+    enabled: true
+    key-store: ${DEV_KEYSTORE:file:dev-certs/dev-keystore.p12}
+    key-store-password: ${DEV_KEYSTORE_PASSWORD:changeit}
+    key-store-type: PKCS12
+    key-alias: dev

@@ -14,6 +14,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     List<Event> findByInitiativeIdAndEnabledTrueOrderByFromDttmAsc(Long initiativeId);
 
+    Optional<Event> findFirstByInitiativeIdAndName(Long initiativeId, String name);
+
     /**
      * Overridden to eagerly fetch initiative: the attendance report renders its name after the
      * request's Hibernate session has closed (open-in-view is disabled), which would otherwise

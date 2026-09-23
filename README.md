@@ -54,6 +54,28 @@ On startup:
 
 Visit `http://localhost:8080/register` to create a volunteer account (lands on `/home`, `/initiatives`, `/profile`), or log in as `admin`/`admin123` (default) to reach `/admin`.
 
+## Testing QR check-in
+
+Coordinators show an event's check-in QR (Coordinator → Events → **Check-in QR**); volunteers scan it with their phone to check in, and again to check out. For real use, set `CHECKIN_SECRET` and serve the site over HTTPS on its real address. To try it locally, two **dev-only** Spring profiles help — never enable them on a real server:
+
+- **`dev`** — creates demo data on startup (`DemoDataInitializer`, only adds what is missing): `demo_coordinator` supervises *Demo Initiative*, which has a *Demo Event* running all day today; `demo_volunteer` is an approved member and `demo_pending` has a pending request. Password for all three: `demo12345` (`DEMO_PASSWORD`). It also shows the QR's link under the code, with **Copy**/**Open** buttons, so you can test **without a phone**: open the link in a private window logged in as `demo_volunteer`. Set `DEMO_EVENT_LATITUDE`/`DEMO_EVENT_LONGITUDE` to also get an event that checks the phone's location.
+- **`https`** — serves `https://<host>:8443` with a self-signed certificate, so a **phone** on your Wi-Fi can check in to events with coordinates (phone browsers only share location over HTTPS). Create the certificate once (git-ignored), listing your PC's Wi-Fi address from `ipconfig`:
+
+  ```bash
+  mkdir -p dev-certs
+  keytool -genkeypair -alias dev -keyalg RSA -keysize 2048 -validity 825 -storetype PKCS12 \
+    -keystore dev-certs/dev-keystore.p12 -storepass changeit -dname "CN=volunteerportal-dev" \
+    -ext "SAN=dns:localhost,ip:127.0.0.1,ip:192.168.1.23"
+  ```
+
+Run with both, then open the coordinator's QR page **using the Wi-Fi address** (the QR contains whatever address the page was opened on — `localhost` won't work on a phone):
+
+```bash
+SPRING_PROFILES_ACTIVE=dev,https ./mvnw spring-boot:run      # PowerShell: $env:SPRING_PROFILES_ACTIVE='dev,https'
+```
+
+The phone warns about the self-signed certificate once; continue anyway (or install `dev-certs/dev-cert.crt`, exported with `keytool -exportcert -rfc`, as a trusted certificate). If the phone can't connect, allow Java through Windows Firewall on private networks.
+
 ## Build / test
 
 ```bash

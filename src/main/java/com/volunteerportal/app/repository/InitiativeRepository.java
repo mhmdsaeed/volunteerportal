@@ -14,6 +14,8 @@ public interface InitiativeRepository extends JpaRepository<Initiative, Long> {
 
     List<Initiative> findByEnabledTrue();
 
+    Optional<Initiative> findFirstByName(String name);
+
     /**
      * office/supervisor are lazy associations that list and detail views render the
      * name/username of after the request's Hibernate session has closed (open-in-view is
