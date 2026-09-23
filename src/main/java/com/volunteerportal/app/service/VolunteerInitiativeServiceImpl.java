@@ -147,9 +147,8 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
         Set<Long> notified = new HashSet<>();
         for (User manager : managers) {
             if (manager != null && !manager.getId().equals(requester.getId()) && notified.add(manager.getId())) {
-                notificationService.notify(manager,
-                        requester.getUsername() + " requested to join '" + initiative.getName() + "'.",
-                        "/coordinator/requests");
+                notificationService.notify(manager, "notification.joinRequested", "/coordinator/requests",
+                        requester.getUsername(), initiative.getName());
             }
         }
     }

@@ -209,8 +209,8 @@ class VolunteerInitiativeServiceImplTest {
 
         service.join(5L, user, new LinkedMultiValueMap<>());
 
-        verify(notificationService).notify(eq(supervisor), contains("vol requested to join 'Beach Cleanup'"), eq("/coordinator/requests"));
-        verify(notificationService).notify(eq(officeCoordinator), contains("Beach Cleanup"), eq("/coordinator/requests"));
+        verify(notificationService).notify(eq(supervisor), eq("notification.joinRequested"), eq("/coordinator/requests"), eq("vol"), eq("Beach Cleanup"));
+        verify(notificationService).notify(eq(officeCoordinator), eq("notification.joinRequested"), eq("/coordinator/requests"), any(String[].class));
     }
 
     @Test
@@ -222,7 +222,7 @@ class VolunteerInitiativeServiceImplTest {
 
         service.join(5L, user, new LinkedMultiValueMap<>());
 
-        verify(notificationService, times(1)).notify(any(User.class), anyString(), anyString());
+        verify(notificationService, times(1)).notify(any(User.class), anyString(), anyString(), any(String[].class));
     }
 
     @Test
@@ -231,7 +231,7 @@ class VolunteerInitiativeServiceImplTest {
 
         service.join(5L, user, new LinkedMultiValueMap<>());
 
-        verify(notificationService, never()).notify(any(User.class), anyString(), anyString());
+        verify(notificationService, never()).notify(any(User.class), anyString(), anyString(), any(String[].class));
     }
 
     @Test
@@ -241,7 +241,7 @@ class VolunteerInitiativeServiceImplTest {
 
         service.join(5L, user, new LinkedMultiValueMap<>());
 
-        verify(notificationService, never()).notify(any(User.class), anyString(), anyString());
+        verify(notificationService, never()).notify(any(User.class), anyString(), anyString(), any(String[].class));
     }
 
     @Test
@@ -254,9 +254,9 @@ class VolunteerInitiativeServiceImplTest {
 
         service.join(5L, user, new LinkedMultiValueMap<>());
 
-        verify(notificationService).notify(eq(admin1), anyString(), eq("/coordinator/requests"));
-        verify(notificationService).notify(eq(admin2), anyString(), eq("/coordinator/requests"));
-        verify(notificationService, never()).notify(eq(disabledAdmin), anyString(), anyString());
+        verify(notificationService).notify(eq(admin1), anyString(), eq("/coordinator/requests"), any(String[].class));
+        verify(notificationService).notify(eq(admin2), anyString(), eq("/coordinator/requests"), any(String[].class));
+        verify(notificationService, never()).notify(eq(disabledAdmin), anyString(), anyString(), any(String[].class));
     }
 
     @Test
@@ -267,7 +267,7 @@ class VolunteerInitiativeServiceImplTest {
 
         service.join(5L, user, new LinkedMultiValueMap<>());
 
-        verify(notificationService, times(1)).notify(any(User.class), anyString(), anyString());
+        verify(notificationService, times(1)).notify(any(User.class), anyString(), anyString(), any(String[].class));
     }
 
     @Test
@@ -277,7 +277,7 @@ class VolunteerInitiativeServiceImplTest {
 
         service.join(5L, user, new LinkedMultiValueMap<>());
 
-        verify(notificationService, never()).notify(any(User.class), anyString(), anyString());
+        verify(notificationService, never()).notify(any(User.class), anyString(), anyString(), any(String[].class));
     }
 
     private User admin(Long id, boolean enabled) {

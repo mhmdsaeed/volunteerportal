@@ -1,8 +1,11 @@
 package com.volunteerportal.app.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -30,8 +33,17 @@ public class Notification {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    /** English rendering; shown as-is for older notifications that have no {@link #messageKey}. */
     @Column(nullable = false, length = 500)
     private String message;
+
+    /** messages.properties key, rendered in the viewer's language with {@link #messageArgs}. */
+    @Column(name = "message_key", length = 100)
+    private String messageKey;
+
+    @Convert(converter = MessageArgsConverter.class)
+    @Column(name = "message_args", length = 1000)
+    private List<String> messageArgs = new ArrayList<>();
 
     private String link;
 

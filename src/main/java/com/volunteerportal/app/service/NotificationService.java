@@ -7,7 +7,11 @@ import com.volunteerportal.app.model.User;
 
 public interface NotificationService {
 
-    Notification notify(User user, String message, String link);
+    /**
+     * Sends a notification whose text is the {@code messageKey} message from messages*.properties,
+     * rendered in each viewer's language with {@code args} ({@code {0}}, {@code {1}}, ...).
+     */
+    Notification notify(User user, String messageKey, String link, String... args);
 
     List<Notification> findForUser(Long userId);
 

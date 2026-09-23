@@ -74,9 +74,8 @@ public class JoinRequestServiceImpl implements JoinRequestService {
     public VolunteerInitiative approve(Long id) {
         VolunteerInitiative saved = decide(id, true);
 
-        notificationService.notify(saved.getUser(),
-                "Your request to join '" + saved.getInitiative().getName() + "' was approved.",
-                "/initiatives/" + saved.getInitiative().getId());
+        notificationService.notify(saved.getUser(), "notification.joinApproved",
+                "/initiatives/" + saved.getInitiative().getId(), saved.getInitiative().getName());
         return saved;
     }
 
@@ -85,9 +84,8 @@ public class JoinRequestServiceImpl implements JoinRequestService {
     public VolunteerInitiative reject(Long id) {
         VolunteerInitiative saved = decide(id, false);
 
-        notificationService.notify(saved.getUser(),
-                "Your request to join '" + saved.getInitiative().getName() + "' was not approved.",
-                "/initiatives/" + saved.getInitiative().getId());
+        notificationService.notify(saved.getUser(), "notification.joinRejected",
+                "/initiatives/" + saved.getInitiative().getId(), saved.getInitiative().getName());
         return saved;
     }
 

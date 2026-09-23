@@ -66,7 +66,7 @@ class JoinRequestServiceImplTest {
 
         assertThat(result.getResponseJoinDttm()).isNotNull();
         assertThat(result.getEnabled()).isTrue();
-        verify(notificationService).notify(eq(volunteer), contains("Beach Cleanup"), eq("/initiatives/10"));
+        verify(notificationService).notify(eq(volunteer), eq("notification.joinApproved"), eq("/initiatives/10"), eq("Beach Cleanup"));
     }
 
     @Test
@@ -90,7 +90,7 @@ class JoinRequestServiceImplTest {
 
         assertThat(result.getResponseJoinDttm()).isNotNull();
         assertThat(result.getEnabled()).isFalse();
-        verify(notificationService).notify(eq(volunteer), contains("Food Drive"), eq("/initiatives/20"));
+        verify(notificationService).notify(eq(volunteer), eq("notification.joinRejected"), eq("/initiatives/20"), eq("Food Drive"));
     }
 
     @Test
@@ -195,7 +195,7 @@ class JoinRequestServiceImplTest {
 
         assertThat(decided.getEnabled()).isFalse();
         verify(volunteerInitiativeRepository, never()).save(any());
-        verify(notificationService, never()).notify(any(), anyString(), anyString());
+        verify(notificationService, never()).notify(any(), anyString(), anyString(), any(String[].class));
     }
 
     private Initiative initiativeManagedBy(Long supervisorId, Long officeCoordinatorId) {

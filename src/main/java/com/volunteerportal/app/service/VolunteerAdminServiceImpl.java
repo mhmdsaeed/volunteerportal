@@ -70,10 +70,12 @@ public class VolunteerAdminServiceImpl implements VolunteerAdminService {
 
         VolunteerProfile saved = volunteerProfileRepository.save(profile);
 
-        String gradeName = saved.getGrade() != null ? saved.getGrade().getName() : "Unranked";
-        notificationService.notify(user,
-                "Your volunteer profile was updated: grade is now " + gradeName + ", points: " + saved.getPoints() + ".",
-                "/profile");
+        String points = String.valueOf(saved.getPoints() != null ? saved.getPoints() : 0);
+        if (saved.getGrade() != null) {
+            notificationService.notify(user, "notification.profileUpdated", "/profile", saved.getGrade().getName(), points);
+        } else {
+            notificationService.notify(user, "notification.profileUpdatedUnranked", "/profile", points);
+        }
 
         return saved;
     }
