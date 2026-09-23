@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{checkinQr.title})}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container text-center" style="max-width: 640px;"
+         th:with="basePath=${'/coordinator/initiatives/' + initiative.id + '/events/' + event.id + '/checkin'}">
+        <p class="text-start"><a th:href="@{/coordinator/initiatives/{id}/events(id=${initiative.id})}">&laquo; <span th:text="#{events.back}">Back to Events</span></a></p>
+
+        <h2 class="mb-1" th:text="${event.name}">Event</h2>
+        <p class="text-muted" th:text="#{checkinQr.intro(${periodSeconds})}">Scan to check in.</p>
+
+        <div th:if="${event.enabled != true}" class="alert alert-warning" th:text="#{checkinQr.eventDisabled}">Disabled.</div>
+        <p th:if="${!requiresLocation}" class="small text-muted" th:text="#{checkinQr.noLocation}">No coordinates.</p>
+
+        <img id="qr" class="img-fluid border rounded p-2 bg-white mb-3" style="width: min(100%, 420px);"
+             th:src="@{|${basePath}/qr.svg|}" th:data-src="@{|${basePath}/qr.svg|}" th:alt="#{checkinQr.title}">
+
+        <div class="d-flex justify-content-center gap-4 fs-5">
+            <div><span class="fw-bold" id="checkedIn" th:text="${counts.checkedIn}">0</span> <span th:text="#{reports.checkedIn}">Checked in</span></div>
+            <div><span class="fw-bold" id="checkedOut" th:text="${counts.checkedOut}">0</span> <span th:text="#{reports.checkedOut}">Checked out</span></div>
+        </div>
+
+        <p class="mt-3">
+            <a class="btn btn-outline-secondary btn-sm"
+               th:href="@{/coordinator/initiatives/{initiativeId}/events/{id}/attendance(initiativeId=${initiative.id},id=${event.id})}"
+               th:text="#{events.attendance}">Attendance</a>
+        </p>
+
+        <span id="countsUrl" class="d-none" th:data-url="@{|${basePath}/counts|}"></span>
+    </div>
+
+    <script>
+        // Keep the code current (it rotates every few seconds) and the counts live
+        (function () {
+            var img = document.getElementById('qr');
+            var countsUrl = document.getElementById('countsUrl').dataset.url;
+            setInterval(function () {
+                img.src = img.dataset.src + '?t=' + Date.now();
+                fetch(countsUrl, { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (c) {
+                        if (c) {
+                            document.getElementById('checkedIn').textContent = c.checkedIn;
+                            document.getElementById('checkedOut').textContent = c.checkedOut;
+                        }
+                    })
+                    .catch(function () { /* keep the last values */ });
+            }, 10000);
+        })();
+    </script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

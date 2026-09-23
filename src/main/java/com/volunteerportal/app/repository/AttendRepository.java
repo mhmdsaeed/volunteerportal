@@ -18,4 +18,6 @@ public interface AttendRepository extends JpaRepository<Attend, Long> {
     List<Attend> findByEventId(Long eventId);
 
     long countByEventIdAndAttendInOut(Long eventId, Integer attendInOut);
+
+    List<Attend> findByEventIdAndVolunteerInitiativeId(Long eventId, Long volunteerInitiativeId);
 }

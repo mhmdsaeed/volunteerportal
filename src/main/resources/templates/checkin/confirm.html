@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{checkin.title})}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container text-center" style="max-width: 480px;">
+        <h2 class="mb-1" th:text="${event.name}">Event</h2>
+        <p class="text-muted" th:if="${event.initiative != null}" th:text="${event.initiative.name}">Initiative</p>
+
+        <div th:if="${!codeValid}" class="alert alert-warning" th:text="#{checkin.result.INVALID_CODE}">Code expired.</div>
+        <div th:if="${codeValid and action.name() == 'NOT_MEMBER'}" class="alert alert-danger" th:text="#{checkin.result.NOT_MEMBER}">Not a member.</div>
+        <div th:if="${codeValid and action.name() == 'DONE'}" class="alert alert-info" th:text="#{checkin.result.ALREADY_DONE}">Already done.</div>
+
+        <form th:if="${codeValid and (action.name() == 'CHECK_IN' or action.name() == 'CHECK_OUT')}"
+              th:action="@{/checkin/{id}(id=${event.id})}" method="post" id="checkinForm"
+              th:data-needs-location="${requiresLocation}">
+            <input type="hidden" name="code" th:value="${code}">
+            <input type="hidden" name="latitude" id="latitude">
+            <input type="hidden" name="longitude" id="longitude">
+
+            <p class="lead" th:text="${action.name() == 'CHECK_IN'} ? #{checkin.confirmIn} : #{checkin.confirmOut}">Confirm</p>
+            <p class="small text-muted" th:if="${requiresLocation}" th:text="#{checkin.locationNote}">Location will be checked.</p>
+
+            <button type="submit" class="btn btn-lg w-100" id="checkinButton"
+                    th:classappend="${action.name() == 'CHECK_IN'} ? 'btn-success' : 'btn-primary'">
+                <i class="bi" th:classappend="${action.name() == 'CHECK_IN'} ? 'bi-box-arrow-in-right bi-flip-rtl' : 'bi-box-arrow-right bi-flip-rtl'"></i>
+                <span th:text="${action.name() == 'CHECK_IN'} ? #{checkin.actionIn} : #{checkin.actionOut}">Check in</span>
+            </button>
+            <p class="small text-muted mt-2 d-none" id="locating" th:text="#{checkin.locating}">Getting your location…</p>
+        </form>
+
+        <p class="mt-4"><a th:href="@{/home}" th:text="#{checkin.backHome}">Go to Home</a></p>
+    </div>
+
+    <script>
+        (function () {
+            var form = document.getElementById('checkinForm');
+            if (!form || form.dataset.needsLocation !== 'true' || !navigator.geolocation) {
+                return;
+            }
+            var sent = false;
+            form.addEventListener('submit', function (e) {
+                if (sent) {
+                    return;
+                }
+                e.preventDefault();
+                document.getElementById('checkinButton').disabled = true;
+                document.getElementById('locating').classList.remove('d-none');
+                var submit = function () { sent = true; form.submit(); };
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                    submit();
+                }, submit, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+            });
+        })();
+    </script>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

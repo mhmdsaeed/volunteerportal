@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{checkin.title})}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container text-center" style="max-width: 480px;"
+         th:with="success=${result == 'CHECKED_IN' or result == 'CHECKED_OUT'}">
+        <div class="display-1 mb-2" th:classappend="${success} ? 'text-success' : 'text-warning'">
+            <i class="bi" th:classappend="${success} ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+        </div>
+        <h2 class="mb-1" th:text="${event.name}">Event</h2>
+        <p class="text-muted" th:if="${event.initiative != null}" th:text="${event.initiative.name}">Initiative</p>
+
+        <p class="lead" th:text="${#messages.msg('checkin.result.' + result)}">Result</p>
+
+        <p class="mt-4"><a th:href="@{/home}" th:text="#{checkin.backHome}">Go to Home</a></p>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

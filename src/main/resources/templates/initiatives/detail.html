@@ -21,6 +21,7 @@
 
         <div th:if="${membership != null and membership.enabled == true}" class="mb-4">
             <h4 class="mt-4" th:text="#{initiatives.eventsHeading}">Events</h4>
+            <p class="small text-muted" th:text="#{initiatives.checkinHint}">At the event, scan the check-in QR code shown by the coordinator.</p>
             <div class="list-group">
                 <div class="list-group-item" th:each="event : ${events}">
                     <div class="fw-semibold" th:text="${event.name}"></div>

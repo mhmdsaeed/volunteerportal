@@ -73,6 +73,12 @@
 			<version>1.13.1</version>
 		</dependency>
 		<dependency>
+			<!-- QR codes for event self check-in (rendered server-side as SVG) -->
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.5.3</version>
+		</dependency>
+		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>webjars-locator-lite</artifactId>
 			<version>1.1.0</version>

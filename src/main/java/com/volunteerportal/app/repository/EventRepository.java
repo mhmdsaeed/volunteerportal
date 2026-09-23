@@ -1,6 +1,7 @@
 package com.volunteerportal.app.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Override
     @EntityGraph(attributePaths = "initiative")
     List<Event> findAll();
+
+    /** Overridden for the same reason: the check-in pages render the event's initiative name. */
+    @Override
+    @EntityGraph(attributePaths = "initiative")
+    Optional<Event> findById(Long id);
 }

@@ -29,7 +29,8 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/home", true)
+                // Back to the page that asked for login (e.g. a scanned QR check-in link), else /home
+                .defaultSuccessUrl("/home", false)
                 .failureUrl("/login?error")
                 .permitAll()
             )
