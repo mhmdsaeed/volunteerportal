@@ -1,11 +1,14 @@
 package com.volunteerportal.app.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -14,11 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 
+import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
 import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
+import com.volunteerportal.app.repository.EventRepository;
 import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
@@ -31,15 +36,20 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
     private final InitiativeQuestionRepository initiativeQuestionRepository;
     private final VolunteerInitiativeRepository volunteerInitiativeRepository;
     private final VolunteerInitiativeAnswerRepository volunteerInitiativeAnswerRepository;
+    private final NotificationService notificationService;
+    private final EventRepository eventRepository;
 
     public VolunteerInitiativeServiceImpl(InitiativeRepository initiativeRepository,
             InitiativeQuestionRepository initiativeQuestionRepository,
             VolunteerInitiativeRepository volunteerInitiativeRepository,
-            VolunteerInitiativeAnswerRepository volunteerInitiativeAnswerRepository) {
+            VolunteerInitiativeAnswerRepository volunteerInitiativeAnswerRepository,
+            NotificationService notificationService, EventRepository eventRepository) {
         this.initiativeRepository = initiativeRepository;
         this.initiativeQuestionRepository = initiativeQuestionRepository;
         this.volunteerInitiativeRepository = volunteerInitiativeRepository;
         this.volunteerInitiativeAnswerRepository = volunteerInitiativeAnswerRepository;
+        this.notificationService = notificationService;
+        this.eventRepository = eventRepository;
     }
 
     @Override
@@ -61,6 +71,11 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
     @Override
     public Optional<VolunteerInitiative> findMembership(Long userId, Long initiativeId) {
         return volunteerInitiativeRepository.findByUserIdAndInitiativeId(userId, initiativeId);
+    }
+
+    @Override
+    public List<Event> findOpenEvents(Long initiativeId) {
+        return eventRepository.findByInitiativeIdAndEnabledTrueOrderByFromDttmAsc(initiativeId);
     }
 
     @Override
@@ -90,7 +105,10 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
                 answers);
 
         membership.setAnswerCount(answeredCount);
-        return volunteerInitiativeRepository.save(membership);
+        VolunteerInitiative saved = volunteerInitiativeRepository.save(membership);
+
+        notifyManagers(initiative, user);
+        return saved;
     }
 
     @Override
@@ -106,6 +124,22 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
 
         volunteerInitiativeAnswerRepository.deleteByVolunteerInitiativeId(membership.getId());
         volunteerInitiativeRepository.delete(membership);
+    }
+
+    /** Tells the initiative's supervisor and office coordinator (once each) that a request is waiting for them. */
+    private void notifyManagers(Initiative initiative, User requester) {
+        List<User> managers = new ArrayList<>();
+        managers.add(initiative.getSupervisor());
+        managers.add(initiative.getOffice() != null ? initiative.getOffice().getUser() : null);
+
+        Set<Long> notified = new HashSet<>();
+        for (User manager : managers) {
+            if (manager != null && !manager.getId().equals(requester.getId()) && notified.add(manager.getId())) {
+                notificationService.notify(manager,
+                        requester.getUsername() + " requested to join '" + initiative.getName() + "'.",
+                        "/coordinator/requests");
+            }
+        }
     }
 
     private int saveAnswers(VolunteerInitiative membership, List<InitiativeQuestion> questions,

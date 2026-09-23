@@ -9,6 +9,8 @@
 
         <h2 class="mb-4" th:text="#{joinRequests.heading(${initiative.name})}">Join Requests</h2>
 
+        <div th:replace="~{fragments/layout :: decisionAlert}"></div>
+
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -35,7 +37,7 @@
                             <button type="submit" class="btn btn-sm btn-success" th:text="#{joinRequests.approve}">Approve</button>
                         </form>
                         <form th:action="@{/coordinator/initiatives/{initiativeId}/requests/{requestId}/reject(initiativeId=${initiative.id},requestId=${request.id})}"
-                              method="post" class="d-inline">
+                              method="post" class="d-inline" th:data-confirm="#{joinRequests.rejectConfirm}" onsubmit="return confirm(this.dataset.confirm);">
                             <button type="submit" class="btn btn-sm btn-danger" th:text="#{joinRequests.reject}">Reject</button>
                         </form>
                     </td>

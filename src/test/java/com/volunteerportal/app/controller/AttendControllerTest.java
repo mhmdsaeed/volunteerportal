@@ -1,6 +1,7 @@
 package com.volunteerportal.app.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import com.volunteerportal.app.config.SecurityConfig;
 import com.volunteerportal.app.model.Attend;
 import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.VolunteerInitiative;
 import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 import com.volunteerportal.app.service.AttendService;
 import com.volunteerportal.app.service.EventService;
@@ -70,10 +72,18 @@ class AttendControllerTest {
         return event;
     }
 
+    private VolunteerInitiative member(Long id, Long initiativeId, Boolean approved) {
+        VolunteerInitiative member = new VolunteerInitiative();
+        member.setId(id);
+        member.setInitiative(initiative(initiativeId));
+        member.setEnabled(approved);
+        return member;
+    }
+
     private void stubParents() {
         given(initiativeService.findById(5L)).willReturn(initiative(5L));
         given(eventService.findById(9L)).willReturn(event(9L));
-        given(volunteerInitiativeRepository.findByInitiativeId(5L)).willReturn(List.of());
+        given(volunteerInitiativeRepository.findByInitiativeIdAndEnabledTrue(5L)).willReturn(List.of());
     }
 
     @Test
@@ -115,6 +125,8 @@ class AttendControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void create_valid_savesAndRedirects() throws Exception {
+        given(volunteerInitiativeRepository.findById(3L)).willReturn(Optional.of(member(3L, 5L, true)));
+
         mockMvc.perform(post("/admin/initiatives/5/events/9/attendance").with(csrf())
                         .param("volunteerInitiativeId", "3")
                         .param("attendInOut", "1"))
@@ -122,6 +134,50 @@ class AttendControllerTest {
                 .andExpect(redirectedUrl("/admin/initiatives/5/events/9/attendance"));
 
         verify(attendService).create(eq(9L), any());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void create_pendingVolunteer_rendersFormWithFieldError() throws Exception {
+        stubParents();
+        given(volunteerInitiativeRepository.findById(3L)).willReturn(Optional.of(member(3L, 5L, null)));
+
+        mockMvc.perform(post("/admin/initiatives/5/events/9/attendance").with(csrf())
+                        .param("volunteerInitiativeId", "3")
+                        .param("attendInOut", "1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/initiatives/events/attendance/form"))
+                .andExpect(model().attributeHasFieldErrorCode("attendForm", "volunteerInitiativeId", "error.attend.notApprovedMember"));
+
+        verify(attendService, never()).create(any(), any());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void create_approvedMemberOfAnotherInitiative_rendersFormWithFieldError() throws Exception {
+        stubParents();
+        given(volunteerInitiativeRepository.findById(3L)).willReturn(Optional.of(member(3L, 6L, true)));
+
+        mockMvc.perform(post("/admin/initiatives/5/events/9/attendance").with(csrf())
+                        .param("volunteerInitiativeId", "3")
+                        .param("attendInOut", "1"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeHasFieldErrorCode("attendForm", "volunteerInitiativeId", "error.attend.notApprovedMember"));
+
+        verify(attendService, never()).create(any(), any());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void newForm_listsOnlyApprovedMembers() throws Exception {
+        stubParents();
+        List<VolunteerInitiative> approved = List.of(member(3L, 5L, true));
+        given(volunteerInitiativeRepository.findByInitiativeIdAndEnabledTrue(5L)).willReturn(approved);
+
+        mockMvc.perform(get("/admin/initiatives/5/events/9/attendance/new"))
+                .andExpect(model().attribute("volunteerInitiatives", approved));
+
+        verify(volunteerInitiativeRepository, never()).findByInitiativeId(any());
     }
 
     @Test
@@ -143,6 +199,8 @@ class AttendControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void update_valid_updatesAndRedirects() throws Exception {
+        given(volunteerInitiativeRepository.findById(3L)).willReturn(Optional.of(member(3L, 5L, true)));
+
         mockMvc.perform(post("/admin/initiatives/5/events/9/attendance/11").with(csrf())
                         .param("volunteerInitiativeId", "3")
                         .param("attendInOut", "2"))

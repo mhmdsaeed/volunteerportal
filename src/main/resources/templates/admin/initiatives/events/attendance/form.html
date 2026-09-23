@@ -21,6 +21,7 @@
                     <option th:each="vi : ${volunteerInitiatives}" th:value="${vi.id}"
                             th:text="${vi.user != null ? vi.user.username : #messages.msg('attendance.volunteerFallback', vi.id)}"></option>
                 </select>
+                <div class="form-text" th:text="#{attendance.onlyApprovedHint}">Only volunteers whose join request was approved are listed.</div>
                 <div class="text-danger" th:if="${#fields.hasErrors('volunteerInitiativeId')}" th:errors="*{volunteerInitiativeId}"></div>
             </div>
 

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.util.MultiValueMap;
 
+import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.User;
@@ -22,6 +23,9 @@ public interface VolunteerInitiativeService {
     Optional<VolunteerInitiative> findMembership(Long userId, Long initiativeId);
 
     Map<Long, VolunteerInitiative> findMembershipsForUser(Long userId);
+
+    /** Enabled events of the initiative, soonest first - shown to approved members. */
+    List<Event> findOpenEvents(Long initiativeId);
 
     VolunteerInitiative join(Long initiativeId, User user, MultiValueMap<String, String> answers);
 

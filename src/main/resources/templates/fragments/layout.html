@@ -43,6 +43,11 @@
             <a class="nav-link" th:href="@{/profile}" sec:authorize="isAuthenticated()" th:title="#{nav.profile}">
                 <i class="bi bi-person"></i><span class="sidebar-label" th:text="#{nav.profile}">My Profile</span>
             </a>
+            <a class="nav-link" th:href="@{/coordinator/requests}" sec:authorize="hasAnyRole('COORDINATOR','ADMIN')" th:title="#{nav.joinRequests}">
+                <i class="bi bi-inbox"></i><span class="sidebar-label" th:text="#{nav.joinRequests}">Join Requests</span>
+                <span th:if="${pendingJoinRequestCount != null and pendingJoinRequestCount > 0}"
+                      class="badge rounded-pill text-bg-warning" th:text="${pendingJoinRequestCount}"></span>
+            </a>
             <a class="nav-link" th:href="@{/coordinator/initiatives}" sec:authorize="hasAnyRole('COORDINATOR','ADMIN')" th:title="#{nav.coordinator}">
                 <i class="bi bi-people"></i><span class="sidebar-label" th:text="#{nav.coordinator}">Coordinator</span>
             </a>
@@ -117,6 +122,11 @@
             })();
         </script>
     </nav>
+
+    <!-- Outcome of approving/rejecting a join request (flash attribute "decision" from CoordinatorController) -->
+    <div th:fragment="decisionAlert" th:if="${decision != null}" class="alert"
+         th:classappend="${decision == 'alreadyDecided'} ? 'alert-warning' : 'alert-success'"
+         th:text="${#messages.msg('joinRequests.decision.' + decision)}">Request approved.</div>
 
     <div th:fragment="scripts">
         <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>

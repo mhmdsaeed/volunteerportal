@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.volunteerportal.app.model.Initiative;
 
@@ -27,4 +29,12 @@ public interface InitiativeRepository extends JpaRepository<Initiative, Long> {
 
     @EntityGraph(attributePaths = {"office", "supervisor"})
     List<Initiative> findBySupervisorId(Long supervisorId);
+
+    /** Initiatives the user manages: as the initiative's supervisor or as its office's coordinator. */
+    @EntityGraph(attributePaths = {"office", "supervisor"})
+    @Query("""
+            select i from Initiative i left join i.supervisor s left join i.office o
+            where s.id = :userId or o.user.id = :userId
+            order by i.name""")
+    List<Initiative> findManagedBy(@Param("userId") Long userId);
 }

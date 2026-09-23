@@ -1,5 +1,7 @@
 package com.volunteerportal.app.controller;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.volunteerportal.app.model.VolunteerInitiative;
 import com.volunteerportal.app.security.UserPrincipal;
 import com.volunteerportal.app.service.VolunteerInitiativeService;
 
@@ -32,10 +35,15 @@ public class VolunteerInitiativeController {
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal, Model model) {
+        VolunteerInitiative membership =
+                volunteerInitiativeService.findMembership(principal.getUser().getId(), id).orElse(null);
+        boolean approvedMember = membership != null && Boolean.TRUE.equals(membership.getEnabled());
+
         model.addAttribute("initiative", volunteerInitiativeService.findInitiativeDetail(id));
         model.addAttribute("questions", volunteerInitiativeService.findQuestions(id));
-        model.addAttribute("membership",
-                volunteerInitiativeService.findMembership(principal.getUser().getId(), id).orElse(null));
+        model.addAttribute("membership", membership);
+        // Events are only for members: a volunteer can attend once their join request is approved
+        model.addAttribute("events", approvedMember ? volunteerInitiativeService.findOpenEvents(id) : List.of());
         return "initiatives/detail";
     }
 

@@ -16,6 +16,23 @@
             <p class="mb-0" th:if="${membership.responseJoinDttm == null}"><span th:text="#{common.status} + ':'">Status:</span> <strong th:text="#{status.pendingReview}">Pending review</strong></p>
             <p class="mb-0" th:if="${membership.responseJoinDttm != null and membership.enabled == true}"><span th:text="#{common.status} + ':'">Status:</span> <strong th:text="#{status.approved}">Approved</strong></p>
             <p class="mb-0" th:if="${membership.responseJoinDttm != null and membership.enabled == false}"><span th:text="#{common.status} + ':'">Status:</span> <strong th:text="#{status.notApproved}">Not approved</strong></p>
+            <p class="mb-0 mt-2 small" th:if="${membership.responseJoinDttm == null}" th:text="#{initiatives.pendingHint}">Once approved, you can attend this initiative's events.</p>
+        </div>
+
+        <div th:if="${membership != null and membership.enabled == true}" class="mb-4">
+            <h4 class="mt-4" th:text="#{initiatives.eventsHeading}">Events</h4>
+            <div class="list-group">
+                <div class="list-group-item" th:each="event : ${events}">
+                    <div class="fw-semibold" th:text="${event.name}"></div>
+                    <div class="small text-muted">
+                        <span th:text="${event.fromDttm != null ? #temporals.format(event.fromDttm, 'yyyy-MM-dd HH:mm') : '-'}"></span>
+                        <span th:if="${event.toDttm != null}"> &ndash; <span th:text="${#temporals.format(event.toDttm, 'yyyy-MM-dd HH:mm')}"></span></span>
+                    </div>
+                    <a th:if="${event.locUrl != null and !event.locUrl.isEmpty()}" th:href="${event.locUrl}" target="_blank" rel="noopener"
+                       class="small" th:text="#{events.map}">Map</a>
+                </div>
+                <p th:if="${#lists.isEmpty(events)}" class="text-muted" th:text="#{initiatives.noEvents}">No events scheduled yet.</p>
+            </div>
         </div>
 
         <form th:if="${membership != null and membership.responseJoinDttm == null}"

@@ -17,11 +17,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.volunteerportal.app.model.Office;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
 import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
+import com.volunteerportal.app.repository.EventRepository;
 import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
@@ -31,6 +33,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -51,6 +56,12 @@ class VolunteerInitiativeServiceImplTest {
 
     @Mock
     private VolunteerInitiativeAnswerRepository volunteerInitiativeAnswerRepository;
+
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private EventRepository eventRepository;
 
     @InjectMocks
     private VolunteerInitiativeServiceImpl service;
@@ -180,5 +191,71 @@ class VolunteerInitiativeServiceImplTest {
         question.setQuestionTypeId(typeId);
         question.setQuestionChoicesText(choicesText);
         return question;
+    }
+
+    @Test
+    void join_notifiesSupervisorAndOfficeCoordinator() {
+        user.setUsername("vol");
+        User supervisor = userWithId(20L);
+        User officeCoordinator = userWithId(30L);
+        initiative.setName("Beach Cleanup");
+        initiative.setSupervisor(supervisor);
+        initiative.setOffice(officeCoordinatedBy(officeCoordinator));
+        stubSuccessfulJoin();
+
+        service.join(5L, user, new LinkedMultiValueMap<>());
+
+        verify(notificationService).notify(eq(supervisor), contains("vol requested to join 'Beach Cleanup'"), eq("/coordinator/requests"));
+        verify(notificationService).notify(eq(officeCoordinator), contains("Beach Cleanup"), eq("/coordinator/requests"));
+    }
+
+    @Test
+    void join_supervisorIsAlsoOfficeCoordinator_isNotifiedOnce() {
+        User manager = userWithId(20L);
+        initiative.setSupervisor(manager);
+        initiative.setOffice(officeCoordinatedBy(userWithId(20L)));
+        stubSuccessfulJoin();
+
+        service.join(5L, user, new LinkedMultiValueMap<>());
+
+        verify(notificationService, times(1)).notify(any(User.class), anyString(), anyString());
+    }
+
+    @Test
+    void join_noManagers_sendsNoNotification() {
+        stubSuccessfulJoin();
+
+        service.join(5L, user, new LinkedMultiValueMap<>());
+
+        verify(notificationService, never()).notify(any(User.class), anyString(), anyString());
+    }
+
+    @Test
+    void join_managerRequestingThemselves_isNotNotified() {
+        initiative.setSupervisor(userWithId(1L)); // same id as the requesting user
+        stubSuccessfulJoin();
+
+        service.join(5L, user, new LinkedMultiValueMap<>());
+
+        verify(notificationService, never()).notify(any(User.class), anyString(), anyString());
+    }
+
+    private void stubSuccessfulJoin() {
+        given(initiativeRepository.findById(5L)).willReturn(Optional.of(initiative));
+        given(volunteerInitiativeRepository.findByUserIdAndInitiativeId(1L, 5L)).willReturn(Optional.empty());
+        given(volunteerInitiativeRepository.save(any(VolunteerInitiative.class))).willAnswer(inv -> inv.getArgument(0));
+        given(initiativeQuestionRepository.findByInitiativeId(5L)).willReturn(List.of());
+    }
+
+    private User userWithId(Long id) {
+        User u = new User();
+        u.setId(id);
+        return u;
+    }
+
+    private Office officeCoordinatedBy(User coordinator) {
+        Office office = new Office();
+        office.setUser(coordinator);
+        return office;
     }
 }

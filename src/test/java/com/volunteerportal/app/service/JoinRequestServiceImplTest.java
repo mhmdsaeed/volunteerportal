@@ -1,5 +1,6 @@
 package com.volunteerportal.app.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.Office;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
 import com.volunteerportal.app.repository.InitiativeRepository;
@@ -19,7 +21,9 @@ import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -106,14 +110,14 @@ class JoinRequestServiceImplTest {
         List<Initiative> result = joinRequestService.findManagedInitiatives(null);
 
         assertThat(result).containsExactly(initiative);
-        verify(initiativeRepository, never()).findBySupervisorId(anyLong());
+        verify(initiativeRepository, never()).findManagedBy(anyLong());
     }
 
     @Test
-    void findManagedInitiatives_withSupervisorId_returnsOnlyThatSupervisorsInitiatives() {
+    void findManagedInitiatives_withManagerId_returnsInitiativesTheySuperviseOrCoordinate() {
         Initiative initiative = new Initiative();
         initiative.setId(2L);
-        given(initiativeRepository.findBySupervisorId(7L)).willReturn(List.of(initiative));
+        given(initiativeRepository.findManagedBy(7L)).willReturn(List.of(initiative));
 
         List<Initiative> result = joinRequestService.findManagedInitiatives(7L);
 
@@ -130,5 +134,84 @@ class JoinRequestServiceImplTest {
         List<VolunteerInitiative> result = joinRequestService.findRequestsForInitiative(3L);
 
         assertThat(result).containsExactly(request);
+    }
+
+    @Test
+    void canManage_supervisor_isTrue() {
+        assertThat(joinRequestService.canManage(initiativeManagedBy(7L, null), 7L)).isTrue();
+    }
+
+    @Test
+    void canManage_officeCoordinator_isTrue() {
+        assertThat(joinRequestService.canManage(initiativeManagedBy(null, 8L), 8L)).isTrue();
+    }
+
+    @Test
+    void canManage_unrelatedUser_isFalse() {
+        assertThat(joinRequestService.canManage(initiativeManagedBy(7L, 8L), 9L)).isFalse();
+    }
+
+    @Test
+    void canManage_initiativeWithoutSupervisorOrOffice_isFalse() {
+        assertThat(joinRequestService.canManage(new Initiative(), 7L)).isFalse();
+    }
+
+    @Test
+    void findPendingRequests_nullManager_returnsEveryPendingRequest() {
+        VolunteerInitiative pending = new VolunteerInitiative();
+        given(volunteerInitiativeRepository.findByResponseJoinDttmIsNullOrderByRequestJoinDttmAsc()).willReturn(List.of(pending));
+
+        assertThat(joinRequestService.findPendingRequests(null)).containsExactly(pending);
+        verify(volunteerInitiativeRepository, never()).findPendingManagedBy(anyLong());
+    }
+
+    @Test
+    void findPendingRequests_withManager_returnsOnlyTheirPendingRequests() {
+        VolunteerInitiative pending = new VolunteerInitiative();
+        given(volunteerInitiativeRepository.findPendingManagedBy(7L)).willReturn(List.of(pending));
+
+        assertThat(joinRequestService.findPendingRequests(7L)).containsExactly(pending);
+    }
+
+    @Test
+    void countPendingRequests_scopesLikeFindPendingRequests() {
+        given(volunteerInitiativeRepository.countByResponseJoinDttmIsNull()).willReturn(5L);
+        given(volunteerInitiativeRepository.countPendingManagedBy(7L)).willReturn(2L);
+
+        assertThat(joinRequestService.countPendingRequests(null)).isEqualTo(5L);
+        assertThat(joinRequestService.countPendingRequests(7L)).isEqualTo(2L);
+    }
+
+    @Test
+    void approve_alreadyDecided_throwsAndDoesNotNotifyAgain() {
+        VolunteerInitiative decided = new VolunteerInitiative();
+        decided.setId(3L);
+        decided.setResponseJoinDttm(LocalDateTime.now());
+        decided.setEnabled(false);
+        given(volunteerInitiativeRepository.findById(3L)).willReturn(Optional.of(decided));
+
+        assertThatThrownBy(() -> joinRequestService.approve(3L)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> joinRequestService.reject(3L)).isInstanceOf(IllegalStateException.class);
+
+        assertThat(decided.getEnabled()).isFalse();
+        verify(volunteerInitiativeRepository, never()).save(any());
+        verify(notificationService, never()).notify(any(), anyString(), anyString());
+    }
+
+    private Initiative initiativeManagedBy(Long supervisorId, Long officeCoordinatorId) {
+        Initiative initiative = new Initiative();
+        if (supervisorId != null) {
+            User supervisor = new User();
+            supervisor.setId(supervisorId);
+            initiative.setSupervisor(supervisor);
+        }
+        if (officeCoordinatorId != null) {
+            User coordinator = new User();
+            coordinator.setId(officeCoordinatorId);
+            Office office = new Office();
+            office.setUser(coordinator);
+            initiative.setOffice(office);
+        }
+        return initiative;
     }
 }

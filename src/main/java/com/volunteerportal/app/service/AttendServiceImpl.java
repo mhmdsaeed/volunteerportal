@@ -71,6 +71,15 @@ public class AttendServiceImpl implements AttendService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Volunteer initiative not found: " + form.getVolunteerInitiativeId()));
 
+        // Only approved members of the event's initiative can attend (the controller shows this as a form error)
+        Long eventInitiativeId = attend.getEvent().getInitiative() != null ? attend.getEvent().getInitiative().getId() : null;
+        if (!Boolean.TRUE.equals(volunteerInitiative.getEnabled())
+                || volunteerInitiative.getInitiative() == null
+                || !volunteerInitiative.getInitiative().getId().equals(eventInitiativeId)) {
+            throw new IllegalStateException("Volunteer " + volunteerInitiative.getId()
+                    + " is not an approved member of the event's initiative");
+        }
+
         attend.setVolunteerInitiative(volunteerInitiative);
         attend.setAttendInOut(form.getAttendInOut());
         attend.setAttendDttm(form.getAttendDttm());

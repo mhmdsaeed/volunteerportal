@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{pendingRequests.title})}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <h2 class="mb-1" th:text="#{pendingRequests.title}">Pending Join Requests</h2>
+        <p class="text-muted mb-4" th:text="#{pendingRequests.intro}">Approve a request to make the volunteer a member of the initiative.</p>
+
+        <div th:replace="~{fragments/layout :: decisionAlert}"></div>
+
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th th:text="#{common.volunteer}">Volunteer</th>
+                    <th th:text="#{common.initiative}">Initiative</th>
+                    <th th:text="#{common.requested}">Requested</th>
+                    <th th:text="#{common.answers}">Answers</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="request : ${requests}">
+                    <td th:text="${request.user != null ? request.user.username : '-'}"></td>
+                    <td>
+                        <a th:href="@{/coordinator/initiatives/{id}/requests(id=${request.initiative.id})}"
+                           th:text="${request.initiative.name}"></a>
+                    </td>
+                    <td th:text="${request.requestJoinDttm != null ? #temporals.format(request.requestJoinDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                    <td th:text="${request.answerCount != null ? request.answerCount : 0}"></td>
+                    <td class="text-end text-nowrap">
+                        <form th:action="@{/coordinator/requests/{requestId}/approve(requestId=${request.id})}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-success" th:text="#{joinRequests.approve}">Approve</button>
+                        </form>
+                        <form th:action="@{/coordinator/requests/{requestId}/reject(requestId=${request.id})}" method="post" class="d-inline"
+                              th:data-confirm="#{joinRequests.rejectConfirm}" onsubmit="return confirm(this.dataset.confirm);">
+                            <button type="submit" class="btn btn-sm btn-danger" th:text="#{joinRequests.reject}">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(requests)}">
+                    <td colspan="5" class="text-muted" th:text="#{pendingRequests.empty}">No requests are waiting for a decision.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
