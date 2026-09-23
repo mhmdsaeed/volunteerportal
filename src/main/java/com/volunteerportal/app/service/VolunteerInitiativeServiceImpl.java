@@ -26,11 +26,14 @@ import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
 import com.volunteerportal.app.repository.EventRepository;
 import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
+import com.volunteerportal.app.repository.UserRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 
 @Service
 public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeService {
+
+    private static final String ADMIN_ROLE = "ADMIN";
 
     private final InitiativeRepository initiativeRepository;
     private final InitiativeQuestionRepository initiativeQuestionRepository;
@@ -38,18 +41,21 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
     private final VolunteerInitiativeAnswerRepository volunteerInitiativeAnswerRepository;
     private final NotificationService notificationService;
     private final EventRepository eventRepository;
+    private final UserRepository userRepository;
 
     public VolunteerInitiativeServiceImpl(InitiativeRepository initiativeRepository,
             InitiativeQuestionRepository initiativeQuestionRepository,
             VolunteerInitiativeRepository volunteerInitiativeRepository,
             VolunteerInitiativeAnswerRepository volunteerInitiativeAnswerRepository,
-            NotificationService notificationService, EventRepository eventRepository) {
+            NotificationService notificationService, EventRepository eventRepository,
+            UserRepository userRepository) {
         this.initiativeRepository = initiativeRepository;
         this.initiativeQuestionRepository = initiativeQuestionRepository;
         this.volunteerInitiativeRepository = volunteerInitiativeRepository;
         this.volunteerInitiativeAnswerRepository = volunteerInitiativeAnswerRepository;
         this.notificationService = notificationService;
         this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -126,11 +132,17 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
         volunteerInitiativeRepository.delete(membership);
     }
 
-    /** Tells the initiative's supervisor and office coordinator (once each) that a request is waiting for them. */
+    /**
+     * Tells the initiative's supervisor, its office coordinator and every enabled admin (once each)
+     * that a request is waiting for them.
+     */
     private void notifyManagers(Initiative initiative, User requester) {
         List<User> managers = new ArrayList<>();
         managers.add(initiative.getSupervisor());
         managers.add(initiative.getOffice() != null ? initiative.getOffice().getUser() : null);
+        userRepository.findByRoles_Name(ADMIN_ROLE).stream()
+                .filter(User::isEnabled)
+                .forEach(managers::add);
 
         Set<Long> notified = new HashSet<>();
         for (User manager : managers) {

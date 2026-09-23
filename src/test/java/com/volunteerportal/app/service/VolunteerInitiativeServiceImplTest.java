@@ -26,6 +26,7 @@ import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
 import com.volunteerportal.app.repository.EventRepository;
 import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
+import com.volunteerportal.app.repository.UserRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 
@@ -62,6 +63,9 @@ class VolunteerInitiativeServiceImplTest {
 
     @Mock
     private EventRepository eventRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private VolunteerInitiativeServiceImpl service;
@@ -238,6 +242,48 @@ class VolunteerInitiativeServiceImplTest {
         service.join(5L, user, new LinkedMultiValueMap<>());
 
         verify(notificationService, never()).notify(any(User.class), anyString(), anyString());
+    }
+
+    @Test
+    void join_notifiesEveryEnabledAdmin() {
+        User admin1 = admin(40L, true);
+        User admin2 = admin(41L, true);
+        User disabledAdmin = admin(42L, false);
+        given(userRepository.findByRoles_Name("ADMIN")).willReturn(List.of(admin1, admin2, disabledAdmin));
+        stubSuccessfulJoin();
+
+        service.join(5L, user, new LinkedMultiValueMap<>());
+
+        verify(notificationService).notify(eq(admin1), anyString(), eq("/coordinator/requests"));
+        verify(notificationService).notify(eq(admin2), anyString(), eq("/coordinator/requests"));
+        verify(notificationService, never()).notify(eq(disabledAdmin), anyString(), anyString());
+    }
+
+    @Test
+    void join_adminWhoIsAlsoSupervisor_isNotifiedOnce() {
+        initiative.setSupervisor(userWithId(40L));
+        given(userRepository.findByRoles_Name("ADMIN")).willReturn(List.of(admin(40L, true)));
+        stubSuccessfulJoin();
+
+        service.join(5L, user, new LinkedMultiValueMap<>());
+
+        verify(notificationService, times(1)).notify(any(User.class), anyString(), anyString());
+    }
+
+    @Test
+    void join_adminRequestingThemselves_isNotNotified() {
+        given(userRepository.findByRoles_Name("ADMIN")).willReturn(List.of(admin(1L, true))); // same id as the requesting user
+        stubSuccessfulJoin();
+
+        service.join(5L, user, new LinkedMultiValueMap<>());
+
+        verify(notificationService, never()).notify(any(User.class), anyString(), anyString());
+    }
+
+    private User admin(Long id, boolean enabled) {
+        User admin = userWithId(id);
+        admin.setEnabled(enabled);
+        return admin;
     }
 
     private void stubSuccessfulJoin() {
