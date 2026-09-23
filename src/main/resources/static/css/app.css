@@ -1,0 +1,170 @@
+/* Collapsible left sidebar (see fragments/layout.html :: navbar) */
+:root {
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 64px;
+    --sidebar-transition: 0.2s ease;
+}
+
+body {
+    padding-left: var(--sidebar-width);
+    padding-top: 1.5rem;
+    transition: padding-left var(--sidebar-transition);
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1030;
+    width: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: width var(--sidebar-transition);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0.75rem 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 3.5rem;
+}
+
+.sidebar-brand {
+    flex: 1;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar-brand:hover {
+    color: #fff;
+}
+
+.sidebar-toggle {
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.sidebar .nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1.25rem;
+    color: rgba(255, 255, 255, 0.75);
+    white-space: nowrap;
+    border-left: 3px solid transparent;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-left-color: var(--bs-primary);
+}
+
+.sidebar .nav-link .bi {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    width: 1.25rem;
+    text-align: center;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+}
+
+.sidebar-user .bi {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    width: 1.25rem;
+    text-align: center;
+}
+
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+/* Collapsed: icon-only rail */
+html.sidebar-collapsed body {
+    padding-left: var(--sidebar-collapsed-width);
+}
+
+html.sidebar-collapsed .sidebar {
+    width: var(--sidebar-collapsed-width);
+}
+
+html.sidebar-collapsed .sidebar-label,
+html.sidebar-collapsed .sidebar-brand {
+    display: none;
+}
+
+html.sidebar-collapsed .sidebar-header {
+    justify-content: center;
+    padding-left: 0.75rem;
+}
+
+html.sidebar-collapsed .sidebar .nav-link {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+html.sidebar-collapsed .sidebar-footer {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+html.sidebar-collapsed .sidebar-user {
+    justify-content: center;
+}
+
+/* Unread count shrinks to a dot on the icon when collapsed */
+html.sidebar-collapsed .sidebar .nav-link .badge {
+    position: absolute;
+    top: 0.35rem;
+    left: calc(50% + 0.35rem);
+    font-size: 0.6rem;
+    padding: 0.2em 0.45em;
+}
+
+/* Small screens: always leave room for the rail only; expanding overlays the content */
+@media (max-width: 767.98px) {
+    body,
+    html.sidebar-collapsed body {
+        padding-left: var(--sidebar-collapsed-width);
+    }
+
+    html:not(.sidebar-collapsed) .sidebar {
+        box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.4);
+    }
+}

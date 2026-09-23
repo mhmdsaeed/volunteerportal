@@ -5,32 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title} + ' - Volunteer Portal'">Volunteer Portal</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script>
+        // Apply the saved sidebar state before first paint to avoid a flash of the wrong width
+        (function () {
+            var collapsed = window.matchMedia('(max-width: 767.98px)').matches;
+            try {
+                if (!collapsed) {
+                    collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                }
+            } catch (e) { /* storage unavailable */ }
+            if (collapsed) {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        })();
+    </script>
 </head>
 <body>
-    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand" th:href="@{/}">Volunteer Portal</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" th:href="@{/home}" sec:authorize="isAuthenticated()">Home</a>
-                <a class="nav-link" th:href="@{/initiatives}" sec:authorize="isAuthenticated()">Initiatives</a>
-                <a class="nav-link" th:href="@{/profile}" sec:authorize="isAuthenticated()">My Profile</a>
-                <a class="nav-link" th:href="@{/coordinator/initiatives}" sec:authorize="hasAnyRole('COORDINATOR','ADMIN')">Coordinator</a>
-                <a class="nav-link" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')">Admin</a>
-                <a class="nav-link" th:href="@{/notifications}" sec:authorize="isAuthenticated()">
-                    Notifications
-                    <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
-                          class="badge rounded-pill text-bg-danger" th:text="${unreadNotificationCount}"></span>
-                </a>
-                <span class="navbar-text text-white me-3" sec:authorize="isAuthenticated()">
-                    Signed in as <span sec:authentication="name"></span>
-                </span>
-                <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" class="d-inline">
-                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                </form>
-                <a class="nav-link" th:href="@{/login}" sec:authorize="isAnonymous()">Login</a>
-                <a class="nav-link" th:href="@{/register}" sec:authorize="isAnonymous()">Register</a>
-            </div>
+    <nav th:fragment="navbar" class="sidebar bg-dark" data-bs-theme="dark" aria-label="Main menu">
+        <div class="sidebar-header">
+            <a class="sidebar-brand" th:href="@{/}">Volunteer Portal</a>
+            <button type="button" class="btn btn-sm btn-outline-light sidebar-toggle" id="sidebarToggle"
+                    aria-label="Toggle menu" title="Toggle menu">
+                <i class="bi bi-list"></i>
+            </button>
         </div>
+
+        <div class="nav flex-column py-2">
+            <a class="nav-link" th:href="@{/home}" sec:authorize="isAuthenticated()" title="Home">
+                <i class="bi bi-house"></i><span class="sidebar-label">Home</span>
+            </a>
+            <a class="nav-link" th:href="@{/initiatives}" sec:authorize="isAuthenticated()" title="Initiatives">
+                <i class="bi bi-flag"></i><span class="sidebar-label">Initiatives</span>
+            </a>
+            <a class="nav-link" th:href="@{/profile}" sec:authorize="isAuthenticated()" title="My Profile">
+                <i class="bi bi-person"></i><span class="sidebar-label">My Profile</span>
+            </a>
+            <a class="nav-link" th:href="@{/coordinator/initiatives}" sec:authorize="hasAnyRole('COORDINATOR','ADMIN')" title="Coordinator">
+                <i class="bi bi-people"></i><span class="sidebar-label">Coordinator</span>
+            </a>
+            <a class="nav-link" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')" title="Admin">
+                <i class="bi bi-gear"></i><span class="sidebar-label">Admin</span>
+            </a>
+            <a class="nav-link" th:href="@{/notifications}" sec:authorize="isAuthenticated()" title="Notifications">
+                <i class="bi bi-bell"></i><span class="sidebar-label">Notifications</span>
+                <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
+                      class="badge rounded-pill text-bg-danger" th:text="${unreadNotificationCount}"></span>
+            </a>
+            <a class="nav-link" th:href="@{/login}" sec:authorize="isAnonymous()" title="Login">
+                <i class="bi bi-box-arrow-in-right"></i><span class="sidebar-label">Login</span>
+            </a>
+            <a class="nav-link" th:href="@{/register}" sec:authorize="isAnonymous()" title="Register">
+                <i class="bi bi-person-plus"></i><span class="sidebar-label">Register</span>
+            </a>
+        </div>
+
+        <div class="sidebar-footer" sec:authorize="isAuthenticated()">
+            <div class="sidebar-user" th:title="'Signed in as ' + ${#authentication.name}">
+                <i class="bi bi-person-circle"></i>
+                <span class="sidebar-label text-truncate">Signed in as <span sec:authentication="name"></span></span>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-outline-light btn-sm sidebar-logout" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i><span class="sidebar-label">Logout</span>
+                </button>
+            </form>
+        </div>
+
+        <script>
+            (function () {
+                var root = document.documentElement;
+                var smallScreen = window.matchMedia('(max-width: 767.98px)');
+
+                document.getElementById('sidebarToggle').addEventListener('click', function () {
+                    var collapsed = root.classList.toggle('sidebar-collapsed');
+                    // On small screens the expanded menu is a temporary overlay, so don't remember it
+                    if (!smallScreen.matches) {
+                        try { localStorage.setItem('sidebarCollapsed', String(collapsed)); } catch (e) { /* storage unavailable */ }
+                    }
+                });
+
+                // Highlight the menu item whose path is the longest prefix of the current URL
+                var path = window.location.pathname;
+                var best = null;
+                document.querySelectorAll('.sidebar .nav-link').forEach(function (link) {
+                    var href = new URL(link.href).pathname;
+                    if ((path === href || path.startsWith(href + '/'))
+                            && (!best || href.length > new URL(best.href).pathname.length)) {
+                        best = link;
+                    }
+                });
+                if (best) {
+                    best.classList.add('active');
+                    best.setAttribute('aria-current', 'page');
+                }
+            })();
+        </script>
     </nav>
 
     <div th:fragment="scripts">
