@@ -19,9 +19,9 @@ import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.security.UserPrincipal;
 import com.volunteerportal.app.service.UserAdminService;
-import com.volunteerportal.app.service.UserAdminService.RoleChangeRejectedException;
+import com.volunteerportal.app.service.UserAdminService.UserChangeRejectedException;
 
-/** Admin → Manage Users: every account with its roles, and changing those roles. */
+/** Admin → Manage Users: every account with its roles and status; changing roles, activating and deactivating. */
 @Controller
 @RequestMapping("/admin/users")
 public class AdminUserController {
@@ -33,8 +33,9 @@ public class AdminUserController {
     }
 
     @GetMapping
-    public String list(Model model) {
+    public String list(Model model, @AuthenticationPrincipal UserPrincipal principal) {
         model.addAttribute("users", userAdminService.findAllUsers());
+        model.addAttribute("currentUserId", principal.getUser().getId());
         return "admin/users/list";
     }
 
@@ -53,11 +54,33 @@ public class AdminUserController {
             User saved = userAdminService.updateRoles(id, requested, principal.getUser().getId());
             redirectAttributes.addFlashAttribute("savedUser", saved.getUsername());
             return "redirect:/admin/users";
-        } catch (RoleChangeRejectedException e) {
+        } catch (UserChangeRejectedException e) {
             addFormModel(model, userAdminService.findUser(id), requested, principal);
             model.addAttribute("errorKey", e.getMessageKey());
             return "admin/users/form";
         }
+    }
+
+    @PostMapping("/{id}/deactivate")
+    public String deactivate(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal,
+            RedirectAttributes redirectAttributes) {
+        return setEnabled(id, false, principal, redirectAttributes);
+    }
+
+    @PostMapping("/{id}/activate")
+    public String activate(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal,
+            RedirectAttributes redirectAttributes) {
+        return setEnabled(id, true, principal, redirectAttributes);
+    }
+
+    private String setEnabled(Long id, boolean enabled, UserPrincipal principal, RedirectAttributes redirectAttributes) {
+        try {
+            User saved = userAdminService.setEnabled(id, enabled, principal.getUser().getId());
+            redirectAttributes.addFlashAttribute(enabled ? "activatedUser" : "deactivatedUser", saved.getUsername());
+        } catch (UserChangeRejectedException e) {
+            redirectAttributes.addFlashAttribute("errorKey", e.getMessageKey());
+        }
+        return "redirect:/admin/users";
     }
 
     private void addFormModel(Model model, User user, Set<String> selected, UserPrincipal principal) {

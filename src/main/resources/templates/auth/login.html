@@ -13,6 +13,9 @@
         <div class="alert alert-danger" th:if="${param.error}" th:text="#{login.error}">
             Invalid username or password.
         </div>
+        <div class="alert alert-warning" th:if="${param.disabled}" th:text="#{login.disabled}">
+            Your account has been deactivated.
+        </div>
         <div class="alert alert-info" th:if="${param.logout}" th:text="#{login.loggedOut}">
             You have been logged out.
         </div>

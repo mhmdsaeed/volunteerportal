@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.volunteerportal.app.model.ApiToken;
 
@@ -21,12 +22,19 @@ public interface ApiTokenRepository extends JpaRepository<ApiToken, Long> {
     Optional<ApiToken> findByTokenHash(String tokenHash);
 
     @Modifying
+    @Transactional
     @Query("delete from ApiToken t where t.tokenHash = :tokenHash")
     int deleteByTokenHash(@Param("tokenHash") String tokenHash);
 
     @Modifying
+    @Transactional
     @Query("delete from ApiToken t where t.expiresDttm < :now")
     int deleteExpired(@Param("now") LocalDateTime now);
 
     long countByUserId(Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("delete from ApiToken t where t.user.id = :userId")
+    int deleteByUserId(@Param("userId") Long userId);
 }

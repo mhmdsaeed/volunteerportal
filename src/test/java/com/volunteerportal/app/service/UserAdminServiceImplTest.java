@@ -13,9 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
+import com.volunteerportal.app.repository.ApiTokenRepository;
 import com.volunteerportal.app.repository.RoleRepository;
 import com.volunteerportal.app.repository.UserRepository;
-import com.volunteerportal.app.service.UserAdminService.RoleChangeRejectedException;
+import com.volunteerportal.app.service.UserAdminService.UserChangeRejectedException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -39,13 +40,16 @@ class UserAdminServiceImplTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private ApiTokenRepository apiTokenRepository;
+
     private UserAdminServiceImpl service;
     private User admin;
     private User volunteer;
 
     @BeforeEach
     void setUp() {
-        service = new UserAdminServiceImpl(userRepository, roleRepository, notificationService);
+        service = new UserAdminServiceImpl(userRepository, roleRepository, notificationService, apiTokenRepository);
         admin = user(1L, "admin", "ADMIN");
         volunteer = user(2L, "vol", "VOLUNTEER");
         for (String name : List.of("ADMIN", "COORDINATOR", "VOLUNTEER")) {
@@ -124,10 +128,53 @@ class UserAdminServiceImplTest {
         assertThat(service.findAllUsers()).extracting(User::getUsername).containsExactly("admin", "Amy", "zed");
     }
 
+    @Test
+    void deactivatingAUser_disablesThem_andDeletesTheirMobileLogins() {
+        User saved = service.setEnabled(2L, false, 1L);
+
+        assertThat(saved.isEnabled()).isFalse();
+        verify(apiTokenRepository).deleteByUserId(2L);
+    }
+
+    @Test
+    void reactivatingAUser_enablesThem() {
+        volunteer.setEnabled(false);
+
+        assertThat(service.setEnabled(2L, true, 1L).isEnabled()).isTrue();
+        verify(apiTokenRepository, never()).deleteByUserId(any());
+    }
+
+    @Test
+    void adminsCannotDeactivateThemselves() {
+        assertRejected(() -> service.setEnabled(1L, false, 1L), "users.error.ownAccount");
+        assertThat(admin.isEnabled()).isTrue();
+    }
+
+    @Test
+    void theLastActiveAdmin_cannotBeDeactivated() {
+        given(userRepository.findByRoles_Name("ADMIN")).willReturn(List.of(admin));
+
+        assertRejected(() -> service.setEnabled(1L, false, 3L), "users.error.lastActiveAdmin");
+    }
+
+    @Test
+    void anAdmin_canBeDeactivatedWhenAnotherAdminIsActive() {
+        given(userRepository.findByRoles_Name("ADMIN")).willReturn(List.of(admin, user(3L, "other", "ADMIN")));
+
+        assertThat(service.setEnabled(1L, false, 3L).isEnabled()).isFalse();
+    }
+
+    @Test
+    void noChange_savesNothing() {
+        service.setEnabled(2L, true, 1L);
+
+        verify(userRepository, never()).save(any());
+    }
+
     private void assertRejected(Runnable call, String expectedKey) {
         assertThatThrownBy(call::run)
-                .isInstanceOf(RoleChangeRejectedException.class)
-                .extracting(e -> ((RoleChangeRejectedException) e).getMessageKey())
+                .isInstanceOf(UserChangeRejectedException.class)
+                .extracting(e -> ((UserChangeRejectedException) e).getMessageKey())
                 .isEqualTo(expectedKey);
         verify(userRepository, never()).save(any());
     }

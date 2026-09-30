@@ -1,5 +1,6 @@
 package com.volunteerportal.app.config;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -8,6 +9,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+
+import com.volunteerportal.app.repository.UserRepository;
+import com.volunteerportal.app.security.DisabledAccountFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +26,12 @@ public class SecurityConfig {
     /** The website (form login + session). /api/** is handled first by ApiSecurityConfig. */
     @Bean
     @Order(2)
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, ObjectProvider<UserRepository> userRepository)
+            throws Exception {
+        // Ends sessions of users deactivated after logging in. Optional only so @WebMvcTest slices
+        // (no repositories) can still import this config; the application always has it.
+        userRepository.ifAvailable(repository ->
+                http.addFilterBefore(new DisabledAccountFilter(repository), AuthorizationFilter.class));
         http
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/", "/register", "/login", "/css/**", "/webjars/**", "/error").permitAll()

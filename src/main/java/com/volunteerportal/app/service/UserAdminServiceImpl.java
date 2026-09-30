@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
+import com.volunteerportal.app.repository.ApiTokenRepository;
 import com.volunteerportal.app.repository.RoleRepository;
 import com.volunteerportal.app.repository.UserRepository;
 
@@ -24,12 +25,14 @@ public class UserAdminServiceImpl implements UserAdminService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final NotificationService notificationService;
+    private final ApiTokenRepository apiTokenRepository;
 
     public UserAdminServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService, ApiTokenRepository apiTokenRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.notificationService = notificationService;
+        this.apiTokenRepository = apiTokenRepository;
     }
 
     @Override
@@ -56,24 +59,23 @@ public class UserAdminServiceImpl implements UserAdminService {
         User user = findUser(userId);
         Set<String> requested = roleNames == null ? Set.of() : roleNames;
         if (requested.isEmpty()) {
-            throw new RoleChangeRejectedException("users.error.noRoles");
+            throw new UserChangeRejectedException("users.error.noRoles");
         }
 
         Set<Role> roles = new HashSet<>();
         for (String name : requested) {
             roles.add(roleRepository.findByName(name)
-                    .orElseThrow(() -> new RoleChangeRejectedException("users.error.unknownRole")));
+                    .orElseThrow(() -> new UserChangeRejectedException("users.error.unknownRole")));
         }
 
         boolean wasAdmin = hasRole(user, ADMIN);
         boolean staysAdmin = requested.contains(ADMIN);
         if (wasAdmin && !staysAdmin) {
             if (user.getId().equals(actingAdminId)) {
-                throw new RoleChangeRejectedException("users.error.ownAdmin"); // don't lock yourself out
+                throw new UserChangeRejectedException("users.error.ownAdmin"); // don't lock yourself out
             }
-            long enabledAdmins = userRepository.findByRoles_Name(ADMIN).stream().filter(User::isEnabled).count();
-            if (user.isEnabled() && enabledAdmins <= 1) {
-                throw new RoleChangeRejectedException("users.error.lastAdmin");
+            if (user.isEnabled() && enabledAdminCount() <= 1) {
+                throw new UserChangeRejectedException("users.error.lastAdmin");
             }
         }
 
@@ -87,6 +89,34 @@ public class UserAdminServiceImpl implements UserAdminService {
                     after.stream().sorted().collect(Collectors.joining(", ")));
         }
         return saved;
+    }
+
+    @Override
+    @Transactional
+    public User setEnabled(Long userId, boolean enabled, Long actingAdminId) {
+        User user = findUser(userId);
+        if (user.isEnabled() == enabled) {
+            return user;
+        }
+        if (!enabled) {
+            if (user.getId().equals(actingAdminId)) {
+                throw new UserChangeRejectedException("users.error.ownAccount"); // don't lock yourself out
+            }
+            if (hasRole(user, ADMIN) && enabledAdminCount() <= 1) {
+                throw new UserChangeRejectedException("users.error.lastActiveAdmin");
+            }
+        }
+        user.setEnabled(enabled);
+        User saved = userRepository.save(user);
+        if (!enabled) {
+            // Mobile app logins stop at once; the website session ends on the user's next request
+            apiTokenRepository.deleteByUserId(saved.getId());
+        }
+        return saved;
+    }
+
+    private long enabledAdminCount() {
+        return userRepository.findByRoles_Name(ADMIN).stream().filter(User::isEnabled).count();
     }
 
     private static boolean hasRole(User user, String roleName) {

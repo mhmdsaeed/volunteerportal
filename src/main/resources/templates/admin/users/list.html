@@ -9,6 +9,9 @@
         <p class="text-muted mb-4" th:text="#{users.intro}">Change what each account can do.</p>
 
         <div class="alert alert-success" th:if="${savedUser != null}" th:text="#{users.saved(${savedUser})}">Saved.</div>
+        <div class="alert alert-success" th:if="${activatedUser != null}" th:text="#{users.activated(${activatedUser})}">Activated.</div>
+        <div class="alert alert-warning" th:if="${deactivatedUser != null}" th:text="#{users.deactivated(${deactivatedUser})}">Deactivated.</div>
+        <div class="alert alert-danger" th:if="${errorKey != null}" th:text="${#messages.msg(errorKey)}">Error.</div>
 
         <table class="table table-striped align-middle">
             <thead>
@@ -29,9 +32,21 @@
                               th:classappend="${role.name == 'ADMIN'} ? 'text-bg-danger' : (${role.name == 'COORDINATOR'} ? 'text-bg-primary' : 'text-bg-secondary')"
                               th:text="${#messages.msgOrNull('role.' + role.name) ?: role.name}">ROLE</span>
                     </td>
-                    <td th:text="${u.enabled} ? #{users.enabled} : #{users.disabled}"></td>
-                    <td class="text-end">
+                    <td>
+                        <span class="badge" th:classappend="${u.enabled} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="${u.enabled} ? #{users.enabled} : #{users.disabled}">Active</span>
+                    </td>
+                    <td class="text-end text-nowrap">
                         <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/users/{id}/edit(id=${u.id})}" th:text="#{users.editRoles}">Edit roles</a>
+                        <th:block th:if="${u.id != currentUserId}">
+                            <form th:if="${u.enabled}" th:action="@{/admin/users/{id}/deactivate(id=${u.id})}" method="post" class="d-inline"
+                                  th:data-confirm="#{users.deactivateConfirm(${u.username})}" onsubmit="return confirm(this.dataset.confirm);">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{users.deactivate}">Deactivate</button>
+                            </form>
+                            <form th:unless="${u.enabled}" th:action="@{/admin/users/{id}/activate(id=${u.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-success" th:text="#{users.activate}">Activate</button>
+                            </form>
+                        </th:block>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(users)}">
