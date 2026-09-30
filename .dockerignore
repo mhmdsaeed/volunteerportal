@@ -1,0 +1,7 @@
+# Only the Maven project goes into the image build
+*
+!mvnw
+!pom.xml
+!.mvn/
+!src/
+src/test/

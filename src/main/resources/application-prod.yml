@@ -1,0 +1,30 @@
+# Production (the server). Enabled by deploy/docker-compose.yml with SPRING_PROFILES_ACTIVE=prod.
+# Secrets come from environment variables (deploy/.env) - never from this file.
+server:
+  # Behind Caddy: trust its X-Forwarded-* headers so redirects and QR check-in links use the public
+  # https:// address. Safe because the app's port is only reachable from Caddy on the Docker network.
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        secure: true
+        http-only: true
+        same-site: lax
+
+spring:
+  thymeleaf:
+    cache: true
+
+app:
+  api:
+    # Browsers may not call the API cross-origin; the phone app doesn't need it
+    cors-allowed-origin-patterns:
+  checkin:
+    show-link: false
+  demo-data:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: WARN

@@ -1,0 +1,66 @@
+# Volunteer Portal on one server: MySQL + the app + Caddy (HTTPS). See deploy/README.md.
+# Settings come from deploy/.env (copy .env.example); `docker compose` refuses to start if a secret is missing.
+name: volunteerportal
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: volunteerportal
+      MYSQL_USER: volunteerportal_app
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in deploy/.env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in deploy/.env}
+      TZ: ${TZ:-UTC}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    # No ports: only the app can reach MySQL, over the internal Docker network
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: volunteerportal:latest
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mysql
+      DB_PASSWORD: ${DB_PASSWORD}
+      CHECKIN_SECRET: ${CHECKIN_SECRET:?Set CHECKIN_SECRET in deploy/.env}
+      SEED_ADMIN: ${SEED_ADMIN:-true}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:?Set ADMIN_DEFAULT_PASSWORD in deploy/.env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.org}
+      TZ: ${TZ:-UTC}
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+    # No ports: only Caddy reaches the app
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in deploy/.env}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data        # HTTPS certificates - keep this volume
+      - caddy-config:/config
+
+volumes:
+  mysql-data:
+  caddy-data:
+  caddy-config:

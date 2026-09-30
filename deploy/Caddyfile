@@ -1,0 +1,12 @@
+# HTTPS in front of the app. Caddy gets and renews a free Let's Encrypt certificate for $DOMAIN
+# (ports 80 and 443 must be reachable from the internet), and sets the X-Forwarded-* headers the
+# app uses (server.forward-headers-strategy in application-prod.yml).
+# With DOMAIN=localhost it uses a local self-signed certificate instead - handy for a test run.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:8080
+}

@@ -34,3 +34,6 @@ build/
 
 ### Local dev HTTPS certificate (private key - never commit) ###
 dev-certs/
+
+### Server settings with secrets (copy deploy/.env.example) ###
+deploy/.env
