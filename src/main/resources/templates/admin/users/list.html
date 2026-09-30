@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{users.title})}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <h2 class="mb-1" th:text="#{users.title}">Users</h2>
+        <p class="text-muted mb-4" th:text="#{users.intro}">Change what each account can do.</p>
+
+        <div class="alert alert-success" th:if="${savedUser != null}" th:text="#{users.saved(${savedUser})}">Saved.</div>
+
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th th:text="#{common.username}">Username</th>
+                    <th th:text="#{common.email}">Email</th>
+                    <th th:text="#{users.roles}">Roles</th>
+                    <th th:text="#{common.status}">Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.username}"></td>
+                    <td th:text="${u.email}" dir="ltr"></td>
+                    <td>
+                        <span th:each="role : ${u.roles}" class="badge me-1"
+                              th:classappend="${role.name == 'ADMIN'} ? 'text-bg-danger' : (${role.name == 'COORDINATOR'} ? 'text-bg-primary' : 'text-bg-secondary')"
+                              th:text="${#messages.msgOrNull('role.' + role.name) ?: role.name}">ROLE</span>
+                    </td>
+                    <td th:text="${u.enabled} ? #{users.enabled} : #{users.disabled}"></td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/users/{id}/edit(id=${u.id})}" th:text="#{users.editRoles}">Edit roles</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(users)}">
+                    <td colspan="5" class="text-muted" th:text="#{users.empty}">No users.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

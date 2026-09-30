@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="#{app.lang}" th:dir="#{app.dir}">
+<head th:replace="~{fragments/layout :: head(title=#{users.editRoles})}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container" style="max-width: 560px;">
+        <p><a th:href="@{/admin/users}">&laquo; <span th:text="#{users.back}">Back to Users</span></a></p>
+
+        <h2 class="mb-1" th:text="#{users.editHeading(${user.username})}">Roles</h2>
+        <p class="text-muted" th:text="${user.email}" dir="ltr"></p>
+
+        <div class="alert alert-danger" th:if="${errorKey != null}" th:text="${#messages.msg(errorKey)}">Error.</div>
+
+        <form th:action="@{/admin/users/{id}(id=${user.id})}" method="post">
+            <div class="list-group mb-3">
+                <label class="list-group-item d-flex gap-3" th:each="role : ${allRoles}">
+                    <input class="form-check-input flex-shrink-0 mt-1" type="checkbox" name="roles"
+                           th:value="${role.name}" th:checked="${selected.contains(role.name)}"
+                           th:id="'role-' + ${role.name}">
+                    <span>
+                        <span class="fw-semibold" th:text="${#messages.msgOrNull('role.' + role.name) ?: role.name}">Role</span>
+                        <small class="d-block text-muted" th:text="${#messages.msgOrNull('role.' + role.name + '.help')}">What it allows</small>
+                    </span>
+                </label>
+            </div>
+
+            <p class="small text-muted" th:if="${isSelf}" th:text="#{users.selfNote}">You can't remove your own admin role.</p>
+            <p class="small text-muted" th:text="#{users.takesEffect}">Takes effect next login.</p>
+
+            <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+            <a class="btn btn-outline-secondary" th:href="@{/admin/users}" th:text="#{common.cancel}">Cancel</a>
+        </form>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
