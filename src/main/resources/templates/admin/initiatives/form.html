@@ -34,8 +34,11 @@
                 <label for="supervisorId" class="form-label" th:text="#{common.supervisor}">Supervisor</label>
                 <select class="form-select" id="supervisorId" th:field="*{supervisorId}">
                     <option value="" th:text="#{common.none}">-- None --</option>
-                    <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}"></option>
+                    <option th:each="user : ${users}" th:value="${user.id}"
+                            th:text="${notEligibleSupervisorIds.contains(user.id)} ? ${user.username} + ' ' + #{initiatives.supervisorNotEligible} : ${user.username}"></option>
                 </select>
+                <div class="form-text" th:text="#{initiatives.supervisorHint}">Only active admins and coordinators are listed.</div>
+                <div class="text-danger" th:if="${#fields.hasErrors('supervisorId')}" th:errors="*{supervisorId}"></div>
             </div>
 
             <div class="form-check mb-3">

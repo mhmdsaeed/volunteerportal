@@ -57,6 +57,28 @@ class UserRepositoryTest {
         assertThat(coordinators).extracting(User::getUsername).contains("coordinator_ut");
     }
 
+    @Test
+    void findActiveWithAnyRole_returnsActiveAdminsAndCoordinatorsOnce_notVolunteersOrDeactivatedUsers() {
+        persistUser("sup_coord_ut", "sup_coord_ut@example.com", "COORDINATOR");
+        persistUser("sup_admin_ut", "sup_admin_ut@example.com", "ADMIN");
+        persistUser("sup_vol_ut", "sup_vol_ut@example.com", "VOLUNTEER");
+        User both = persistUser("sup_both_ut", "sup_both_ut@example.com", "COORDINATOR");
+        both.getRoles().add(roleRepository.findByName("ADMIN").orElseThrow());
+        entityManager.persistAndFlush(both);
+        User off = persistUser("sup_off_ut", "sup_off_ut@example.com", "COORDINATOR");
+        off.setEnabled(false);
+        entityManager.persistAndFlush(off);
+        entityManager.clear();
+
+        List<String> names = userRepository.findActiveWithAnyRole(List.of("ADMIN", "COORDINATOR")).stream()
+                .map(User::getUsername).toList();
+
+        assertThat(names).contains("sup_coord_ut", "sup_admin_ut", "sup_both_ut");
+        assertThat(names).doesNotContain("sup_vol_ut", "sup_off_ut");
+        assertThat(names).filteredOn("sup_both_ut"::equals).hasSize(1);
+        assertThat(names).isSortedAccordingTo(String::compareTo);
+    }
+
     private User persistUser(String username, String email, String roleName) {
         Role role = roleRepository.findByName(roleName).orElseThrow();
         User user = new User();
