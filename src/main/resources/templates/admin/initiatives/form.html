@@ -5,6 +5,12 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{initiatives.title}, '/admin/initiatives')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(${initiativeId} != null ? #{adminInitiatives.edit} : #{adminInitiatives.new})}"></li>
+        </ol></nav>
+
         <h2 class="mb-4" th:text="${initiativeId} != null ? #{adminInitiatives.edit} : #{adminInitiatives.new}">Initiative</h2>
 
         <form th:action="${initiativeId} != null ? @{/admin/initiatives/{id}(id=${initiativeId})} : @{/admin/initiatives}"

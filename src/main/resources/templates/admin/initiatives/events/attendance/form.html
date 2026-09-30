@@ -8,7 +8,21 @@
     <div class="container" style="max-width: 560px;"
          th:with="eventsPath=${eventsPath != null ? eventsPath : '/admin/initiatives/' + initiative.id + '/events'},
                   attendancePath=${attendancePath != null ? attendancePath : eventsPath + '/' + event.id + '/attendance'}">
-        <p><a th:href="@{${attendancePath}}">&laquo; <span th:text="#{attendance.back}">Back to Attendance</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb" th:with="fromCoordinator=${#strings.startsWith(eventsPath, '/coordinator')}">
+            <th:block th:if="${fromCoordinator}">
+                <li th:replace="~{fragments/layout :: crumb(#{nav.coordinator}, '/coordinator/initiatives')}"></li>
+                <li th:replace="~{fragments/layout :: crumbText(${initiative.name})}"></li>
+            </th:block>
+            <th:block th:unless="${fromCoordinator}">
+                <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+                <li th:replace="~{fragments/layout :: crumb(#{initiatives.title}, '/admin/initiatives')}"></li>
+                <li th:replace="~{fragments/layout :: crumb(${initiative.name}, ${'/admin/initiatives/' + initiative.id + '/edit'})}"></li>
+            </th:block>
+            <li th:replace="~{fragments/layout :: crumb(#{adminInitiatives.events}, ${eventsPath})}"></li>
+            <li th:replace="~{fragments/layout :: crumbText(${event.name})}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{attendance.title}, ${attendancePath})}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(${attendId} != null ? #{attendance.edit} : #{attendance.record})}"></li>
+        </ol></nav>
 
         <h2 class="mb-4" th:text="${attendId} != null ? #{attendance.editHeading(${event.name})} : #{attendance.recordHeading(${event.name})}">Attendance</h2>
 

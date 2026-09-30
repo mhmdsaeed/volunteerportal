@@ -123,6 +123,16 @@
         </script>
     </nav>
 
+    <!-- Breadcrumb trail parts. A page writes its trail as:
+         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+           <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>      (a link)
+           <li th:replace="~{fragments/layout :: crumbText(${initiative.name})}"></li>         (context, not a link)
+           <li th:replace="~{fragments/layout :: crumbHere(#{offices.title})}"></li>          (the current page)
+         </ol></nav> -->
+    <li th:fragment="crumb(label, url)" class="breadcrumb-item"><a th:href="@{${url}}" th:text="${label}">Link</a></li>
+    <li th:fragment="crumbText(label)" class="breadcrumb-item" th:text="${label}">Context</li>
+    <li th:fragment="crumbHere(label)" class="breadcrumb-item active" aria-current="page" th:text="${label}">Current page</li>
+
     <!-- Outcome of approving/rejecting a join request (flash attribute "decision" from CoordinatorController) -->
     <div th:fragment="decisionAlert" th:if="${decision != null}" class="alert"
          th:classappend="${decision == 'alreadyDecided'} ? 'alert-warning' : 'alert-success'"

@@ -5,6 +5,10 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumbHere(#{admin.title})}"></li>
+        </ol></nav>
+
         <div class="alert alert-primary">
             <h2 th:text="#{admin.heading}">Admin Area</h2>
             <p th:utext="#{admin.intro}">This page is only reachable by users with the <code>ADMIN</code> role.</p>

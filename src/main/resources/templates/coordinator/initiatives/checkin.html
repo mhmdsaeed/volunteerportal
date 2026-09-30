@@ -6,7 +6,13 @@
 
     <div class="container text-center" style="max-width: 640px;"
          th:with="basePath=${'/coordinator/initiatives/' + initiative.id + '/events/' + event.id + '/checkin'}">
-        <p class="text-start"><a th:href="@{/coordinator/initiatives/{id}/events(id=${initiative.id})}">&laquo; <span th:text="#{events.back}">Back to Events</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{nav.coordinator}, '/coordinator/initiatives')}"></li>
+            <li th:replace="~{fragments/layout :: crumbText(${initiative.name})}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{adminInitiatives.events}, ${'/coordinator/initiatives/' + initiative.id + '/events'})}"></li>
+            <li th:replace="~{fragments/layout :: crumbText(${event.name})}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(#{checkinQr.title})}"></li>
+        </ol></nav>
 
         <h2 class="mb-1" th:text="${event.name}">Event</h2>
         <p class="text-muted" th:text="#{checkinQr.intro(${periodSeconds})}">Scan to check in.</p>

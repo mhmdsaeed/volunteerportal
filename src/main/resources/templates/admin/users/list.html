@@ -5,6 +5,11 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(#{users.title})}"></li>
+        </ol></nav>
+
         <h2 class="mb-1" th:text="#{users.title}">Users</h2>
         <p class="text-muted mb-4" th:text="#{users.intro}">Change what each account can do.</p>
 

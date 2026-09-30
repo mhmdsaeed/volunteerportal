@@ -5,6 +5,12 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{questionLibrary.title}, '/admin/question-library')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(${categoryId} != null ? #{questionLibrary.editCategory} : #{questionLibrary.newCategory})}"></li>
+        </ol></nav>
+
         <h2 class="mb-4" th:text="${categoryId} != null ? #{questionLibrary.editCategory} : #{questionLibrary.newCategory}">Category</h2>
 
         <form th:action="${categoryId} != null ? @{/admin/question-library/{id}(id=${categoryId})} : @{/admin/question-library}"

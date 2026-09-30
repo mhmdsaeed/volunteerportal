@@ -5,7 +5,11 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 480px;">
-        <p><a th:href="@{/admin/volunteers}">&laquo; <span th:text="#{volunteers.back}">Back to Volunteers</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{volunteers.title}, '/admin/volunteers')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(${volunteer.username})}"></li>
+        </ol></nav>
 
         <h2 class="mb-4" th:text="#{volunteers.editHeading(${volunteer.username})}">Edit Volunteer</h2>
 

@@ -5,6 +5,11 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(#{reports.title})}"></li>
+        </ol></nav>
+
         <h2 class="mb-4" th:text="#{reports.title}">Reports</h2>
 
         <a class="btn btn-outline-primary" th:href="@{/admin/reports/initiatives}" th:text="#{reports.initiatives}">Initiative Participation</a>

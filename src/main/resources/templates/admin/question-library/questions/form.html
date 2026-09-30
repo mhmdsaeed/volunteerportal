@@ -5,7 +5,12 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/question-library/{id}/questions(id=${category.id})}">&laquo; <span th:text="#{initiativeQuestions.back}">Back to Questions</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{questionLibrary.title}, '/admin/question-library')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(${category.name}, ${'/admin/question-library/' + category.id + '/questions'})}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(${questionId} != null ? #{initiativeQuestions.edit} : #{initiativeQuestions.new})}"></li>
+        </ol></nav>
 
         <h2 class="mb-4" th:text="${questionId} != null ? #{questionLibrary.editQuestionHeading(${category.name})} : #{questionLibrary.newQuestionHeading(${category.name})}">Question</h2>
 

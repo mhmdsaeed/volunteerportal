@@ -5,6 +5,11 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(#{grades.title})}"></li>
+        </ol></nav>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 th:text="#{grades.title}">Grades</h2>
             <a class="btn btn-primary" th:href="@{/admin/grades/new}" th:text="#{grades.new}">New Grade</a>

@@ -177,3 +177,8 @@ html.sidebar-collapsed .sidebar .nav-link .badge {
         box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.4);
     }
 }
+
+/* Breadcrumb trail at the top of admin pages: a little smaller than body text, so long trails stay on one line */
+.breadcrumb {
+    font-size: 0.875rem;
+}

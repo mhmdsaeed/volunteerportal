@@ -5,7 +5,13 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}">&laquo; <span th:text="#{initiativeQuestions.back}">Back to Questions</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{initiatives.title}, '/admin/initiatives')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(${initiative.name}, ${'/admin/initiatives/' + initiative.id + '/edit'})}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{common.questions}, ${'/admin/initiatives/' + initiative.id + '/questions'})}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(${questionId} != null ? #{initiativeQuestions.edit} : #{initiativeQuestions.new})}"></li>
+        </ol></nav>
 
         <h2 class="mb-4" th:text="${questionId} != null ? #{initiativeQuestions.editHeading(${initiative.name})} : #{initiativeQuestions.newHeading(${initiative.name})}">Question</h2>
 

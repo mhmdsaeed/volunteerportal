@@ -5,7 +5,12 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <p><a th:href="@{/admin/reports}">&laquo; <span th:text="#{reports.back}">Back to Reports</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{reports.title}, '/admin/reports')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(#{reports.attendance})}"></li>
+        </ol></nav>
+
         <h2 class="mb-4" th:text="#{reports.attendance}">Event Attendance</h2>
 
         <table class="table table-striped">

@@ -5,7 +5,12 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <p><a th:href="@{/admin/initiatives}">&laquo; <span th:text="#{initiatives.back}">Back to Initiatives</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{initiatives.title}, '/admin/initiatives')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(${initiative.name}, ${'/admin/initiatives/' + initiative.id + '/edit'})}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(#{adminInitiatives.events})}"></li>
+        </ol></nav>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 th:text="#{events.heading(${initiative.name})}">Events</h2>

@@ -5,6 +5,11 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(#{questionLibrary.title})}"></li>
+        </ol></nav>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 th:text="#{questionLibrary.title}">Question Library</h2>
             <a class="btn btn-primary" th:href="@{/admin/question-library/new}" th:text="#{questionLibrary.newCategory}">New Category</a>

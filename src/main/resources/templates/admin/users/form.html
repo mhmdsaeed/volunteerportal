@@ -5,7 +5,11 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container" style="max-width: 560px;">
-        <p><a th:href="@{/admin/users}">&laquo; <span th:text="#{users.back}">Back to Users</span></a></p>
+        <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
+            <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
+            <li th:replace="~{fragments/layout :: crumb(#{users.title}, '/admin/users')}"></li>
+            <li th:replace="~{fragments/layout :: crumbHere(${user.username})}"></li>
+        </ol></nav>
 
         <h2 class="mb-1" th:text="#{users.editHeading(${user.username})}">Roles</h2>
         <p class="text-muted" th:text="${user.email}" dir="ltr"></p>
