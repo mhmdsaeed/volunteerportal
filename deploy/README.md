@@ -65,7 +65,6 @@ Open `https://<your-domain>`. On the first start Flyway creates the database tab
 `deploy/backup.sh` writes a compressed database dump to `/var/backups/volunteerportal` and keeps 14 days. Schedule it nightly:
 
 ```bash
-chmod +x /opt/volunteerportal/deploy/backup.sh
 sudo mkdir -p /var/backups/volunteerportal && sudo chown ubuntu: /var/backups/volunteerportal
 crontab -e   # add:
 30 2 * * * /opt/volunteerportal/deploy/backup.sh >> /var/backups/volunteerportal/backup.log 2>&1

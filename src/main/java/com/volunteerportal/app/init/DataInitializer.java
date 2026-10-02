@@ -53,11 +53,14 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        boolean adminExists = userRepository.findByUsername(adminUsername)
-                .map(user -> user.getRoles().stream().anyMatch(role -> ADMIN_ROLE.equals(role.getName())))
-                .orElse(false);
-
-        if (adminExists) {
+        var existing = userRepository.findByUsername(adminUsername);
+        if (existing.isPresent()) {
+            // Never create the account again: usernames are unique, so that would fail on every
+            // start. An admin may have deliberately changed this account's roles in Manage Users.
+            boolean stillAdmin = existing.get().getRoles().stream().anyMatch(role -> ADMIN_ROLE.equals(role.getName()));
+            if (!stillAdmin) {
+                log.warn("Admin seeding skipped: user '{}' exists but no longer has the {} role.", adminUsername, ADMIN_ROLE);
+            }
             return;
         }
 
