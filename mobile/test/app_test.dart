@@ -174,6 +174,7 @@ void main() {
     await tester.tap(find.byKey(const Key('profileButton')));
     await tester.pumpAndSettle();
     expect(find.text('demo_volunteer'), findsOneWidget);
+    expect(find.text('Volunteer'), findsOneWidget); // the VOLUNTEER role, translated
     await tester.tap(find.byKey(const Key('logoutButton')));
     await tester.pumpAndSettle();
 

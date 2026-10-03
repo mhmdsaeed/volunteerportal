@@ -147,6 +147,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get roles => 'الأدوار';
 
   @override
+  String get roleAdmin => 'مسؤول';
+
+  @override
+  String get roleCoordinator => 'منسق';
+
+  @override
+  String get roleVolunteer => 'متطوع';
+
+  @override
   String get cameraUnavailable =>
       'الكاميرا غير متاحة. اسمح بالوصول إلى الكاميرا من إعدادات هاتفك.';
 }

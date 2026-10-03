@@ -44,5 +44,8 @@
   "points": "Points",
   "unranked": "Unranked",
   "roles": "Roles",
+  "roleAdmin": "Admin",
+  "roleCoordinator": "Coordinator",
+  "roleVolunteer": "Volunteer",
   "cameraUnavailable": "The camera isn't available. Allow camera access in your phone's settings."
 }

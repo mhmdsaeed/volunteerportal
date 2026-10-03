@@ -44,5 +44,8 @@
   "points": "النقاط",
   "unranked": "بدون درجة",
   "roles": "الأدوار",
+  "roleAdmin": "مسؤول",
+  "roleCoordinator": "منسق",
+  "roleVolunteer": "متطوع",
   "cameraUnavailable": "الكاميرا غير متاحة. اسمح بالوصول إلى الكاميرا من إعدادات هاتفك."
 }

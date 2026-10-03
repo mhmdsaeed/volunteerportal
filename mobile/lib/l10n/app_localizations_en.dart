@@ -147,6 +147,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roles => 'Roles';
 
   @override
+  String get roleAdmin => 'Admin';
+
+  @override
+  String get roleCoordinator => 'Coordinator';
+
+  @override
+  String get roleVolunteer => 'Volunteer';
+
+  @override
   String get cameraUnavailable =>
       'The camera isn\'t available. Allow camera access in your phone\'s settings.';
 }

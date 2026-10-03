@@ -33,7 +33,7 @@ class ProfileScreen extends StatelessWidget {
                 const Divider(height: 1),
                 ListTile(leading: const Icon(Icons.star), title: Text(t.points), trailing: _Value('${me.points}')),
                 const Divider(height: 1),
-                ListTile(leading: const Icon(Icons.badge), title: Text(t.roles), trailing: _Value(me.roles.join(', '))),
+                ListTile(leading: const Icon(Icons.badge), title: Text(t.roles), trailing: _Value(roleNames(t, me.roles))),
               ]),
             ),
             const SizedBox(height: 8),
@@ -76,6 +76,18 @@ class LanguageMenuButton extends StatelessWidget {
       ],
     );
   }
+}
+
+/// The server's role names (ADMIN, COORDINATOR, VOLUNTEER) in the app's language, as on the website.
+/// A role the app doesn't know yet is shown as the server sends it.
+String roleNames(AppLocalizations t, List<String> roles) {
+  final names = roles.map((role) => switch (role) {
+        'ADMIN' => t.roleAdmin,
+        'COORDINATOR' => t.roleCoordinator,
+        'VOLUNTEER' => t.roleVolunteer,
+        _ => role,
+      });
+  return names.join(t.localeName == 'ar' ? '، ' : ', ');
 }
 
 class _Value extends StatelessWidget {

@@ -362,6 +362,24 @@ abstract class AppLocalizations {
   /// **'Roles'**
   String get roles;
 
+  /// No description provided for @roleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get roleAdmin;
+
+  /// No description provided for @roleCoordinator.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinator'**
+  String get roleCoordinator;
+
+  /// No description provided for @roleVolunteer.
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteer'**
+  String get roleVolunteer;
+
   /// No description provided for @cameraUnavailable.
   ///
   /// In en, this message translates to:
