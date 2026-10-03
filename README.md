@@ -1,14 +1,21 @@
 # Volunteer Portal
 
-Spring Boot 4.1.1 / Java 21 / Thymeleaf / Bootstrap / MySQL volunteer management portal.
+Spring Boot 4.1.1 / Java 21 / Thymeleaf / Bootstrap / MySQL volunteer management portal, in English and Arabic, with a Flutter mobile app for volunteers.
+
+| Folder | What's in it |
+|---|---|
+| `src/` | The Spring Boot server: website and mobile JSON API |
+| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, QR check-in, history, notifications |
+| [`deploy/`](deploy/README.md) | Production setup: Docker Compose with MySQL and Caddy (HTTPS), backups |
 
 ## Stack
 
 - Spring Boot 4.1.1 (Spring Framework 7, Spring Security 7)
 - Java 21
-- Thymeleaf + Bootstrap 5 (via WebJars)
+- Thymeleaf + Bootstrap 5 and Bootstrap Icons (via WebJars); right-to-left Bootstrap for Arabic
 - MySQL 8, schema managed by Flyway
 - Spring Data JPA / Hibernate 7
+- ZXing core for the check-in QR codes (rendered as SVG)
 
 ## Prerequisites
 
@@ -39,6 +46,8 @@ The app reads connection settings from environment variables (see `src/main/reso
 | `ADMIN_USERNAME` | `admin` |
 | `ADMIN_DEFAULT_PASSWORD` | `admin123` |
 | `ADMIN_EMAIL` | `admin@volunteerportal.local` |
+| `CHECKIN_SECRET` | empty: a random secret is generated at startup (set it in any real deployment, the same on every instance) |
+| `SERVER_PORT` | `8080` |
 
 Set them to match whatever you used above (or just use the defaults).
 
@@ -49,10 +58,16 @@ Set them to match whatever you used above (or just use the defaults).
 ```
 
 On startup:
-1. Flyway applies `src/main/resources/db/migration/V1__init_schema.sql` (full schema), `V2__seed_roles.sql` (default roles: `ADMIN`, `COORDINATOR`, `VOLUNTEER`), and `V3__add_notifications.sql` (the `notification` table).
-2. `DataInitializer` seeds a default `admin` user with the `ADMIN` role (unless `SEED_ADMIN=false`) — **change its password immediately in any non-local environment.**
+1. Flyway applies the migrations in `src/main/resources/db/migration/`:
+   - `V1__init_schema.sql` — full schema
+   - `V2__seed_roles.sql` — default roles: `ADMIN`, `COORDINATOR`, `VOLUNTEER`
+   - `V3__add_notifications.sql` — the `notification` table
+   - `V4__notification_message_key.sql` — message key + arguments on notifications, so they're shown in the viewer's language
+   - `V5__backfill_notification_message_keys.sql` — fills in keys for notifications stored before V4
+   - `V6__api_tokens.sql` — the `api_token` table for the mobile app's bearer tokens
+2. `DataInitializer` seeds a default `admin` user with the `ADMIN` role (unless `SEED_ADMIN=false`) — **change its password immediately in any non-local environment.** If a user with that name already exists it's left alone (with a warning in the log if it no longer has the `ADMIN` role), so leaving `SEED_ADMIN=true` is safe.
 
-Visit `http://localhost:8080/register` to create a volunteer account (lands on `/home`, `/initiatives`, `/profile`), or log in as `admin`/`admin123` (default) to reach `/admin`.
+Visit `http://localhost:8080/register` to create a volunteer account (lands on `/home`, `/initiatives`, `/profile`), or log in as `admin`/`admin123` (default) to reach `/admin`. Add `?lang=ar` to any page (or use the switch at the bottom of the sidebar) for Arabic; the choice is remembered in a cookie.
 
 ## Testing QR check-in
 
@@ -112,7 +127,8 @@ Requires the database above to be reachable. The suite includes:
 - A context-load smoke test (`VolunteerPortalApplicationTests`)
 - Repository tests (`@DataJpaTest`, run against the real configured MySQL DB via `@AutoConfigureTestDatabase(replace = NONE)` — there's no embedded test DB since the schema/Flyway migrations are MySQL-specific; each test rolls back its own transaction)
 - Service unit tests (Mockito, no DB) covering registration, join-request approve/reject/find-managed-initiatives, the per-question-type answer logic in `VolunteerInitiativeServiceImpl.join()`/`withdraw()`, config key-uniqueness checks, notification creation/ownership-checked mark-read/mark-all-read, the report aggregation logic in `ReportServiceImpl` (participation counts by status, attendance counts by check-in/out, leaderboard sorting and its no-profile-yet case), the CSV rendering (header, per-status rows, comma/quote escaping) in `InitiativeExportServiceImpl`, and the copy semantics (name suffix, disabled by default, question cloning, question count) in `InitiativeDuplicateServiceImpl`
-- Web-layer tests (`@WebMvcTest`), covering **every controller in the app**:
+- More service unit tests: bearer tokens (`ApiTokenService`), check-in codes and rules including distance (`CheckInCodes`, `CheckInServiceImpl`), attendance only for approved members (`AttendServiceImpl`), and the Manage Users rules (`UserAdminServiceImpl`: at least one role, admins can't remove their own Admin role or deactivate themselves, the last active admin stays)
+- Web-layer tests (`@WebMvcTest`) for the admin, coordinator, auth and notification controllers:
   - `AuthController` — registration validation (duplicate username, password mismatch, happy path)
   - `CoordinatorController` — supervisor-scoped authorization (a coordinator can only manage initiatives they supervise; an admin can manage any) and the check that a join request being approved/rejected actually belongs to the initiative in the URL. Uses `SecurityMockMvcRequestPostProcessors.user(UserDetails)` to inject a real `UserPrincipal`, since `@WithMockUser`'s generic principal doesn't satisfy code that dereferences it
   - `NotificationController` — same real-`UserPrincipal` technique, asserting list/mark-read/mark-all-read are scoped to the current user's id
@@ -123,15 +139,30 @@ Requires the database above to be reachable. The suite includes:
   - `ReportsController` — each report view renders the rows returned by the (mocked) `ReportService`
   - `InitiativeExportController` — the CSV download's `Content-Type`, `Content-Disposition` filename, and body come from the (mocked) `InitiativeExportService`
   - `InitiativeDuplicateController` — redirects to the edit page of the newly created (mocked) copy
+  - `CoordinatorEventController` / `CoordinatorAttendController` — only the initiative's supervisor, its office coordinator or an admin gets in, and the event/record must belong to the initiative/event in the URL
 - A full-context `MockMvc` test asserting the `/admin/**` and `/coordinator/**` access-control rules from `SecurityConfig` (anonymous → redirect to login, wrong role → 403)
 - `LazyAssociationRenderingTest` (full context, real repositories, no test-level `@Transactional`) — regression tests for a `LazyInitializationException` bug where a view rendered a lazy `@ManyToOne` association's name/username after the request's Hibernate session had already closed (`open-in-view` is disabled). Unlike the `@WebMvcTest`s above, which mock the service layer, this persists real data with the association populated and hits the actual page, so it exercises Hibernate's real session lifecycle — covering the offices list, initiatives list, the volunteer-facing initiative detail page, the admin volunteers list, `/profile`, the coordinator's join-requests list, the attendance list, and the event attendance report
+- End-to-end flows against the real database (`regression/`, `api/`): join requests, QR check-in (and the dev-only test link), Manage Users (role changes, deactivation ending a live session and revoking mobile tokens), admin breadcrumb trails, and the mobile API (login, events, check-in, logout) including CORS and QR parsing
+- Translation tests (`i18n/`): English and Arabic bundles have the same keys, `?lang=` switching and its cookie, no missing keys on pages in either language, and notifications rendered in the viewer's language
+- Startup data: `DataInitializer` (including an existing `admin` without the `ADMIN` role) and `DemoDataInitializer` (creates the demo data once, only what's missing)
+
+The Flutter app has its own tests (`cd mobile && flutter test`), see [`mobile/README.md`](mobile/README.md).
+
+## Deployment
+
+[`deploy/README.md`](deploy/README.md) runs the portal on one server (for example Oracle Cloud's Always Free tier) with Docker Compose: MySQL 8.4, the app with the `prod` profile, and Caddy in front for HTTPS with a free Let's Encrypt certificate. Only Caddy's ports 80/443 are open. Secrets go in `deploy/.env` (git-ignored), and `deploy/backup.sh` makes nightly database backups. The image is built from the root `Dockerfile`, which skips the tests (they need a database), so run `./mvnw verify` before deploying.
+
+The `prod` profile (`application-prod.yml`) trusts Caddy's forwarded headers so redirects and QR links use the public `https://` address. It also sets a secure session cookie, caches templates, and turns off demo data, the QR test link and CORS.
 
 ## What's implemented
 
-- **Auth**: registration, login, logout, BCrypt password hashing, role-based access control (`users` / `roles` / `user_roles`), roles seeded as `ADMIN`, `COORDINATOR`, `VOLUNTEER`
+- **Auth**: registration, login, logout, BCrypt password hashing, role-based access control (`users` / `roles` / `user_roles`), roles seeded as `ADMIN`, `COORDINATOR`, `VOLUNTEER`. After logging in you return to the page you asked for (so a scanned check-in link survives the login). A deactivated user's website session ends on their next request (`DisabledAccountFilter`) and the login page says the account is deactivated
+- **English / Arabic**: all UI text, validation messages and notifications in both languages; Arabic pages render right-to-left. Language from `?lang=en|ar`, remembered in a `lang` cookie, anything else falls back to English
+- **Layout**: collapsible left sidebar (icon-only when collapsed, remembered in the browser; starts collapsed on narrow screens) with an unread-notification badge and a pending join request count; breadcrumb trails on every admin page and on the coordinator pages
 - **Admin** (`/admin/**`, `ADMIN` role):
+  - Manage Users (`/admin/users`) — every account with its roles and status; edit roles (Admin, Coordinator, Volunteer) and activate/deactivate accounts. Rules: at least one role, admins can't remove their own Admin role or deactivate themselves, and the last active admin can't lose the role or be deactivated. The user is notified when their roles change (the website applies it at their next login, the mobile API on the next request); deactivating also deletes their mobile app tokens
   - Offices CRUD (`/admin/offices`) — an office has many initiatives
-  - Initiatives CRUD (`/admin/initiatives`)
+  - Initiatives CRUD (`/admin/initiatives`) — the supervisor must be an active user with the `ADMIN` or `COORDINATOR` role (a current supervisor who no longer qualifies stays listed when editing, so saving doesn't silently remove them)
   - Initiative questions CRUD, nested per initiative (`/admin/initiatives/{id}/questions`) — true/false, single-choice, multi-choice, and free-text question types
   - Events CRUD, nested per initiative (`/admin/initiatives/{id}/events`)
   - Attendance (check-in/check-out) CRUD, nested per event (`/admin/initiatives/{id}/events/{eventId}/attendance`)
@@ -140,18 +171,25 @@ Requires the database above to be reachable. The suite includes:
   - Volunteer grade/points management (`/admin/volunteers`) — assign a grade and set points on any volunteer's profile, lazily creating the profile row if the volunteer hasn't visited `/profile` yet
   - Config CRUD (`/admin/config`) for the `configset` key/value table, with a duplicate-key check surfaced as a form error
   - Reports (`/admin/reports`) — read-only: initiative participation (approved/pending/rejected join-request counts per initiative), event attendance (check-in/check-out counts per event), and a volunteer leaderboard sorted by points
-  - Initiative volunteer export (`/admin/initiatives/{id}/export`) — downloads a CSV of every join request for an initiative (username, email, status, request/response dates, answer count)
+  - Initiative volunteer export (`/admin/initiatives/{id}/export`) — downloads a CSV of every join request for an initiative (username, email, status, request/response dates, answer count); values that a spreadsheet would read as a formula are prefixed with an apostrophe
   - Initiative duplication (`/admin/initiatives/{id}/duplicate`) — creates a disabled copy of an initiative (name suffixed "(Copy)") along with copies of all its questions, so a recurring initiative doesn't need to be rebuilt from scratch; join requests, events, and attendance are not carried over
-- **Coordinator** (`/coordinator/**`, `COORDINATOR` or `ADMIN` role):
-  - View initiatives you supervise and approve/reject volunteer join requests
+- **Coordinator** (`/coordinator/**`, `COORDINATOR` or `ADMIN` role). An initiative can be managed by its supervisor, its office's coordinator, or any admin:
+  - View the initiatives you manage and approve/reject volunteer join requests; `/coordinator/requests` lists every pending request you can decide (admins see all). A request can only be decided once
+  - Events (`/coordinator/initiatives/{id}/events`) — list, add and edit the initiative's events (deleting stays admin-only)
+  - Attendance (`.../events/{eventId}/attendance`) — record, edit and delete check-ins/check-outs; only approved members can be recorded (same rule as the admin pages)
+  - Check-in QR (`.../events/{eventId}/checkin`) — a full-screen QR for volunteers to scan, with live check-in/out counts. The code is an HMAC of the event and a 30-second window, accepted for 2 minutes (`app.checkin.*`)
 - **Volunteer-facing** (`/initiatives`, any authenticated user):
   - Browse enabled initiatives, view details, and submit a join request answering that initiative's questions
   - Withdraw your own join request while it's still pending (not yet reviewed by a coordinator)
+  - Approved members see the initiative's upcoming events
+- **QR self check-in** (`/checkin/{eventId}`): scanning the coordinator's QR checks you in, or out if you're already in. It needs a valid code, an enabled event, an approved membership and, for events with coordinates, a phone location within 300 m (`app.checkin.max-distance-meters`). See [Testing QR check-in](#testing-qr-check-in)
+- **Mobile app API** (`/api/**`): bearer-token JSON API for the Flutter app, see [Mobile app API](#mobile-app-api)
 - **Profile self-service** (`/profile`, any authenticated user):
   - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only since they're set by an admin
 - **In-app notifications** (`/notifications`, any authenticated user):
-  - Notified on join-request approval/rejection and when an admin updates your grade/points, with a link back to the relevant page; navbar shows an unread-count badge on every page
-- Full schema for the volunteer-management domain: `volunteer_profile`, `grade`, `office`, `initiative`, `initiative_question`, `question_lib` / `question_lib_cat`, `volunteer_initiative`, `volunteer_initiative_answer`, `event`, `attend`, `configset`, `notification`
+  - Volunteers are notified on join-request approval/rejection, when an admin updates their grade/points, and when their roles change; the initiative's supervisor, its office coordinator and all active admins are notified of new join requests (never about their own). Each has a link back to the relevant page, and the sidebar shows an unread-count badge on every page
+  - Shown in the viewer's language: notifications store a message key and arguments and are rendered when viewed
+- Full schema for the volunteer-management domain: `volunteer_profile`, `grade`, `office`, `initiative`, `initiative_question`, `question_lib` / `question_lib_cat`, `volunteer_initiative`, `volunteer_initiative_answer`, `event`, `attend`, `configset`, `notification`, `api_token`
 - JPA entities + Spring Data repositories for every table above
 
 ## What's not implemented yet
