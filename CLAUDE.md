@@ -1,0 +1,40 @@
+# CLAUDE.md
+
+Volunteer management portal: a Spring Boot 4.1.1 / Java 21 / Thymeleaf / MySQL website and JSON API (`src/`), a Flutter volunteer app (`mobile/`), and a Docker Compose + Caddy production setup (`deploy/`). `README.md` describes the features, the API and the run/test setup; keep it up to date when you add or change features.
+
+## Commands
+
+```bash
+./mvnw spring-boot:run                                    # needs MySQL (see README "Database setup")
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run         # + demo users/initiative/event (password demo12345)
+./mvnw clean verify                                       # full test suite
+./mvnw test -Dtest=CheckInServiceImplTest                 # one test class (or Class#method)
+
+cd mobile && flutter pub get && flutter test && flutter analyze
+```
+
+**Every test except the plain Mockito ones needs the MySQL database from `application.yml` to be running.** There's no embedded database: the migrations are MySQL-specific, and repository tests use `@AutoConfigureTestDatabase(replace = NONE)`.
+
+## Server layout (`com.volunteerportal.app`)
+
+- `controller/`: website MVC controllers. Admin pages are under `/admin/**` and coordinator pages under `/coordinator/**`, with access rules in `config/SecurityConfig`.
+- `service/`: an interface plus an `*Impl` for each service. Business rules belong here, with `@Transactional` on writes.
+- `model/`: JPA entities (Lombok `@Getter/@Setter/@NoArgsConstructor`). Associations are `LAZY`.
+- `repository/`: Spring Data repositories.
+- `dto/`: `*Form` classes are validated form-backing objects; `*Row` classes are report rows.
+- `api/`: the mobile JSON API under `/api/**`. It has its own stateless security chain (`config/ApiSecurityConfig`) with bearer tokens (`security/ApiTokenAuthenticationFilter`), and it never uses the website session.
+- `init/`: `DataInitializer` seeds the admin user. `DemoDataInitializer` runs only with the `dev` profile.
+- Spring profiles: `dev` (demo data, QR test link, CORS for `localhost`), `https` (self-signed cert on 8443 for phone testing), and `prod` (behind Caddy). Never enable `dev` or `https` in production.
+
+## Conventions and gotchas
+
+- **`open-in-view` is disabled.** A view that shows a lazy association (an office name, a username, …) needs it loaded in the service or repository. Use a `JOIN FETCH` query or `@EntityGraph`, as the existing repositories do. Otherwise rendering throws a `LazyInitializationException`; `regression/LazyAssociationRenderingTest` guards this.
+- **Schema changes go in a new Flyway migration** (`src/main/resources/db/migration/V<n>__name.sql`). Never edit an applied migration. `ddl-auto: validate` means entities must match the schema exactly.
+- **All user-visible text is translated.** Add every new key to both `messages.properties` and `messages_ar.properties`; `i18n/I18nMessagesTest` fails if their keys differ. Templates use `#{...}` keys. Validation errors and service refusals use message codes. Arabic pages render right-to-left, so use logical CSS properties (`start`/`end`, not `left`/`right`).
+- **Notifications** are created with `NotificationService.notify(user, messageKey, link, args...)`. They store a key and arguments and are rendered in the viewer's language.
+- **Coordinator access**: an initiative can be managed by an admin, its supervisor, or its office's coordinator. Check this with `CoordinatorAccess.assertCanManage` / `JoinRequestService.canManage`, and also check that nested ids in the URL belong together (the event to the initiative, the record to the event).
+- **Some templates are shared between admin and coordinator pages.** The event and attendance pages take their base URLs from the `eventsPath` / `attendancePath` model attributes.
+- **Layout fragments** live in `templates/fragments/layout.html`: `head(title)`, the `navbar` sidebar, `scripts`, and the breadcrumb fragments `crumb(label, url)`, `crumbText(label)` and `crumbHere(label)`. Every admin page starts with a breadcrumb trail.
+- **Tests**: add a `@WebMvcTest` for a new controller, a Mockito unit test for service rules, and a flow test under `regression/` against the real database when the behaviour spans layers (security, Hibernate sessions, real queries). For code that reads the logged-in user, inject a real `UserPrincipal` with `SecurityMockMvcRequestPostProcessors.user(...)`; `@WithMockUser` doesn't provide one.
+- **Line endings**: shell scripts, `mvnw`, `Dockerfile` and `deploy/Caddyfile` must keep LF (see `.gitattributes`).
+- **Deployment**: the `Dockerfile` skips tests, so run `./mvnw verify` before deploying. Secrets come from `deploy/.env`, which is git-ignored and must never be committed.
