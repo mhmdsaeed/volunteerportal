@@ -26,6 +26,17 @@ cd mobile && flutter pub get && flutter test && flutter analyze
 - `init/`: `DataInitializer` seeds the admin user. `DemoDataInitializer` runs only with the `dev` profile.
 - Spring profiles: `dev` (demo data, QR test link, CORS for `localhost`), `https` (self-signed cert on 8443 for phone testing), and `prod` (behind Caddy). Never enable `dev` or `https` in production.
 
+## Mobile app (`mobile/`, Flutter)
+
+`mobile/README.md` has the setup and a code map. Things that are easy to miss:
+
+- **It talks only to `/api/**`.** If you change a DTO in `api/ApiDtos.java`, update `lib/api/models.dart` and `test/fake_server.dart`; the tests run against that fake server, not the real API.
+- **Translations** go in both `lib/l10n/app_en.arb` and `app_ar.arb`. Then run `flutter gen-l10n`, and commit the generated `app_localizations*.dart` files too. Reuse the website's wording (`messages*.properties`) for shared terms such as role names (`roleNames` in `screens/profile_screen.dart`).
+- **Dates**: always format them with `formatDateTime` / `formatEventTime` in `screens/widgets.dart`. They keep Western digits in Arabic, as the website does; a bare `DateFormat` would show Arabic-Indic digits.
+- **Styling**: use `VpColors` and the theme in `lib/theme.dart`, never hard-coded colours. Its values mirror the website's `--vp-*` tokens, so change both together. Yellow (`VpColors.vest`) means current or yours, as on the website.
+- **Font**: Readex Pro is bundled as three static TTF weights (400/500/600) in `assets/fonts/`. Use one of those weights; Flutter doesn't reliably map weights onto variable fonts.
+- **Tests** (`test/app_test.dart`) find widgets by `Key` (`loginButton`, `scanTab`, `event-<id>`, …) and by visible text, so keep those keys when restyling.
+
 ## Conventions and gotchas
 
 - **`open-in-view` is disabled.** A view that shows a lazy association (an office name, a username, …) needs it loaded in the service or repository. Use a `JOIN FETCH` query or `@EntityGraph`, as the existing repositories do. Otherwise rendering throws a `LazyInitializationException`; `regression/LazyAssociationRenderingTest` guards this.
