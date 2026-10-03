@@ -1,6 +1,8 @@
 {
   "@@locale": "en",
   "appTitle": "Volunteer Portal",
+  "loginTagline": "Join initiatives, see your upcoming events, and check in with your phone when you arrive.",
+  "nextEvent": "Your next event",
   "serverUrl": "Server address",
   "serverUrlHint": "https://portal.example.org",
   "username": "Username",

@@ -13,6 +13,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appTitle => 'بوابة المتطوعين';
 
   @override
+  String get loginTagline =>
+      'انضم إلى المبادرات، وتابع فعالياتك القادمة، وسجّل حضورك بهاتفك عند وصولك.';
+
+  @override
+  String get nextEvent => 'فعاليتك القادمة';
+
+  @override
   String get serverUrl => 'عنوان الخادم';
 
   @override

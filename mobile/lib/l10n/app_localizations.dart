@@ -104,6 +104,18 @@ abstract class AppLocalizations {
   /// **'Volunteer Portal'**
   String get appTitle;
 
+  /// No description provided for @loginTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Join initiatives, see your upcoming events, and check in with your phone when you arrive.'**
+  String get loginTagline;
+
+  /// No description provided for @nextEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next event'**
+  String get nextEvent;
+
   /// No description provided for @serverUrl.
   ///
   /// In en, this message translates to:

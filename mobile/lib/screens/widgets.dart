@@ -3,15 +3,19 @@ import 'package:intl/intl.dart';
 
 import '../app_scope.dart';
 import '../l10n/app_localizations.dart';
+import '../theme.dart';
 
 /// Loads a list from the API and shows it, with loading, error (+ retry), empty and
 /// pull-to-refresh states. Calls go through [AppState.guard], so an expired token logs out.
 class AsyncList<T> extends StatefulWidget {
-  const AsyncList({super.key, required this.load, required this.itemBuilder, required this.emptyText});
+  const AsyncList({super.key, required this.load, required this.itemBuilder, required this.emptyText, this.firstItemBuilder});
 
   final Future<List<T>> Function() load;
   final Widget Function(BuildContext context, T item, VoidCallback reload) itemBuilder;
   final String emptyText;
+
+  /// Builds the first item differently (e.g. the next event as a pass), shown above the list.
+  final Widget Function(BuildContext context, T item, VoidCallback reload)? firstItemBuilder;
 
   @override
   State<AsyncList<T>> createState() => AsyncListState<T>();
@@ -53,13 +57,31 @@ class AsyncListState<T> extends State<AsyncList<T>> {
           },
           child: items.isEmpty
               ? ListView(children: [SizedBox(height: 360, child: MessageView(icon: Icons.inbox, text: widget.emptyText))])
-              : ListView.separated(
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, index) => widget.itemBuilder(context, items[index], reload),
-                ),
+              : _list(context, items),
         );
       },
+    );
+  }
+
+  /// The items as rows on a white sheet; with [AsyncList.firstItemBuilder], the first item sits above it.
+  Widget _list(BuildContext context, List<T> items) {
+    final first = widget.firstItemBuilder;
+    final rows = first == null ? items : items.skip(1).toList();
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(), // so pull-to-refresh works on short lists
+      children: [
+        if (first != null) Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 8), child: first(context, items.first, reload)),
+        if (rows.isNotEmpty)
+          Material(
+            color: VpColors.surface, // a Material, so tapped rows still show their ripple
+            child: Column(children: [
+              for (final (index, item) in rows.indexed) ...[
+                if (index > 0) const Divider(height: 1),
+                widget.itemBuilder(context, item, reload),
+              ],
+            ]),
+          ),
+      ],
     );
   }
 }
@@ -98,4 +120,16 @@ String formatDateTime(BuildContext context, DateTime? value) {
   }
   final locale = Localizations.localeOf(context).languageCode;
   return DateFormat.yMMMd(locale).add_jm().format(value);
+}
+
+/// An event's time for the next-event pass, e.g. "Sunday, October 4 08:00–22:00" (the end shows only its
+/// time when it is the same day).
+String formatEventTime(BuildContext context, DateTime from, DateTime? to) {
+  final locale = Localizations.localeOf(context).languageCode;
+  final start = DateFormat.MMMMEEEEd(locale).add_Hm().format(from);
+  if (to == null) {
+    return start;
+  }
+  final sameDay = DateUtils.isSameDay(from, to);
+  return '$start–${sameDay ? DateFormat.Hm(locale).format(to) : DateFormat.MMMMEEEEd(locale).add_Hm().format(to)}';
 }

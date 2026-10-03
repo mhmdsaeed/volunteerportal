@@ -13,6 +13,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Volunteer Portal';
 
   @override
+  String get loginTagline =>
+      'Join initiatives, see your upcoming events, and check in with your phone when you arrive.';
+
+  @override
+  String get nextEvent => 'Your next event';
+
+  @override
   String get serverUrl => 'Server address';
 
   @override

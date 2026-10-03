@@ -1,6 +1,8 @@
 {
   "@@locale": "ar",
   "appTitle": "بوابة المتطوعين",
+  "loginTagline": "انضم إلى المبادرات، وتابع فعالياتك القادمة، وسجّل حضورك بهاتفك عند وصولك.",
+  "nextEvent": "فعاليتك القادمة",
   "serverUrl": "عنوان الخادم",
   "serverUrlHint": "https://portal.example.org",
   "username": "اسم المستخدم",

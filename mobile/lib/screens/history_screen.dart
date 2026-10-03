@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api/models.dart';
 import '../app_scope.dart';
 import '../l10n/app_localizations.dart';
+import '../theme.dart';
 import 'widgets.dart';
 
 /// My check-ins and check-outs, newest first.
@@ -17,7 +18,7 @@ class HistoryScreen extends StatelessWidget {
       load: () => AppScope.read(context).api.attendance(),
       emptyText: t.noHistory,
       itemBuilder: (context, item, _) => ListTile(
-        leading: Icon(item.isCheckOut ? Icons.logout : Icons.login, color: item.isCheckOut ? null : Colors.green),
+        leading: Icon(item.isCheckOut ? Icons.logout : Icons.login, color: item.isCheckOut ? null : VpColors.leaf),
         title: Text(item.event),
         subtitle: Text([if (item.initiative != null) item.initiative!, formatDateTime(context, item.time)].join('\n')),
         isThreeLine: item.initiative != null,

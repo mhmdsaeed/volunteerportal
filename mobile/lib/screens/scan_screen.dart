@@ -5,6 +5,7 @@ import '../api/models.dart';
 import '../app_scope.dart';
 import '../check_in_flow.dart';
 import '../l10n/app_localizations.dart';
+import '../theme.dart';
 
 /// Builds the camera view; calls [onCode] with the text of each QR code it sees.
 typedef ScannerBuilder = Widget Function(BuildContext context, void Function(String code) onCode);
@@ -129,7 +130,7 @@ class _ResultView extends StatelessWidget {
               success ? (checkedOut ? Icons.logout : Icons.check_circle) : Icons.error_outline,
               key: Key(success ? 'scanSuccess' : 'scanProblem'),
               size: 88,
-              color: success ? Colors.green : Theme.of(context).colorScheme.error,
+              color: success ? VpColors.leaf : Theme.of(context).colorScheme.error,
             ),
             if (title != null) ...[
               const SizedBox(height: 16),

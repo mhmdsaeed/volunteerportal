@@ -66,6 +66,16 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Readex Pro, the website's font too (Latin + Arabic, SIL Open Font License: assets/fonts/OFL.txt)
+  fonts:
+    - family: ReadexPro
+      fonts:
+        - asset: assets/fonts/ReadexPro-Regular.ttf
+        - asset: assets/fonts/ReadexPro-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ReadexPro-SemiBold.ttf
+          weight: 600
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

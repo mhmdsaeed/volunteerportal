@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
 import '../l10n/app_localizations.dart';
+import '../theme.dart';
 import 'profile_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -61,7 +62,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final error = _error ?? (state.sessionExpired ? t.sessionExpired : null);
 
     return Scaffold(
-      appBar: AppBar(actions: const [LanguageMenuButton()]),
+      // A plain bar here, so the navy header below stands alone
+      appBar: AppBar(
+        backgroundColor: VpColors.paper,
+        foregroundColor: VpColors.ink,
+        actions: const [LanguageMenuButton()],
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -73,10 +79,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.volunteer_activism, size: 64, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(height: 12),
-                    Text(t.appTitle, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
-                    const SizedBox(height: 32),
+                    const _LoginHeader(),
+                    const SizedBox(height: 28),
                     TextFormField(
                       key: const Key('server'),
                       controller: _server,
@@ -129,6 +133,40 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The portal's name on navy under the yellow lanyard band, like the website's sign-in page.
+class _LoginHeader extends StatelessWidget {
+  const _LoginHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: ColoredBox(
+        color: VpColors.ink,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const LanyardStrip(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(t.appTitle, style: text.headlineMedium?.copyWith(color: Colors.white)),
+                  const SizedBox(height: 8),
+                  Text(t.loginTagline, style: text.bodyMedium?.copyWith(color: Colors.white.withValues(alpha: 0.85), height: 1.5)),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -25,9 +25,18 @@ class ProfileScreen extends StatelessWidget {
                   ? null
                   : Text(me.email!, textDirection: TextDirection.ltr, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-            ListTile(leading: const Icon(Icons.military_tech), title: Text(t.grade), trailing: Text(me.grade ?? t.unranked)),
-            ListTile(leading: const Icon(Icons.star), title: Text(t.points), trailing: Text('${me.points}')),
-            ListTile(leading: const Icon(Icons.badge), title: Text(t.roles), trailing: Text(me.roles.join(', '))),
+            const SizedBox(height: 8),
+            // My standing on a white card, like "Your grade and points" on the website's home page
+            Card(
+              child: Column(children: [
+                ListTile(leading: const Icon(Icons.military_tech), title: Text(t.grade), trailing: _Value(me.grade ?? t.unranked)),
+                const Divider(height: 1),
+                ListTile(leading: const Icon(Icons.star), title: Text(t.points), trailing: _Value('${me.points}')),
+                const Divider(height: 1),
+                ListTile(leading: const Icon(Icons.badge), title: Text(t.roles), trailing: _Value(me.roles.join(', '))),
+              ]),
+            ),
+            const SizedBox(height: 8),
           ],
           ListTile(leading: const Icon(Icons.dns), title: Text(t.serverUrl), subtitle: Text(state.serverUrl ?? '', textDirection: TextDirection.ltr)),
           const SizedBox(height: 24),
@@ -67,4 +76,14 @@ class LanguageMenuButton extends StatelessWidget {
       ],
     );
   }
+}
+
+class _Value extends StatelessWidget {
+  const _Value(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(text, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600));
 }

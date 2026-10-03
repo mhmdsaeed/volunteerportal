@@ -8,6 +8,7 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/scan_screen.dart';
 import 'services/session_store.dart';
+import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,7 @@ class VolunteerApp extends StatelessWidget {
         builder: (context, _) => MaterialApp(
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(colorSchemeSeed: const Color(0xFF0D6EFD), useMaterial3: true),
+          theme: buildVpTheme(),
           locale: Locale(state.language),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [

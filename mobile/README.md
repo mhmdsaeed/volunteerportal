@@ -3,10 +3,11 @@
 Flutter app (Android and iPhone) for volunteers, talking to the Spring Boot server's mobile API (`/api/**`, see "Mobile app API" in the main `README.md`).
 
 - **Log in** with the server address and your Volunteer Portal username/password. The token is kept in the phone's secure storage (Keychain / Android Keystore); **Log out** revokes it on the server.
-- **Events** — upcoming events of initiatives you're an approved member of, with your check-in status.
+- **Events** — upcoming events of initiatives you're an approved member of, with your check-in status. The next one is shown as a pass, as on the website's home page.
 - **Check in** — scan the event's QR code (the one the coordinator shows under Coordinator → Events → Check-in QR). Scanning again checks you out. Location is only asked for at events that check it.
 - **History** — your check-ins and check-outs. **Notifications** — in your language; tap to mark read.
 - **English / Arabic** from the translate button; Arabic switches the whole layout to right-to-left, and server messages come back in Arabic too (`Accept-Language`).
+- **Same look as the website**: navy bars, a cool light-grey background, and safety yellow for what is current or yours (the selected tab, the next event, being checked in). The Readex Pro font is bundled in `assets/fonts/`. Colours live in `lib/theme.dart` (`VpColors`); use them instead of hard-coded colours.
 
 ## Setup (Windows, everything on drive E:)
 
