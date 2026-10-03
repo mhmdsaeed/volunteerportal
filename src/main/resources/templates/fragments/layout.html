@@ -7,6 +7,8 @@
     <title th:text="#{app.title(${title})}">Volunteer Portal</title>
     <link rel="stylesheet" th:href="#{app.dir} == 'rtl' ? @{/webjars/bootstrap/css/bootstrap.rtl.min.css} : @{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
+    <link rel="preload" th:href="#{app.dir} == 'rtl' ? @{/fonts/readex-pro-arabic.woff2} : @{/fonts/readex-pro-latin.woff2}"
+          as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
         // Apply the saved sidebar state before first paint to avoid a flash of the wrong width
@@ -24,7 +26,7 @@
     </script>
 </head>
 <body>
-    <nav th:fragment="navbar" class="sidebar bg-dark" data-bs-theme="dark" th:aria-label="#{nav.menu}">
+    <nav th:fragment="navbar" class="sidebar" data-bs-theme="dark" th:aria-label="#{nav.menu}">
         <div class="sidebar-header">
             <a class="sidebar-brand" th:href="@{/}" th:text="#{app.name}">Volunteer Portal</a>
             <button type="button" class="btn btn-sm btn-outline-light sidebar-toggle" id="sidebarToggle"

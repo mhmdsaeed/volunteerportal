@@ -34,7 +34,7 @@ public class SecurityConfig {
                 http.addFilterBefore(new DisabledAccountFilter(repository), AuthorizationFilter.class));
         http
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/register", "/login", "/css/**", "/webjars/**", "/error").permitAll()
+                .requestMatchers("/", "/register", "/login", "/css/**", "/fonts/**", "/webjars/**", "/error").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/coordinator/**").hasAnyRole("COORDINATOR", "ADMIN")
                 .anyRequest().authenticated()

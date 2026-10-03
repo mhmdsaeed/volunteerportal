@@ -4,38 +4,47 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 480px;">
-        <h2 class="mb-4" th:text="#{register.title}">Register</h2>
+    <main class="container">
+        <div class="vp-auth">
+            <div class="vp-auth-form">
+                <h2 class="mb-4" th:text="#{register.title}">Register</h2>
 
-        <form th:action="@{/register}" th:object="${registrationForm}" method="post">
-            <div class="mb-3">
-                <label for="username" class="form-label" th:text="#{common.username}">Username</label>
-                <input type="text" class="form-control" id="username" th:field="*{username}">
-                <div class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label" th:text="#{common.email}">Email</label>
-                <input type="email" class="form-control" id="email" th:field="*{email}" dir="ltr">
-                <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label" th:text="#{common.password}">Password</label>
-                <input type="password" class="form-control" id="password" th:field="*{password}">
-                <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-            </div>
-            <div class="mb-3">
-                <label for="confirmPassword" class="form-label" th:text="#{register.confirmPassword}">Confirm Password</label>
-                <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}">
-                <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
-            </div>
-            <button type="submit" class="btn btn-primary w-100" th:text="#{register.submit}">Register</button>
-        </form>
+                <form th:action="@{/register}" th:object="${registrationForm}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label" th:text="#{common.username}">Username</label>
+                        <input type="text" class="form-control" id="username" th:field="*{username}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label" th:text="#{common.email}">Email</label>
+                        <input type="email" class="form-control" id="email" th:field="*{email}" dir="ltr">
+                        <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label" th:text="#{common.password}">Password</label>
+                        <input type="password" class="form-control" id="password" th:field="*{password}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label" th:text="#{register.confirmPassword}">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}">
+                        <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" th:text="#{register.submit}">Register</button>
+                </form>
 
-        <p class="mt-3">
-            <span th:text="#{register.haveAccount}">Already have an account?</span>
-            <a th:href="@{/login}" th:text="#{register.loginLink}">Login here</a>
-        </p>
-    </div>
+                <p class="mt-3">
+                    <span th:text="#{register.haveAccount}">Already have an account?</span>
+                    <a th:href="@{/login}" th:text="#{register.loginLink}">Login here</a>
+                </p>
+            </div>
+
+            <div class="vp-auth-intro vp-lanyard">
+                <p class="vp-auth-name" th:text="#{app.name}">Volunteer Portal</p>
+                <p th:text="#{auth.tagline}">Join initiatives, see your upcoming events, and check in with your phone when you arrive.</p>
+            </div>
+        </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

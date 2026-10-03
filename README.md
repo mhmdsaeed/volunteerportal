@@ -13,6 +13,7 @@ Spring Boot 4.1.1 / Java 21 / Thymeleaf / Bootstrap / MySQL volunteer management
 - Spring Boot 4.1.1 (Spring Framework 7, Spring Security 7)
 - Java 21
 - Thymeleaf + Bootstrap 5 and Bootstrap Icons (via WebJars); right-to-left Bootstrap for Arabic
+- Readex Pro font (Latin and Arabic, SIL Open Font License), self-hosted in `static/fonts/`
 - MySQL 8, schema managed by Flyway
 - Spring Data JPA / Hibernate 7
 - ZXing core for the check-in QR codes (rendered as SVG)
@@ -158,7 +159,8 @@ The `prod` profile (`application-prod.yml`) trusts Caddy's forwarded headers so 
 
 - **Auth**: registration, login, logout, BCrypt password hashing, role-based access control (`users` / `roles` / `user_roles`), roles seeded as `ADMIN`, `COORDINATOR`, `VOLUNTEER`. After logging in you return to the page you asked for (so a scanned check-in link survives the login). A deactivated user's website session ends on their next request (`DisabledAccountFilter`) and the login page says the account is deactivated
 - **English / Arabic**: all UI text, validation messages and notifications in both languages; Arabic pages render right-to-left. Language from `?lang=en|ar`, remembered in a `lang` cookie, anything else falls back to English
-- **Layout**: collapsible left sidebar (icon-only when collapsed, remembered in the browser; starts collapsed on narrow screens) with an unread-notification badge and a pending join request count; breadcrumb trails on every admin page and on the coordinator pages
+- **Layout**: collapsible left sidebar (icon-only when collapsed, remembered in the browser; starts collapsed on narrow screens) with an unread-notification badge and a pending join request count; breadcrumb trails on every admin page and on the coordinator pages. Look and feel: navy, cool light grey and safety yellow, with yellow kept for what is current or yours (the current page, your next event, being checked in, counts, keyboard focus). The colours are `--vp-*` tokens in `static/css/app.css`, which also drive Bootstrap's variables. On phones, wide tables scroll sideways inside their frame
+- **Home** (`/home`): your next event shown as a pass (date and time, map link, check-in status), later events, your join requests with their status, your grade and points, and unread notifications. Coordinators and admins also see how many join requests are waiting for them. With no upcoming events, it points to the initiatives list. The sign-in and register pages show the form beside a short description of the portal
 - **Admin** (`/admin/**`, `ADMIN` role):
   - Manage Users (`/admin/users`) — every account with its roles and status; edit roles (Admin, Coordinator, Volunteer) and activate/deactivate accounts. Rules: at least one role, admins can't remove their own Admin role or deactivate themselves, and the last active admin can't lose the role or be deactivated. The user is notified when their roles change (the website applies it at their next login, the mobile API on the next request); deactivating also deletes their mobile app tokens
   - Offices CRUD (`/admin/offices`) — an office has many initiatives
