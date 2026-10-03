@@ -119,17 +119,21 @@ String formatDateTime(BuildContext context, DateTime? value) {
     return '';
   }
   final locale = Localizations.localeOf(context).languageCode;
-  return DateFormat.yMMMd(locale).add_jm().format(value);
+  return _westernDigits(DateFormat.yMMMd(locale).add_jm()).format(value);
 }
 
 /// An event's time for the next-event pass, e.g. "Sunday, October 4 08:00–22:00" (the end shows only its
 /// time when it is the same day).
 String formatEventTime(BuildContext context, DateTime from, DateTime? to) {
   final locale = Localizations.localeOf(context).languageCode;
-  final start = DateFormat.MMMMEEEEd(locale).add_Hm().format(from);
+  final dayAndTime = _westernDigits(DateFormat.MMMMEEEEd(locale).add_Hm());
+  final start = dayAndTime.format(from);
   if (to == null) {
     return start;
   }
   final sameDay = DateUtils.isSameDay(from, to);
-  return '$start–${sameDay ? DateFormat.Hm(locale).format(to) : DateFormat.MMMMEEEEd(locale).add_Hm().format(to)}';
+  return '$start–${sameDay ? _westernDigits(DateFormat.Hm(locale)).format(to) : dayAndTime.format(to)}';
 }
+
+/// Arabic dates keep Western digits (23, 08:00), like the website, instead of Arabic-Indic (٢٣).
+DateFormat _westernDigits(DateFormat format) => format..useNativeDigits = false;

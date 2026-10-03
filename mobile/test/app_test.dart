@@ -155,10 +155,15 @@ void main() {
 
     expect(find.text('الفعاليات'), findsWidgets);
     expect(Directionality.of(tester.element(find.text('Demo Event'))), TextDirection.rtl);
+    // Arabic month and weekday names, but Western digits like the website
+    expect(find.textContaining('23 سبتمبر'), findsOneWidget);
+    expect(find.textContaining('08:00'), findsOneWidget);
+    expect(find.textContaining('٢٣'), findsNothing);
 
     await tester.tap(find.text('الإشعارات'));
     await tester.pumpAndSettle();
     expect(find.text('تم قبول طلب انضمامك'), findsOneWidget);
+    expect(find.textContaining('2026'), findsOneWidget); // the notification's date, Western digits too
     expect(server.requests.last.headers['Accept-Language'], 'ar');
   });
 
