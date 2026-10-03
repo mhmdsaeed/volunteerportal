@@ -6,7 +6,8 @@ Flutter app (Android and iPhone) for volunteers, talking to the Spring Boot serv
 - **Events** — upcoming events of initiatives you're an approved member of, with your check-in status. The next one is shown as a pass, as on the website's home page.
 - **Check in** — scan the event's QR code (the one the coordinator shows under Coordinator → Events → Check-in QR). Scanning again checks you out. Location is only asked for at events that check it.
 - **History** — your check-ins and check-outs. **Notifications** — in your language; tap to mark read.
-- **English / Arabic** from the translate button; Arabic switches the whole layout to right-to-left, and server messages come back in Arabic too (`Accept-Language`).
+- **Profile** (the account button at the top) — your username and email, your grade, points and roles, and the server address; **Log out** is here too.
+- **English / Arabic** from the translate button; Arabic switches the whole layout to right-to-left, and server messages come back in Arabic too (`Accept-Language`). Role names are translated with the website's wording (Admin / Coordinator / Volunteer, مسؤول / منسق / متطوع). Dates show Arabic month and day names with Western digits, as on the website (e.g. `الأربعاء، 23 سبتمبر 08:00–22:00`).
 - **Same look as the website**: navy bars, a cool light-grey background, and safety yellow for what is current or yours (the selected tab, the next event, being checked in). The Readex Pro font is bundled in `assets/fonts/`. Colours live in `lib/theme.dart` (`VpColors`); use them instead of hard-coded colours.
 
 ## Setup (Windows, everything on drive E:)
@@ -16,7 +17,7 @@ The SDK lives in `E:\IDEs\flutter` (Flutter 3.47.5, Dart 3.13.4) with `E:\IDEs\f
 ```bash
 cd mobile
 flutter pub get
-flutter test          # unit + widget tests, no phone needed (a fake server stands in for the API)
+flutter test          # unit + widget tests (login, events, check-in, history, Arabic, profile), no phone needed: a fake server stands in for the API
 flutter analyze
 ```
 
@@ -39,6 +40,8 @@ Log in with server `http://localhost:8080`, user `demo_volunteer`, password `dem
 | `lib/api/` | `ApiClient` (bearer token, language, JSON errors → `ApiException`/`UnauthorizedException`) and the JSON models |
 | `lib/check_in_flow.dart` | Scan → check in; asks for location only when the server answers `LOCATION_REQUIRED` |
 | `lib/app_state.dart` | Server, session, language; `guard()` logs out when the token is rejected |
-| `lib/screens/` | Login, home tabs (events, scan, history, notifications), profile |
+| `lib/screens/` | Login, home tabs (events, scan, history, notifications), profile; `widgets.dart` has the shared list and the date helpers (`formatDateTime`, `formatEventTime`) |
+| `lib/theme.dart` | The website's colours (`VpColors`), the app theme, and the shared `StatusPill` and `LanyardStrip` widgets |
+| `assets/fonts/` | Readex Pro (Regular, Medium, SemiBold; Latin and Arabic) and its licence, `OFL.txt` |
 | `lib/l10n/app_en.arb`, `app_ar.arb` | Translations (`flutter gen-l10n` generates `app_localizations*.dart`) |
 | `test/fake_server.dart` | In-memory stand-in for the API used by the tests |
