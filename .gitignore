@@ -37,3 +37,6 @@ dev-certs/
 
 ### Server settings with secrets (copy deploy/.env.example) ###
 deploy/.env
+
+### Claude Code local settings ###
+.claude/
