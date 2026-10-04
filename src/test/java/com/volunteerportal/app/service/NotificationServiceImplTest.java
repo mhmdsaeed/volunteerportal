@@ -163,4 +163,56 @@ class NotificationServiceImplTest {
         assertThat(unread1.isRead()).isTrue();
         assertThat(unread2.isRead()).isTrue();
     }
+
+    private static Notification withKey(String key, String... args) {
+        Notification notification = new Notification();
+        notification.setMessageKey(key);
+        notification.setMessageArgs(new java.util.ArrayList<>(List.of(args)));
+        notification.setMessage("stored English text");
+        return notification;
+    }
+
+    @Test
+    void text_translatesRoleCodesInRoleChangeNotifications() {
+        Notification rolesChanged = withKey("notification.rolesChanged", "ADMIN, COORDINATOR, VOLUNTEER");
+
+        assertThat(notificationService.text(rolesChanged, Locale.ENGLISH))
+                .isEqualTo("Your roles were changed to: Admin, Coordinator, Volunteer.");
+        assertThat(notificationService.text(rolesChanged, Locale.forLanguageTag("ar")))
+                .isEqualTo("تم تغيير أدوارك إلى: مسؤول، منسق، متطوع.");
+    }
+
+    @Test
+    void text_keepsARoleCodeItDoesNotKnow() {
+        Notification rolesChanged = withKey("notification.rolesChanged", "AUDITOR, VOLUNTEER");
+
+        assertThat(notificationService.text(rolesChanged, Locale.ENGLISH))
+                .isEqualTo("Your roles were changed to: AUDITOR, Volunteer.");
+    }
+
+    @Test
+    void text_leavesOtherNotificationsArgumentsAlone() {
+        // An initiative called "ADMIN" is a name, not a role code
+        Notification approved = withKey("notification.joinApproved", "ADMIN");
+
+        assertThat(notificationService.text(approved, Locale.ENGLISH)).isEqualTo("Your request to join 'ADMIN' was approved.");
+    }
+
+    @Test
+    void text_ofAnOlderNotificationWithoutKey_isItsStoredText() {
+        Notification legacy = new Notification();
+        legacy.setMessage("Legacy English text from before V4.");
+
+        assertThat(notificationService.text(legacy, Locale.forLanguageTag("ar"))).isEqualTo("Legacy English text from before V4.");
+    }
+
+    @Test
+    void notify_storesRoleCodesButAnEnglishCopyWithRoleNames() {
+        given(notificationRepository.save(any(Notification.class))).willAnswer(inv -> inv.getArgument(0));
+
+        Notification result = notificationService.notify(new User(), "notification.rolesChanged", "/home", "ADMIN, VOLUNTEER");
+
+        assertThat(result.getMessageArgs()).containsExactly("ADMIN, VOLUNTEER");
+        assertThat(result.getMessage()).isEqualTo("Your roles were changed to: Admin, Volunteer.");
+    }
 }

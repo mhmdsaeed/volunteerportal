@@ -107,6 +107,24 @@ class NotificationTranslationTest {
     }
 
     @Test
+    void roleChangeNotification_showsRoleNamesInTheViewersLanguage() throws Exception {
+        // Stored as role codes, as UserAdminServiceImpl sends them (also how older rows look)
+        notificationService.notify(volunteer, "notification.rolesChanged", "/home", "ADMIN, VOLUNTEER");
+
+        Notification stored = notificationRepository.findByUserIdOrderByCreatedDttmDesc(volunteer.getId()).get(0);
+        assertThat(stored.getMessageArgs()).containsExactly("ADMIN, VOLUNTEER");
+        assertThat(stored.getMessage()).isEqualTo("Your roles were changed to: Admin, Volunteer.");
+
+        mockMvc.perform(get("/notifications").param("lang", "ar").with(user(principal())))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("تم تغيير أدوارك إلى: مسؤول، متطوع.")))
+                .andExpect(content().string(not(containsString("ADMIN"))));
+
+        mockMvc.perform(get("/notifications").param("lang", "en").with(user(principal())))
+                .andExpect(content().string(containsString("Your roles were changed to: Admin, Volunteer.")));
+    }
+
+    @Test
     void olderNotificationWithoutKey_showsItsStoredText() throws Exception {
         legacy("Legacy English text from before V4.");
 

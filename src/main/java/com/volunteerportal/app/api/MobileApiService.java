@@ -22,7 +22,6 @@ import com.volunteerportal.app.api.ApiDtos.InitiativeItem;
 import com.volunteerportal.app.api.ApiDtos.Me;
 import com.volunteerportal.app.api.ApiDtos.NotificationItem;
 import com.volunteerportal.app.model.Event;
-import com.volunteerportal.app.model.Notification;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
@@ -121,7 +120,7 @@ public class MobileApiService {
     @Transactional(readOnly = true)
     public List<NotificationItem> notifications(Long userId, Locale locale) {
         return notificationService.findForUser(userId).stream()
-                .map(n -> new NotificationItem(n.getId(), text(n, locale), n.getLink(), n.isRead(), n.getCreatedDttm()))
+                .map(n -> new NotificationItem(n.getId(), notificationService.text(n, locale), n.getLink(), n.isRead(), n.getCreatedDttm()))
                 .toList();
     }
 
@@ -144,14 +143,6 @@ public class MobileApiService {
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
-    }
-
-    private String text(Notification notification, Locale locale) {
-        if (notification.getMessageKey() == null) {
-            return notification.getMessage(); // older notifications only have their stored text
-        }
-        return messageSource.getMessage(notification.getMessageKey(), notification.getMessageArgs().toArray(),
-                notification.getMessage(), locale);
     }
 
     private static String membershipStatus(VolunteerInitiative membership) {
