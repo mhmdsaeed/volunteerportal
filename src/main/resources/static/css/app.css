@@ -364,6 +364,12 @@ a {
     --bs-list-group-active-border-color: var(--vp-ink);
 }
 
+/* An unread notification: a navy bar on its start edge only (right in Arabic) and a faint tint */
+.list-group-item.vp-unread {
+    border-inline-start: 4px solid var(--vp-ink);
+    background-color: var(--vp-paper);
+}
+
 /* Breadcrumb trail: a little smaller than body text, so long trails stay on one line */
 .breadcrumb {
     font-size: 0.875rem;
