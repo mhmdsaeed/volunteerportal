@@ -156,6 +156,51 @@ class CheckInServiceImplTest {
     }
 
     @Test
+    void checkInAfterTheEventEnded_isRefused() {
+        event.setFromDttm(NOW.minusHours(3));
+        event.setToDttm(NOW); // ended exactly now
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.EVENT_ENDED);
+        verify(attendService, never()).create(anyLong(), any());
+        assertThat(service.messageTime(Result.EVENT_ENDED, event)).isEqualTo(NOW);
+    }
+
+    @Test
+    void checkInJustBeforeTheEnd_isAllowed() {
+        event.setFromDttm(NOW.minusHours(3));
+        event.setToDttm(NOW.plusMinutes(1));
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.CHECKED_IN);
+    }
+
+    @Test
+    void checkingOutAfterTheEventEnded_isStillPossible() {
+        // Forgot to check out on the way home
+        event.setFromDttm(NOW.minusHours(5));
+        event.setToDttm(NOW.minusHours(1));
+        given(attendRepository.findByEventIdAndVolunteerInitiativeId(9L, 3L)).willReturn(List.of(attend(1)));
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.CHECKED_OUT);
+    }
+
+    @Test
+    void eventWithoutAnEndTime_staysOpen() {
+        event.setFromDttm(NOW.minusDays(2));
+        event.setToDttm(null);
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.CHECKED_IN);
+        assertThat(service.checkInClosesAt(event)).isNull();
+    }
+
+    @Test
+    void messageTime_isTheOpeningTimeForTooEarly_andNothingForOtherResults() {
+        event.setFromDttm(NOW.plusHours(3));
+
+        assertThat(service.messageTime(Result.TOO_EARLY, event)).isEqualTo(NOW.plusHours(2));
+        assertThat(service.messageTime(Result.CHECKED_IN, event)).isNull();
+    }
+
+    @Test
     void tooEarly_isSaidBeforeAskingForTheLocation() {
         event.setFromDttm(NOW.plusHours(3));
         withCoordinates();

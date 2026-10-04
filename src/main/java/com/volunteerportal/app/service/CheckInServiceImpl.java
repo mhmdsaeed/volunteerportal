@@ -93,6 +93,11 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Override
+    public LocalDateTime checkInClosesAt(Event event) {
+        return event.getToDttm();
+    }
+
+    @Override
     @Transactional
     public Result checkIn(Long eventId, Long userId, String code, Double latitude, Double longitude) {
         Event event = findEvent(eventId);
@@ -110,11 +115,16 @@ public class CheckInServiceImpl implements CheckInService {
         if (action == Action.DONE) {
             return Result.ALREADY_DONE;
         }
-        // Only a check-in can be too early; checking out needs a check-in first
+        // Only a check-in is limited to the event's time: checking out needs a check-in first, and a volunteer
+        // who forgot can still check out after the event ends
         LocalDateTime opensAt = checkInOpensAt(event);
+        LocalDateTime closesAt = checkInClosesAt(event);
         LocalDateTime now = LocalDateTime.now(clock);
         if (action == Action.CHECK_IN && opensAt != null && now.isBefore(opensAt)) {
             return Result.TOO_EARLY;
+        }
+        if (action == Action.CHECK_IN && closesAt != null && !now.isBefore(closesAt)) {
+            return Result.EVENT_ENDED;
         }
         if (requiresLocation(event)) {
             if (latitude == null || longitude == null) {

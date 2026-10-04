@@ -13,8 +13,8 @@ public interface CheckInService {
     }
 
     enum Result {
-        CHECKED_IN, CHECKED_OUT, ALREADY_DONE, INVALID_CODE, NOT_MEMBER, EVENT_CLOSED, TOO_EARLY, LOCATION_REQUIRED,
-        TOO_FAR
+        CHECKED_IN, CHECKED_OUT, ALREADY_DONE, INVALID_CODE, NOT_MEMBER, EVENT_CLOSED, TOO_EARLY, EVENT_ENDED,
+        LOCATION_REQUIRED, TOO_FAR
     }
 
     Event findEvent(Long eventId);
@@ -31,9 +31,28 @@ public interface CheckInService {
     LocalDateTime checkInOpensAt(Event event);
 
     /**
+     * When check-in closes: when the event ends. {@code null} for an event without an end time, which stays open.
+     * Checking out is still possible after that, for volunteers who forgot.
+     */
+    LocalDateTime checkInClosesAt(Event event);
+
+    /**
+     * The time that a result's message ({@code checkin.result.*}) shows as {0}: when check-in opens for
+     * TOO_EARLY, when it closed for EVENT_ENDED; {@code null} for other results.
+     */
+    default LocalDateTime messageTime(Result result, Event event) {
+        return switch (result) {
+            case TOO_EARLY -> checkInOpensAt(event);
+            case EVENT_ENDED -> checkInClosesAt(event);
+            default -> null;
+        };
+    }
+
+    /**
      * Records a check-in (or, if already checked in, a check-out) after checking the code, that the
-     * event is enabled, that the user is an approved member, that check-in has opened (a check-in, not a
-     * check-out), and, for events with coordinates, that the given location is close enough.
+     * event is enabled, that the user is an approved member, that check-in is open (for a check-in, not a
+     * check-out: after it opens and before the event ends), and, for events with coordinates, that the given
+     * location is close enough.
      */
     Result checkIn(Long eventId, Long userId, String code, Double latitude, Double longitude);
 }

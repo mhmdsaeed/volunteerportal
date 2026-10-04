@@ -105,10 +105,11 @@ public class MobileApiService {
         Event event = checkInService.findEvent(scanned.eventId());
         boolean success = result == CheckInService.Result.CHECKED_IN || result == CheckInService.Result.CHECKED_OUT;
         Object[] args = null;
-        if (result == CheckInService.Result.TOO_EARLY) {
-            // "Check-in for this event opens on {0}." with the opening time in the phone's language
+        LocalDateTime time = checkInService.messageTime(result, event);
+        if (time != null) {
+            // e.g. "Check-in for this event opens on {0}." with the time in the phone's language
             DateTimeFormatter format = DateTimeFormatter.ofPattern(messageSource.getMessage("checkin.dateTime", null, locale), locale);
-            args = new Object[] {checkInService.checkInOpensAt(event).format(format)};
+            args = new Object[] {time.format(format)};
         }
         return new CheckInResponse(result.name(), success, event.getId(), event.getName(),
                 messageSource.getMessage("checkin.result." + result.name(), args, locale));

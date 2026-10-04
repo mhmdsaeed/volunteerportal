@@ -12,8 +12,8 @@
         <h2 class="mb-1" th:text="${event.name}">Event</h2>
         <p class="text-muted" th:if="${event.initiative != null}" th:text="${event.initiative.name}">Initiative</p>
 
-        <p class="lead" th:text="${result == 'TOO_EARLY' and opensAt != null
-                ? #messages.msg('checkin.result.TOO_EARLY', #temporals.format(opensAt, #messages.msg('checkin.dateTime')))
+        <p class="lead" th:text="${messageTime != null
+                ? #messages.msg('checkin.result.' + result, #temporals.format(messageTime, #messages.msg('checkin.dateTime')))
                 : #messages.msg('checkin.result.' + result)}">Result</p>
 
         <p class="mt-4"><a th:href="@{/home}" th:text="#{checkin.backHome}">Go to Home</a></p>

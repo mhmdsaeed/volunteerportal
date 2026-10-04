@@ -110,7 +110,7 @@ JSON API for the volunteer mobile app under `/api` (the Flutter app itself is in
 
 Browsers may call the API only from the origins in `app.api.cors-allowed-origin-patterns` (empty by default; the `dev` profile allows `http://localhost:*` so the app can run with `flutter run -d web-server`). Native phone apps don't need CORS.
 
-`result` values: `CHECKED_IN`, `CHECKED_OUT`, `ALREADY_DONE`, `INVALID_CODE`, `NOT_MEMBER`, `EVENT_CLOSED`, `TOO_EARLY` (the message says when check-in opens), `LOCATION_REQUIRED`, `TOO_FAR`. The app sends the QR text as scanned; the server reads the event id and code from the check-in link.
+`result` values: `CHECKED_IN`, `CHECKED_OUT`, `ALREADY_DONE`, `INVALID_CODE`, `NOT_MEMBER`, `EVENT_CLOSED`, `TOO_EARLY` (the message says when check-in opens), `EVENT_ENDED` (when it closed), `LOCATION_REQUIRED`, `TOO_FAR`. The app sends the QR text as scanned; the server reads the event id and code from the check-in link.
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' \
@@ -184,7 +184,7 @@ The `prod` profile (`application-prod.yml`) trusts Caddy's forwarded headers so 
   - Browse enabled initiatives, view details, and submit a join request answering that initiative's questions
   - Withdraw your own join request while it's still pending (not yet reviewed by a coordinator)
   - Approved members see the initiative's upcoming events
-- **QR self check-in** (`/checkin/{eventId}`): scanning the coordinator's QR checks you in, or out if you're already in. It needs a valid code, an enabled event, an approved membership, and, for events with coordinates, a phone location within 300 m (`app.checkin.max-distance-meters`). Check-in opens 60 minutes before the event starts (`app.checkin.opens-before`); scanning earlier says when it opens, and the confirmation page shows that instead of the button. Checking out is never too early, and an event without a start time can be checked in to at any time. See [Testing QR check-in](#testing-qr-check-in)
+- **QR self check-in** (`/checkin/{eventId}`): scanning the coordinator's QR checks you in, or out if you're already in. It needs a valid code, an enabled event, an approved membership, and, for events with coordinates, a phone location within 300 m (`app.checkin.max-distance-meters`). Check-in opens 60 minutes before the event starts (`app.checkin.opens-before`) and closes when it ends; scanning outside that says when check-in opens or closed, and the confirmation page shows that instead of the button. Checking out is never too early and still possible after the end, for volunteers who forgot; an event without a start or end time has no limit on that side. See [Testing QR check-in](#testing-qr-check-in)
 - **Mobile app API** (`/api/**`): bearer-token JSON API for the Flutter app, see [Mobile app API](#mobile-app-api)
 - **Profile self-service** (`/profile`, any authenticated user):
   - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only since they're set by an admin

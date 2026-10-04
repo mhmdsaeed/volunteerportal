@@ -42,12 +42,19 @@ public class CheckInController {
         model.addAttribute("code", code);
         model.addAttribute("codeValid", checkInCodes.isValid(eventId, code));
         CheckInService.Action action = checkInService.nextAction(event, principal.getUser().getId());
-        LocalDateTime opensAt = checkInService.checkInOpensAt(event);
         model.addAttribute("action", action);
-        model.addAttribute("opensAt", opensAt);
-        // Too early: show when check-in opens instead of the button
-        model.addAttribute("tooEarly", action == CheckInService.Action.CHECK_IN && opensAt != null
-                && LocalDateTime.now().isBefore(opensAt));
+        // Check-in not open yet, or already closed: say so (with the time) instead of showing the button
+        if (action == CheckInService.Action.CHECK_IN) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime opensAt = checkInService.checkInOpensAt(event);
+            LocalDateTime closesAt = checkInService.checkInClosesAt(event);
+            CheckInService.Result notOpen = opensAt != null && now.isBefore(opensAt) ? CheckInService.Result.TOO_EARLY
+                    : closesAt != null && !now.isBefore(closesAt) ? CheckInService.Result.EVENT_ENDED : null;
+            if (notOpen != null) {
+                model.addAttribute("notOpen", notOpen.name());
+                model.addAttribute("messageTime", checkInService.messageTime(notOpen, event));
+            }
+        }
         model.addAttribute("requiresLocation", checkInService.requiresLocation(event));
         return "checkin/confirm";
     }
@@ -58,8 +65,9 @@ public class CheckInController {
             @AuthenticationPrincipal UserPrincipal principal, RedirectAttributes redirectAttributes) {
         CheckInService.Result result = checkInService.checkIn(eventId, principal.getUser().getId(), code, latitude, longitude);
         redirectAttributes.addFlashAttribute("result", result.name());
-        if (result == CheckInService.Result.TOO_EARLY) {
-            redirectAttributes.addFlashAttribute("opensAt", checkInService.checkInOpensAt(checkInService.findEvent(eventId)));
+        LocalDateTime messageTime = checkInService.messageTime(result, checkInService.findEvent(eventId));
+        if (messageTime != null) {
+            redirectAttributes.addFlashAttribute("messageTime", messageTime);
         }
         return "redirect:/checkin/{eventId}/done";
     }
