@@ -4,7 +4,7 @@ Flutter app (Android and iPhone) for volunteers, talking to the Spring Boot serv
 
 - **Log in** with the server address and your Volunteer Portal username/password. The token is kept in the phone's secure storage (Keychain / Android Keystore); **Log out** revokes it on the server.
 - **Events** — upcoming events of initiatives you're an approved member of, with your check-in status. The next one is shown as a pass, as on the website's home page.
-- **Check in** — scan the event's QR code (the one the coordinator shows under Coordinator → Events → Check-in QR). Scanning again checks you out. Location is only asked for at events that check it.
+- **Check in** — scan the event's QR code (the one the coordinator shows under Coordinator → Events → Check-in QR). Scanning again checks you out. Location is only asked for at events that check it. Check-in works from an hour before the event starts until it ends; outside that the server says when it opens or closed, and the app shows that message. Checking out still works after the end.
 - **History** — your check-ins and check-outs. **Notifications** — in your language; tap to mark read.
 - **Profile** (the account button at the top) — your username and email, your grade, points and roles, and the server address; **Log out** is here too.
 - **English / Arabic** from the translate button; Arabic switches the whole layout to right-to-left, and server messages come back in Arabic too (`Accept-Language`). Role names are translated with the website's wording (Admin / Coordinator / Volunteer, مسؤول / منسق / متطوع). Dates show Arabic month and day names with Western digits, as on the website (e.g. `الأربعاء، 23 سبتمبر 08:00–22:00`).
