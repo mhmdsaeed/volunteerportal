@@ -44,6 +44,7 @@ app:
     code-period: 30s        # a new code every 30 seconds
     code-max-age: 120s      # a scanned code stays valid this long (time to log in first)
     max-distance-meters: 300 # for events with coordinates, how close the phone must be
+    opens-before: 60m       # check-in opens this long before the event starts (checking out is never too early)
   seed-admin:
     enabled: ${SEED_ADMIN:true}
     username: ${ADMIN_USERNAME:admin}

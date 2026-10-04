@@ -1,11 +1,14 @@
 package com.volunteerportal.app.service;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,17 +35,30 @@ public class CheckInServiceImpl implements CheckInService {
     private final AttendService attendService;
     private final CheckInCodes checkInCodes;
     private final double maxDistanceMeters;
+    private final Duration opensBefore;
+    private final Clock clock;
 
+    @Autowired // the other constructor takes a Clock, for tests
     public CheckInServiceImpl(EventRepository eventRepository,
             VolunteerInitiativeRepository volunteerInitiativeRepository, AttendRepository attendRepository,
             AttendService attendService, CheckInCodes checkInCodes,
-            @Value("${app.checkin.max-distance-meters:300}") double maxDistanceMeters) {
+            @Value("${app.checkin.max-distance-meters:300}") double maxDistanceMeters,
+            @Value("${app.checkin.opens-before:60m}") Duration opensBefore) {
+        this(eventRepository, volunteerInitiativeRepository, attendRepository, attendService, checkInCodes,
+                maxDistanceMeters, opensBefore, Clock.systemDefaultZone());
+    }
+
+    CheckInServiceImpl(EventRepository eventRepository, VolunteerInitiativeRepository volunteerInitiativeRepository,
+            AttendRepository attendRepository, AttendService attendService, CheckInCodes checkInCodes,
+            double maxDistanceMeters, Duration opensBefore, Clock clock) {
         this.eventRepository = eventRepository;
         this.volunteerInitiativeRepository = volunteerInitiativeRepository;
         this.attendRepository = attendRepository;
         this.attendService = attendService;
         this.checkInCodes = checkInCodes;
         this.maxDistanceMeters = maxDistanceMeters;
+        this.opensBefore = opensBefore;
+        this.clock = clock;
     }
 
     @Override
@@ -72,6 +88,11 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Override
+    public LocalDateTime checkInOpensAt(Event event) {
+        return event.getFromDttm() == null ? null : event.getFromDttm().minus(opensBefore);
+    }
+
+    @Override
     @Transactional
     public Result checkIn(Long eventId, Long userId, String code, Double latitude, Double longitude) {
         Event event = findEvent(eventId);
@@ -85,6 +106,16 @@ public class CheckInServiceImpl implements CheckInService {
         if (membership.isEmpty()) {
             return Result.NOT_MEMBER;
         }
+        Action action = nextAction(event, userId);
+        if (action == Action.DONE) {
+            return Result.ALREADY_DONE;
+        }
+        // Only a check-in can be too early; checking out needs a check-in first
+        LocalDateTime opensAt = checkInOpensAt(event);
+        LocalDateTime now = LocalDateTime.now(clock);
+        if (action == Action.CHECK_IN && opensAt != null && now.isBefore(opensAt)) {
+            return Result.TOO_EARLY;
+        }
         if (requiresLocation(event)) {
             if (latitude == null || longitude == null) {
                 return Result.LOCATION_REQUIRED;
@@ -94,15 +125,10 @@ public class CheckInServiceImpl implements CheckInService {
             }
         }
 
-        Action action = nextAction(event, userId);
-        if (action == Action.DONE) {
-            return Result.ALREADY_DONE;
-        }
-
         AttendForm form = new AttendForm();
         form.setVolunteerInitiativeId(membership.get().getId());
         form.setAttendInOut(action == Action.CHECK_IN ? CHECK_IN : CHECK_OUT);
-        form.setAttendDttm(LocalDateTime.now());
+        form.setAttendDttm(now);
         form.setNote(NOTE);
         attendService.create(eventId, form);
         return action == Action.CHECK_IN ? Result.CHECKED_IN : Result.CHECKED_OUT;

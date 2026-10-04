@@ -2,6 +2,7 @@ package com.volunteerportal.app.api;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -103,8 +104,14 @@ public class MobileApiService {
         CheckInService.Result result = checkInService.checkIn(scanned.eventId(), userId, scanned.code(), latitude, longitude);
         Event event = checkInService.findEvent(scanned.eventId());
         boolean success = result == CheckInService.Result.CHECKED_IN || result == CheckInService.Result.CHECKED_OUT;
+        Object[] args = null;
+        if (result == CheckInService.Result.TOO_EARLY) {
+            // "Check-in for this event opens on {0}." with the opening time in the phone's language
+            DateTimeFormatter format = DateTimeFormatter.ofPattern(messageSource.getMessage("checkin.dateTime", null, locale), locale);
+            args = new Object[] {checkInService.checkInOpensAt(event).format(format)};
+        }
         return new CheckInResponse(result.name(), success, event.getId(), event.getName(),
-                messageSource.getMessage("checkin.result." + result.name(), null, locale));
+                messageSource.getMessage("checkin.result." + result.name(), args, locale));
     }
 
     @Transactional(readOnly = true)

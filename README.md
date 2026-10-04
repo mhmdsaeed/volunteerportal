@@ -74,7 +74,7 @@ Visit `http://localhost:8080/register` to create a volunteer account (lands on `
 
 Coordinators show an event's check-in QR (Coordinator → Events → **Check-in QR**); volunteers scan it with their phone to check in, and again to check out. For real use, set `CHECKIN_SECRET` and serve the site over HTTPS on its real address. To try it locally, two **dev-only** Spring profiles help — never enable them on a real server:
 
-- **`dev`** — creates demo data on startup (`DemoDataInitializer`, only adds what is missing): `demo_coordinator` supervises *Demo Initiative*, which has a *Demo Event* running all day today; `demo_volunteer` is an approved member and `demo_pending` has a pending request. Password for all three: `demo12345` (`DEMO_PASSWORD`). It also shows the QR's link under the code, with **Copy**/**Open** buttons, so you can test **without a phone**: open the link in a private window logged in as `demo_volunteer`. Set `DEMO_EVENT_LATITUDE`/`DEMO_EVENT_LONGITUDE` to also get an event that checks the phone's location.
+- **`dev`** — creates demo data on startup (`DemoDataInitializer`, only adds what is missing): `demo_coordinator` supervises *Demo Initiative*, which has a *Demo Event* running all day today (00:00–23:59, reset at each start); `demo_volunteer` is an approved member and `demo_pending` has a pending request. Password for all three: `demo12345` (`DEMO_PASSWORD`). It also shows the QR's link under the code, with **Copy**/**Open** buttons, so you can test **without a phone**: open the link in a private window logged in as `demo_volunteer`. Set `DEMO_EVENT_LATITUDE`/`DEMO_EVENT_LONGITUDE` to also get an event that checks the phone's location.
 - **`https`** — serves `https://<host>:8443` with a self-signed certificate, so a **phone** on your Wi-Fi can check in to events with coordinates (phone browsers only share location over HTTPS). Create the certificate once (git-ignored), listing your PC's Wi-Fi address from `ipconfig`:
 
   ```bash
@@ -110,7 +110,7 @@ JSON API for the volunteer mobile app under `/api` (the Flutter app itself is in
 
 Browsers may call the API only from the origins in `app.api.cors-allowed-origin-patterns` (empty by default; the `dev` profile allows `http://localhost:*` so the app can run with `flutter run -d web-server`). Native phone apps don't need CORS.
 
-`result` values: `CHECKED_IN`, `CHECKED_OUT`, `ALREADY_DONE`, `INVALID_CODE`, `NOT_MEMBER`, `EVENT_CLOSED`, `LOCATION_REQUIRED`, `TOO_FAR`. The app sends the QR text as scanned; the server reads the event id and code from the check-in link.
+`result` values: `CHECKED_IN`, `CHECKED_OUT`, `ALREADY_DONE`, `INVALID_CODE`, `NOT_MEMBER`, `EVENT_CLOSED`, `TOO_EARLY` (the message says when check-in opens), `LOCATION_REQUIRED`, `TOO_FAR`. The app sends the QR text as scanned; the server reads the event id and code from the check-in link.
 
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' \
@@ -184,7 +184,7 @@ The `prod` profile (`application-prod.yml`) trusts Caddy's forwarded headers so 
   - Browse enabled initiatives, view details, and submit a join request answering that initiative's questions
   - Withdraw your own join request while it's still pending (not yet reviewed by a coordinator)
   - Approved members see the initiative's upcoming events
-- **QR self check-in** (`/checkin/{eventId}`): scanning the coordinator's QR checks you in, or out if you're already in. It needs a valid code, an enabled event, an approved membership and, for events with coordinates, a phone location within 300 m (`app.checkin.max-distance-meters`). See [Testing QR check-in](#testing-qr-check-in)
+- **QR self check-in** (`/checkin/{eventId}`): scanning the coordinator's QR checks you in, or out if you're already in. It needs a valid code, an enabled event, an approved membership, and, for events with coordinates, a phone location within 300 m (`app.checkin.max-distance-meters`). Check-in opens 60 minutes before the event starts (`app.checkin.opens-before`); scanning earlier says when it opens, and the confirmation page shows that instead of the button. Checking out is never too early, and an event without a start time can be checked in to at any time. See [Testing QR check-in](#testing-qr-check-in)
 - **Mobile app API** (`/api/**`): bearer-token JSON API for the Flutter app, see [Mobile app API](#mobile-app-api)
 - **Profile self-service** (`/profile`, any authenticated user):
   - View/edit your own volunteer profile (name, mobile, city, address); grade and points are shown read-only since they're set by an admin

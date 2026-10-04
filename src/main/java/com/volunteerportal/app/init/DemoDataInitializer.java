@@ -124,8 +124,8 @@ public class DemoDataInitializer implements CommandLineRunner {
         event.setName(name);
         event.setInitiative(initiative);
         event.setEnabled(true);
-        event.setFromDttm(LocalDate.now().atTime(LocalTime.of(8, 0)));
-        event.setToDttm(LocalDate.now().atTime(LocalTime.of(22, 0)));
+        event.setFromDttm(LocalDate.now().atStartOfDay());
+        event.setToDttm(LocalDate.now().atTime(LocalTime.of(23, 59)));
         event.setLocLatitude(latitude);
         event.setLocLongitude(longitude);
         eventRepository.save(event);

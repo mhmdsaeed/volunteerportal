@@ -1,5 +1,9 @@
 package com.volunteerportal.app.service;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +57,10 @@ class CheckInServiceImplTest {
     @Mock
     private CheckInCodes checkInCodes;
 
+    // The fixed "now" for the tests: 10:00 on 11 October 2026
+    private static final ZoneId ZONE = ZoneId.of("UTC");
+    private static final LocalDateTime NOW = LocalDateTime.of(2026, 10, 11, 10, 0);
+
     private CheckInServiceImpl service;
     private Event event;
     private VolunteerInitiative membership;
@@ -60,7 +68,7 @@ class CheckInServiceImplTest {
     @BeforeEach
     void setUp() {
         service = new CheckInServiceImpl(eventRepository, volunteerInitiativeRepository, attendRepository,
-                attendService, checkInCodes, 300);
+                attendService, checkInCodes, 300, Duration.ofMinutes(60), Clock.fixed(NOW.atZone(ZONE).toInstant(), ZONE));
 
         Initiative initiative = new Initiative();
         initiative.setId(5L);
@@ -108,6 +116,51 @@ class CheckInServiceImplTest {
 
         assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.ALREADY_DONE);
         verify(attendService, never()).create(anyLong(), any());
+    }
+
+    @Test
+    void checkInMoreThanAnHourBeforeTheStart_isTooEarly() {
+        event.setFromDttm(NOW.plusMinutes(61));
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.TOO_EARLY);
+        verify(attendService, never()).create(anyLong(), any());
+        assertThat(service.checkInOpensAt(event)).isEqualTo(NOW.plusMinutes(1));
+    }
+
+    @Test
+    void checkInWithinTheHourBeforeTheStart_isAllowedAndRecordsTheTime() {
+        event.setFromDttm(NOW.plusMinutes(60)); // opens exactly now
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.CHECKED_IN);
+
+        ArgumentCaptor<AttendForm> form = ArgumentCaptor.forClass(AttendForm.class);
+        verify(attendService).create(eq(9L), form.capture());
+        assertThat(form.getValue().getAttendDttm()).isEqualTo(NOW);
+    }
+
+    @Test
+    void eventWithoutAStartTime_canBeCheckedInToAnyTime() {
+        event.setFromDttm(null);
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.CHECKED_IN);
+        assertThat(service.checkInOpensAt(event)).isNull();
+    }
+
+    @Test
+    void checkingOut_isNeverTooEarly() {
+        // Checked in (e.g. recorded by the coordinator) before check-in opened for scanning
+        event.setFromDttm(NOW.plusHours(3));
+        given(attendRepository.findByEventIdAndVolunteerInitiativeId(9L, 3L)).willReturn(List.of(attend(1)));
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.CHECKED_OUT);
+    }
+
+    @Test
+    void tooEarly_isSaidBeforeAskingForTheLocation() {
+        event.setFromDttm(NOW.plusHours(3));
+        withCoordinates();
+
+        assertThat(service.checkIn(9L, 7L, "good", null, null)).isEqualTo(Result.TOO_EARLY);
     }
 
     @Test

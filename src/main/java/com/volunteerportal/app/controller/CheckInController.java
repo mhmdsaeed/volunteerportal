@@ -1,5 +1,7 @@
 package com.volunteerportal.app.controller;
 
+import java.time.LocalDateTime;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,7 +41,13 @@ public class CheckInController {
         model.addAttribute("event", event);
         model.addAttribute("code", code);
         model.addAttribute("codeValid", checkInCodes.isValid(eventId, code));
-        model.addAttribute("action", checkInService.nextAction(event, principal.getUser().getId()));
+        CheckInService.Action action = checkInService.nextAction(event, principal.getUser().getId());
+        LocalDateTime opensAt = checkInService.checkInOpensAt(event);
+        model.addAttribute("action", action);
+        model.addAttribute("opensAt", opensAt);
+        // Too early: show when check-in opens instead of the button
+        model.addAttribute("tooEarly", action == CheckInService.Action.CHECK_IN && opensAt != null
+                && LocalDateTime.now().isBefore(opensAt));
         model.addAttribute("requiresLocation", checkInService.requiresLocation(event));
         return "checkin/confirm";
     }
@@ -50,6 +58,9 @@ public class CheckInController {
             @AuthenticationPrincipal UserPrincipal principal, RedirectAttributes redirectAttributes) {
         CheckInService.Result result = checkInService.checkIn(eventId, principal.getUser().getId(), code, latitude, longitude);
         redirectAttributes.addFlashAttribute("result", result.name());
+        if (result == CheckInService.Result.TOO_EARLY) {
+            redirectAttributes.addFlashAttribute("opensAt", checkInService.checkInOpensAt(checkInService.findEvent(eventId)));
+        }
         return "redirect:/checkin/{eventId}/done";
     }
 
