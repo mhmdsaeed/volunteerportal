@@ -5,25 +5,54 @@ import '../api/models.dart';
 import '../app_scope.dart';
 import '../check_in_flow.dart';
 import '../l10n/app_localizations.dart';
+import '../services/camera_release.dart';
 import '../theme.dart';
 
 /// Builds the camera view; calls [onCode] with the text of each QR code it sees.
 typedef ScannerBuilder = Widget Function(BuildContext context, void Function(String code) onCode);
 
-Widget cameraScanner(BuildContext context, void Function(String code) onCode) => MobileScanner(
-      onDetect: (capture) {
-        final value = capture.barcodes.map((b) => b.rawValue).whereType<String>().firstOrNull;
-        if (value != null) {
-          onCode(value);
-        }
-      },
-      errorBuilder: (context, error) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(AppLocalizations.of(context).cameraUnavailable, textAlign: TextAlign.center),
+Widget cameraScanner(BuildContext context, void Function(String code) onCode) => _CameraScanner(onCode: onCode);
+
+/// The camera view. It turns the camera off when it goes away (a result is shown, another tab is opened):
+/// on the web mobile_scanner itself leaves the camera running.
+class _CameraScanner extends StatefulWidget {
+  const _CameraScanner({required this.onCode});
+
+  final void Function(String code) onCode;
+
+  @override
+  State<_CameraScanner> createState() => _CameraScannerState();
+}
+
+class _CameraScannerState extends State<_CameraScanner> {
+  @override
+  void initState() {
+    super.initState();
+    trackCameraStreams(); // before MobileScanner (built below) asks for the camera
+  }
+
+  @override
+  void dispose() {
+    releaseCamera();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MobileScanner(
+        onDetect: (capture) {
+          final value = capture.barcodes.map((b) => b.rawValue).whereType<String>().firstOrNull;
+          if (value != null) {
+            widget.onCode(value);
+          }
+        },
+        errorBuilder: (context, error) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(AppLocalizations.of(context).cameraUnavailable, textAlign: TextAlign.center),
+          ),
         ),
-      ),
-    );
+      );
+}
 
 /// Scan the event's QR code to check in (or out, if already checked in).
 class ScanScreen extends StatefulWidget {

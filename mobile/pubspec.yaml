@@ -39,6 +39,7 @@ dependencies:
   mobile_scanner: ^7.4.2
   geolocator: ^14.0.3
   intl: ^0.20.3
+  web: ^1.1.1 # stopping the camera on the web (lib/services/camera_release_web.dart)
   flutter_localizations:
     sdk: flutter
 
