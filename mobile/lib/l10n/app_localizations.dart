@@ -206,6 +206,12 @@ abstract class AppLocalizations {
   /// **'Check in'**
   String get tabScan;
 
+  /// Bottom tab label for the Check in tab; must fit one line on a 360-wide phone. The screen title uses tabScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Check in'**
+  String get tabScanShort;
+
   /// No description provided for @tabHistory.
   ///
   /// In en, this message translates to:

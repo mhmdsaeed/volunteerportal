@@ -18,6 +18,7 @@
   "invalidServerUrl": "أدخل عنواناً يبدأ بـ http:// أو https://",
   "tabEvents": "الفعاليات",
   "tabScan": "تسجيل الحضور",
+  "tabScanShort": "الحضور",
   "tabHistory": "السجل",
   "tabNotifications": "الإشعارات",
   "profile": "الملف الشخصي",

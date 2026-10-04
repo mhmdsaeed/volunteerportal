@@ -67,6 +67,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabScan => 'Check in';
 
   @override
+  String get tabScanShort => 'Check in';
+
+  @override
   String get tabHistory => 'History';
 
   @override

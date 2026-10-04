@@ -18,6 +18,8 @@
   "invalidServerUrl": "Enter an address starting with http:// or https://",
   "tabEvents": "Events",
   "tabScan": "Check in",
+  "tabScanShort": "Check in",
+  "@tabScanShort": {"description": "Bottom tab label for the Check in tab; must fit one line on a 360-wide phone. The screen title uses tabScan."},
   "tabHistory": "History",
   "tabNotifications": "Notifications",
   "profile": "Profile",

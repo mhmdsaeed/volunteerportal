@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (index) => setState(() => _tab = index),
         destinations: [
           NavigationDestination(icon: const Icon(Icons.event), label: t.tabEvents),
-          NavigationDestination(key: const Key('scanTab'), icon: const Icon(Icons.qr_code_scanner), label: t.tabScan),
+          NavigationDestination(key: const Key('scanTab'), icon: const Icon(Icons.qr_code_scanner), label: t.tabScanShort),
           NavigationDestination(icon: const Icon(Icons.history), label: t.tabHistory),
           NavigationDestination(icon: const Icon(Icons.notifications), label: t.tabNotifications),
         ],

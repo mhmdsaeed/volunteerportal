@@ -83,9 +83,13 @@ ThemeData buildVpTheme() {
       iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
             color: states.contains(WidgetState.selected) ? VpColors.ink : Colors.white.withValues(alpha: 0.8),
           )),
+      // Long labels ("Notifications", تسجيل الحضور) must stay on one line on 360-wide phones: no letter
+      // spacing (Material's 0.5 adds ~6px, and spacing Arabic letters apart is wrong anyway) and the same
+      // weight selected or not (bolder is wider). The yellow indicator and full white mark the selected tab.
       labelTextStyle: WidgetStateProperty.resolveWith((states) => text.labelMedium?.copyWith(
             color: Colors.white.withValues(alpha: states.contains(WidgetState.selected) ? 1 : 0.8),
-            fontWeight: states.contains(WidgetState.selected) ? FontWeight.w600 : FontWeight.w400,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0,
           )),
     ),
     cardTheme: CardThemeData(

@@ -66,6 +66,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tabScan => 'تسجيل الحضور';
 
   @override
+  String get tabScanShort => 'الحضور';
+
+  @override
   String get tabHistory => 'السجل';
 
   @override
