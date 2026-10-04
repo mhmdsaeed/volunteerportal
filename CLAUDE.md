@@ -32,12 +32,12 @@ cd mobile && flutter pub get && flutter test && flutter analyze
 
 - **It talks only to `/api/**`.** If you change a DTO in `api/ApiDtos.java`, update `lib/api/models.dart` and `test/fake_server.dart`; the tests run against that fake server, not the real API.
 - **Translations** go in both `lib/l10n/app_en.arb` and `app_ar.arb`. Then run `flutter gen-l10n`, and commit the generated `app_localizations*.dart` files too. Reuse the website's wording (`messages*.properties`) for shared terms such as role names (`roleNames` in `screens/profile_screen.dart`). A build or `pub get` can regenerate those files with only line-ending changes; if `git diff` shows no content change, restore them with `git checkout` instead of committing the noise.
-- **Camera**: show it only through `cameraScanner` in `screens/scan_screen.dart`, never a bare `MobileScanner`. On the web, mobile_scanner 7.4.2 leaves the camera running after it stops, so that wrapper turns it off when it closes (`services/camera_release*.dart`).
+- **Camera**: show it only through `cameraScanner` in `screens/scan_screen.dart`, never a bare `MobileScanner`. On the web, mobile_scanner 7.4.2 leaves the camera running after it stops, so that wrapper turns it off when it closes (`services/camera_release*.dart`). The scan screen also removes the camera while another screen is on top of it (`RouteAware` with `appRouteObserver` in `app_scope.dart`); open new screens with `Navigator.push` on the app's navigator, or that observer won't see them.
 - **Browser-only code** (`package:web`, `dart:js_interop`) doesn't compile for Android or iPhone. Put it behind a conditional export with a stub for other platforms, as `services/camera_release.dart` does.
 - **Dates**: always format them with `formatDateTime` / `formatEventTime` in `screens/widgets.dart`. They keep Western digits in Arabic, as the website does; a bare `DateFormat` would show Arabic-Indic digits.
 - **Styling**: use `VpColors` and the theme in `lib/theme.dart`, never hard-coded colours. Its values mirror the website's `--vp-*` tokens, so change both together. Yellow (`VpColors.vest`) means current or yours, as on the website.
 - **Font**: Readex Pro is bundled as three static TTF weights (400/500/600) in `assets/fonts/`. Use one of those weights; Flutter doesn't reliably map weights onto variable fonts.
-- **Tests** (`test/app_test.dart`) find widgets by `Key` (`loginButton`, `scanTab`, `event-<id>`, …) and by visible text, so keep those keys when restyling.
+- **Tests** (`test/app_test.dart`) find widgets by `Key` (`loginButton`, `scanTab`, `event-<id>`, …) and by visible text, so keep those keys when restyling. Finders skip offstage widgets, and a screen covered by another is offstage: to check something is gone from a covered screen, use `skipOffstage: false`, or the test passes either way.
 
 ## Conventions and gotchas
 
