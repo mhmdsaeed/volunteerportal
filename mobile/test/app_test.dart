@@ -128,6 +128,23 @@ void main() {
     expect(find.byKey(const Key('fakeScan')), findsOneWidget);
   });
 
+  testWidgets('the camera is off while Profile covers the Check in tab, and back after', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await tester.tap(find.byKey(const Key('scanTab')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('fakeScan')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('profileButton')));
+    await tester.pumpAndSettle();
+    // skipOffstage: false, or the covered screen's scanner wouldn't be found even if it were still there
+    expect(find.byKey(const Key('fakeScan'), skipOffstage: false), findsNothing);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('fakeScan')), findsOneWidget);
+  });
+
   testWidgets('a revoked token sends the user back to login with an explanation', (tester) async {
     await startApp(tester);
     await logIn(tester);

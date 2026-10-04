@@ -69,10 +69,34 @@ class ScanScreen extends StatefulWidget {
 
 enum _Phase { scanning, working, locating, done }
 
-class _ScanScreenState extends State<ScanScreen> {
+class _ScanScreenState extends State<ScanScreen> with RouteAware {
   _Phase _phase = _Phase.scanning;
   ScanOutcome? _outcome;
   String? _error;
+
+  // Another screen (Profile) is on top: the camera is off until it closes
+  bool _covered = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      appRouteObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    appRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPushNext() => setState(() => _covered = true);
+
+  @override
+  void didPopNext() => setState(() => _covered = false);
 
   Future<void> _onCode(String code) async {
     if (_phase != _Phase.scanning) {
@@ -114,7 +138,8 @@ class _ScanScreenState extends State<ScanScreen> {
     return switch (_phase) {
       _Phase.scanning => Column(
           children: [
-            Expanded(child: widget.scannerBuilder(context, _onCode)),
+            // Removing the scanner turns the camera off (see _CameraScanner)
+            Expanded(child: _covered ? const SizedBox.shrink() : widget.scannerBuilder(context, _onCode)),
             Padding(padding: const EdgeInsets.all(16), child: Text(t.scanHint, textAlign: TextAlign.center)),
           ],
         ),

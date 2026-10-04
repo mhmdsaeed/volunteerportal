@@ -15,6 +15,10 @@ class AppScope extends InheritedNotifier<AppState> {
   static AppState read(BuildContext context) => context.getInheritedWidgetOfExactType<AppScope>()!.notifier!;
 }
 
+/// Tells screens when another screen is pushed over them or popped off again (see [RouteAware]); the scan
+/// screen uses it to turn the camera off while Profile covers it.
+final appRouteObserver = RouteObserver<ModalRoute<void>>();
+
 /// A short, translated description of an API failure for the user.
 String describeError(BuildContext context, Object error) {
   final t = AppLocalizations.of(context);

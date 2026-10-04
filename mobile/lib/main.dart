@@ -33,6 +33,7 @@ class VolunteerApp extends StatelessWidget {
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
           debugShowCheckedModeBanner: false,
           theme: buildVpTheme(),
+          navigatorObservers: [appRouteObserver],
           locale: Locale(state.language),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
