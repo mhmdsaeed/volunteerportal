@@ -13,8 +13,8 @@ typedef ScannerBuilder = Widget Function(BuildContext context, void Function(Str
 
 Widget cameraScanner(BuildContext context, void Function(String code) onCode) => _CameraScanner(onCode: onCode);
 
-/// The camera view. It turns the camera off when it goes away (a result is shown, another tab is opened):
-/// on the web mobile_scanner itself leaves the camera running.
+/// The camera view. It turns the camera off when it goes away (a result is shown, another tab is opened) and
+/// when the app goes to the background: on the web mobile_scanner itself leaves the camera running.
 class _CameraScanner extends StatefulWidget {
   const _CameraScanner({required this.onCode});
 
@@ -24,17 +24,31 @@ class _CameraScanner extends StatefulWidget {
   State<_CameraScanner> createState() => _CameraScannerState();
 }
 
-class _CameraScannerState extends State<_CameraScanner> {
+class _CameraScannerState extends State<_CameraScanner> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     trackCameraStreams(); // before MobileScanner (built below) asks for the camera
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     releaseCamera();
     super.dispose();
+  }
+
+  /// Going to the background: MobileScanner pauses the camera here and starts a new one on return, but on the
+  /// web its pause leaves the camera running, so each trip to the background would add a running camera.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.inactive || AppLifecycleState.hidden || AppLifecycleState.paused:
+        releaseCamera();
+      case AppLifecycleState.resumed || AppLifecycleState.detached:
+        break;
+    }
   }
 
   @override
