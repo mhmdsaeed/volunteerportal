@@ -4,7 +4,7 @@ Flutter app (Android and iPhone) for volunteers, talking to the Spring Boot serv
 
 - **Log in** with the server address and your Volunteer Portal username/password. The token is kept in the phone's secure storage (Keychain / Android Keystore); **Log out** revokes it on the server.
 - **Events** — upcoming events of initiatives you're an approved member of, with your check-in status. The next one is shown as a pass, as on the website's home page.
-- **Check in** — scan the event's QR code (the one the coordinator shows under Coordinator → Events → Check-in QR). Scanning again checks you out. Location is only asked for at events that check it. Check-in works from an hour before the event starts until it ends; outside that the server says when it opens or closed, and the app shows that message. Checking out still works after the end.
+- **Check in** — scan the event's QR code (the one the coordinator shows under Coordinator → Events → Check-in QR). Scanning again checks you out. Location is only asked for at events that check it. Check-in works from an hour before the event starts until it ends; outside that the server says when it opens or closed, and the app shows that message. Checking out still works after the end. The camera turns off as soon as a result is shown or you leave the tab.
 - **History** — your check-ins and check-outs. **Notifications** — in your language; tap to mark read.
 - **Profile** (the account button at the top) — your username and email, your grade, points and roles, and the server address; **Log out** is here too.
 - **English / Arabic** from the translate button; Arabic switches the whole layout to right-to-left, and server messages come back in Arabic too (`Accept-Language`). Role names are translated with the website's wording (Admin / Coordinator / Volunteer, مسؤول / منسق / متطوع). Dates show Arabic month and day names with Western digits, as on the website (e.g. `الأربعاء، 23 سبتمبر 08:00–22:00`).
@@ -41,6 +41,7 @@ Log in with server `http://localhost:8080`, user `demo_volunteer`, password `dem
 | `lib/check_in_flow.dart` | Scan → check in; asks for location only when the server answers `LOCATION_REQUIRED` |
 | `lib/app_state.dart` | Server, session, language; `guard()` logs out when the token is rejected |
 | `lib/screens/` | Login, home tabs (events, scan, history, notifications), profile; `widgets.dart` has the shared list and the date helpers (`formatDateTime`, `formatEventTime`) |
+| `lib/services/` | The phone's location (`location_service.dart`), the token in secure storage (`session_store.dart`), and turning the camera off when the scanner closes (`camera_release*.dart`: on the web, mobile_scanner leaves the camera running, so the app stops it; a no-op on Android and iPhone) |
 | `lib/theme.dart` | The website's colours (`VpColors`), the app theme, and the shared `StatusPill` and `LanyardStrip` widgets |
 | `assets/fonts/` | Readex Pro (Regular, Medium, SemiBold; Latin and Arabic) and its licence, `OFL.txt` |
 | `lib/l10n/app_en.arb`, `app_ar.arb` | Translations (`flutter gen-l10n` generates `app_localizations*.dart`) |
