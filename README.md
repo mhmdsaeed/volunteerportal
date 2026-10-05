@@ -5,7 +5,7 @@ Spring Boot 4.1.1 / Java 21 / Thymeleaf / Bootstrap / MySQL volunteer management
 | Folder | What's in it |
 |---|---|
 | `src/` | The Spring Boot server: website and mobile JSON API |
-| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, QR check-in, history, notifications, profile; same look and English/Arabic as the website |
+| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, initiatives (with the same Joined/Pending/Not approved/Not joined/All filter as the website), QR check-in, history, notifications, profile; same look and English/Arabic as the website |
 | [`deploy/`](deploy/README.md) | Production setup: Docker Compose with MySQL and Caddy (HTTPS), backups |
 
 ## Stack
@@ -101,7 +101,7 @@ JSON API for the volunteer mobile app under `/api` (the Flutter app itself is in
 | `POST /api/auth/login` | `{"username", "password", "deviceName"?}` | `{"token", "expiresAt", "user"}`, or `401 invalid_credentials` |
 | `POST /api/auth/logout` | — | `204`; the token is revoked |
 | `GET /api/me` | — | `{"id", "username", "email", "roles", "grade", "points"}` |
-| `GET /api/initiatives` | — | open initiatives with `membership`: `NONE` / `PENDING` / `APPROVED` / `REJECTED` |
+| `GET /api/initiatives` | — | open initiatives with `office` and `membership`: `NONE` / `PENDING` / `APPROVED` / `REJECTED` (the app filters on it) |
 | `GET /api/events` | — | upcoming events of initiatives I'm an approved member of, with `requiresLocation` and `myStatus`: `NOT_CHECKED_IN` / `CHECKED_IN` / `CHECKED_OUT` |
 | `POST /api/checkin` | `{"qr": "<scanned text>", "latitude"?, "longitude"?}` | `{"result", "success", "eventId", "event", "message"}` — checks in, or out if already in; same rules as the web check-in. `400 invalid_qr` if it isn't an event check-in QR |
 | `GET /api/attendance` | — | my check-ins/outs, newest first |
