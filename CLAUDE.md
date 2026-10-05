@@ -11,7 +11,14 @@ SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run         # + demo users/initiat
 ./mvnw test -Dtest=CheckInServiceImplTest                 # one test class (or Class#method)
 
 cd mobile && flutter pub get && flutter test && flutter analyze
+cd mobile && flutter run -d edge                          # the app in a browser, against the dev server
 ```
+
+To run the app by hand (browser, the `vp_pixel` emulator, or a phone over USB), follow "Run it" in `mobile/README.md`. Its two easy-to-miss settings:
+- **The server address differs per device.** Use `http://localhost:8080` in a browser, `http://10.0.2.2:8080` on the emulator (`localhost` there is the emulator itself), and the PC's Wi-Fi address on a phone.
+- **The Android tools need environment variables in every shell.** On this machine the SDK, emulator and Gradle cache live on drive E: and nothing is set globally, so set `ANDROID_HOME`, `ANDROID_USER_HOME`, `ANDROID_AVD_HOME`, `GRADLE_USER_HOME` and `JAVA_TOOL_OPTIONS` first, as listed there.
+
+When you change those steps, update that section too.
 
 **Every test except the plain Mockito ones needs the MySQL database from `application.yml` to be running.** There's no embedded database: the migrations are MySQL-specific, and repository tests use `@AutoConfigureTestDatabase(replace = NONE)`.
 
