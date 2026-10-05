@@ -45,6 +45,8 @@ The website is then at http://localhost:8080. The `dev` profile lets `http://loc
 | `demo_pending` | See a pending request |
 | `demo_coordinator` | Approve or reject requests on the website, and show the event's check-in QR |
 
+These are the accounts as first created. The demo setup only adds what is missing, so once you approve `demo_pending`'s request (or change the demo event) it stays that way on later starts; register new accounts to try those steps again.
+
 To try **joining an initiative**, register a new account at http://localhost:8080/register, then log in to the app with it.
 
 ### 2a. In a browser
@@ -56,7 +58,7 @@ cd E:\workspace_self_emp\claude_ws\volunteerportal\mobile
 flutter run -d edge          # or: flutter run -d web-server --web-port 5000, then open http://localhost:5000
 ```
 
-Log in with server `http://localhost:8080`. In the terminal, `r` reloads after a code change and `q` quits. There is no camera here, so the Check in tab can't scan; use the QR page's test link on the website instead.
+The first time, the debug build takes about a minute to compile and then shows a blank page for up to 40 seconds while it loads; later runs are quicker. Log in with server `http://localhost:8080`. In the terminal, `r` reloads after a code change and `q` quits. There is no camera here, so the Check in tab can't scan; use the QR page's test link on the website instead.
 
 ### 2b. On the Android emulator
 
@@ -69,6 +71,8 @@ $env:ANDROID_AVD_HOME = 'E:\IDEs\Android\user\avd'                       # where
 $env:GRADLE_USER_HOME = 'E:\IDEs\gradle'                                  # Gradle caches several GB
 $env:JAVA_TOOL_OPTIONS = '-Djavax.net.ssl.trustStoreType=Windows-ROOT'    # lets Gradle download through the PC's certificates
 ```
+
+With the last one set, Java prints `Picked up JAVA_TOOL_OPTIONS: ...` when it starts; that is a notice, not an error.
 
 Start the emulator with its window, in one window (with those variables):
 
@@ -83,7 +87,7 @@ cd E:\workspace_self_emp\claude_ws\volunteerportal\mobile
 flutter run -d emulator-5554          # the first build takes several minutes
 ```
 
-In the app, use server **`http://10.0.2.2:8080`**: inside the emulator that address is your PC (`localhost` would be the emulator itself). If "System UI isn't responding" appears at startup, tap **Wait**. The emulator's camera shows a virtual room, so it can't scan a real QR code.
+In the app, use server **`http://10.0.2.2:8080`**: inside the emulator that address is your PC (`localhost` would be the emulator itself). If "System UI isn't responding" appears at startup, tap **Wait**. `flutter run` keeps the app's data, so the app reopens logged in as whoever used it last; use Profile → **Log out** to switch accounts. The emulator's camera shows a virtual room, so it can't scan a real QR code.
 
 ### 2c. On your own Android phone
 
