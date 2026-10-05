@@ -24,15 +24,77 @@ flutter analyze
 
 ## Run it
 
-**In a browser (quickest, no phone):** start the server with the `dev` profile (it allows `http://localhost:*` to call the API and creates demo accounts), then:
+Three ways, all against the server running on your PC: in a browser (quickest), on the Android emulator, or on your own Android phone (the only one that can scan a real QR code). The commands are for PowerShell.
 
-```bash
-flutter run -d web-server --web-port 5000     # open http://localhost:5000
+### 1. Start the server
+
+MySQL must be running. From the project folder:
+
+```powershell
+cd E:\workspace_self_emp\claude_ws\volunteerportal
+$env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-21.0.12.8-hotspot'   # the system JAVA_HOME is an older JDK
+$env:SPRING_PROFILES_ACTIVE = 'dev'
+.\mvnw -o spring-boot:run
 ```
 
-Log in with server `http://localhost:8080`, user `demo_volunteer`, password `demo12345`. A browser has no camera in most setups, so test scanning on a phone, or use the QR page's test link on the website.
+The website is then at http://localhost:8080. The `dev` profile lets `http://localhost:*` call the API and creates demo accounts, all with password `demo12345`:
 
-**On a phone:** needs the Android SDK (Android Studio — install it and its SDK on E: too, and set `GRADLE_USER_HOME` to a folder on E:, since Gradle caches several GB) or a Mac with Xcode for iPhone. Debug builds may use plain `http://<your-PC-address>:8080` on the same Wi-Fi; release builds need `https`.
+| Account | Use it to |
+|---|---|
+| `demo_volunteer` | Log in to the app as a member of *Demo Initiative* (its *Demo Event* runs all day today, so check-in is always open) |
+| `demo_pending` | See a pending request |
+| `demo_coordinator` | Approve or reject requests on the website, and show the event's check-in QR |
+
+To try **joining an initiative**, register a new account at http://localhost:8080/register, then log in to the app with it.
+
+### 2a. In a browser
+
+In a second PowerShell window:
+
+```powershell
+cd E:\workspace_self_emp\claude_ws\volunteerportal\mobile
+flutter run -d edge          # or: flutter run -d web-server --web-port 5000, then open http://localhost:5000
+```
+
+Log in with server `http://localhost:8080`. In the terminal, `r` reloads after a code change and `q` quits. There is no camera here, so the Check in tab can't scan; use the QR page's test link on the website instead.
+
+### 2b. On the Android emulator
+
+The Android SDK and an emulator phone (`vp_pixel`, a Pixel 6) are installed on E:. The Android tools must be told so in each PowerShell window you use for them:
+
+```powershell
+$env:ANDROID_HOME = 'E:\IDEs\Android\Sdk'
+$env:ANDROID_USER_HOME = 'E:\IDEs\Android\user'
+$env:ANDROID_AVD_HOME = 'E:\IDEs\Android\user\avd'                       # where the emulator looks for vp_pixel
+$env:GRADLE_USER_HOME = 'E:\IDEs\gradle'                                  # Gradle caches several GB
+$env:JAVA_TOOL_OPTIONS = '-Djavax.net.ssl.trustStoreType=Windows-ROOT'    # lets Gradle download through the PC's certificates
+```
+
+Start the emulator with its window, in one window (with those variables):
+
+```powershell
+& E:\IDEs\Android\Sdk\emulator\emulator.exe -avd vp_pixel
+```
+
+When the phone has started, in another (with the same variables):
+
+```powershell
+cd E:\workspace_self_emp\claude_ws\volunteerportal\mobile
+flutter run -d emulator-5554          # the first build takes several minutes
+```
+
+In the app, use server **`http://10.0.2.2:8080`**: inside the emulator that address is your PC (`localhost` would be the emulator itself). If "System UI isn't responding" appears at startup, tap **Wait**. The emulator's camera shows a virtual room, so it can't scan a real QR code.
+
+### 2c. On your own Android phone
+
+1. On the phone, turn on **Developer options** (Settings → About phone → tap *Build number* 7 times), then **USB debugging** in them.
+2. Connect it by USB and accept the prompt on the phone. `flutter devices` should list it.
+3. In a PowerShell window with the variables from 2b: `flutter run`.
+4. In the app, use server `http://<your PC's Wi-Fi address>:8080` (the IPv4 address of the Wi-Fi adapter in `ipconfig`); the phone must be on the same Wi-Fi. If it can't connect, allow Java through Windows Firewall on private networks.
+
+Plain `http://` works because these are debug builds (`android/app/src/debug/AndroidManifest.xml` allows it); release builds need `https`. An iPhone needs a Mac with Xcode.
+
+**To test check-in by scanning:** on the website as `demo_coordinator`, open Coordinator → *Demo Initiative* → Events → *Demo Event* → **Check-in QR**, and scan it from the app's Check in tab as `demo_volunteer`.
 
 ## Code map
 
