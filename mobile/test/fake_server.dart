@@ -17,6 +17,14 @@ class FakeServer {
   final List<Map<String, Object?>> attendance = [];
   bool notificationRead = false;
 
+  /// Open initiatives with my membership in each: one of every kind, as GET /api/initiatives returns them.
+  List<Map<String, Object?>> initiatives = [
+    {'id': 487, 'name': 'Demo Initiative', 'description': 'Created by the dev profile.', 'office': 'Demo Office', 'membership': 'APPROVED'},
+    {'id': 488, 'name': 'Beach Clean-up', 'description': null, 'office': null, 'membership': 'PENDING'},
+    {'id': 489, 'name': 'Food Bank', 'description': 'Sorting donations.', 'office': null, 'membership': 'REJECTED'},
+    {'id': 490, 'name': 'Library Reading', 'description': 'Reading to children.', 'office': 'Demo Office', 'membership': 'NONE'},
+  ];
+
   late final http.Client client = MockClient((request) async {
     requests.add(request);
     return _handle(request);
@@ -48,6 +56,8 @@ class FakeServer {
         return http.Response('', 204);
       case '/api/me':
         return _json(_me);
+      case '/api/initiatives':
+        return _json(initiatives);
       case '/api/events':
         return _json([
           {

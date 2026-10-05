@@ -43,6 +43,45 @@ class LoginResult {
       );
 }
 
+/// My membership in an initiative: never asked, asked and waiting, approved or turned down.
+enum Membership {
+  none,
+  pending,
+  approved,
+  rejected;
+
+  static Membership parse(String? value) => switch (value) {
+        'PENDING' => pending,
+        'APPROVED' => approved,
+        'REJECTED' => rejected,
+        _ => none,
+      };
+}
+
+class InitiativeItem {
+  const InitiativeItem({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.office,
+    required this.membership,
+  });
+
+  final int id;
+  final String name;
+  final String? description;
+  final String? office;
+  final Membership membership;
+
+  factory InitiativeItem.fromJson(Map<String, dynamic> json) => InitiativeItem(
+        id: json['id'] as int,
+        name: json['name'] as String? ?? '',
+        description: json['description'] as String?,
+        office: json['office'] as String?,
+        membership: Membership.parse(json['membership'] as String?),
+      );
+}
+
 /// My check-in status for an event.
 enum EventStatus { notCheckedIn, checkedIn, checkedOut }
 

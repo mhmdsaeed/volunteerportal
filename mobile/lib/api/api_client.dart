@@ -66,6 +66,9 @@ class ApiClient {
 
   Future<Me> me() async => Me.fromJson(await _send('GET', '/api/me') as Map<String, dynamic>);
 
+  Future<List<InitiativeItem>> initiatives() async =>
+      _list(await _send('GET', '/api/initiatives')).map(InitiativeItem.fromJson).toList();
+
   Future<List<EventItem>> events() async =>
       _list(await _send('GET', '/api/events')).map(EventItem.fromJson).toList();
 

@@ -8,7 +8,16 @@ import '../theme.dart';
 /// Loads a list from the API and shows it, with loading, error (+ retry), empty and
 /// pull-to-refresh states. Calls go through [AppState.guard], so an expired token logs out.
 class AsyncList<T> extends StatefulWidget {
-  const AsyncList({super.key, required this.load, required this.itemBuilder, required this.emptyText, this.firstItemBuilder});
+  const AsyncList({
+    super.key,
+    required this.load,
+    required this.itemBuilder,
+    required this.emptyText,
+    this.firstItemBuilder,
+    this.where,
+    this.headerBuilder,
+    this.emptyAction,
+  });
 
   final Future<List<T>> Function() load;
   final Widget Function(BuildContext context, T item, VoidCallback reload) itemBuilder;
@@ -16,6 +25,15 @@ class AsyncList<T> extends StatefulWidget {
 
   /// Builds the first item differently (e.g. the next event as a pass), shown above the list.
   final Widget Function(BuildContext context, T item, VoidCallback reload)? firstItemBuilder;
+
+  /// Shows only the loaded items that pass; changing it filters again without reloading.
+  final bool Function(T item)? where;
+
+  /// Shown above the list, also when it is empty, and given every loaded item (e.g. filter chips with counts).
+  final Widget Function(BuildContext context, List<T> all)? headerBuilder;
+
+  /// A button under [emptyText].
+  final Widget? emptyAction;
 
   @override
   State<AsyncList<T>> createState() => AsyncListState<T>();
@@ -49,27 +67,37 @@ class AsyncListState<T> extends State<AsyncList<T>> {
             action: FilledButton.tonal(onPressed: reload, child: Text(AppLocalizations.of(context).retry)),
           );
         }
-        final items = snapshot.data!;
+        final all = snapshot.data!;
+        final where = widget.where;
+        final items = where == null ? all : all.where(where).toList();
+        final header = widget.headerBuilder?.call(context, all);
         return RefreshIndicator(
           onRefresh: () async {
             reload();
             await _items.catchError((_) => <T>[]);
           },
           child: items.isEmpty
-              ? ListView(children: [SizedBox(height: 360, child: MessageView(icon: Icons.inbox, text: widget.emptyText))])
-              : _list(context, items),
+              ? ListView(physics: const AlwaysScrollableScrollPhysics(), children: [
+                  ?header,
+                  SizedBox(
+                    height: 360,
+                    child: MessageView(icon: Icons.inbox, text: widget.emptyText, action: widget.emptyAction),
+                  ),
+                ])
+              : _list(context, items, header),
         );
       },
     );
   }
 
   /// The items as rows on a white sheet; with [AsyncList.firstItemBuilder], the first item sits above it.
-  Widget _list(BuildContext context, List<T> items) {
+  Widget _list(BuildContext context, List<T> items, Widget? header) {
     final first = widget.firstItemBuilder;
     final rows = first == null ? items : items.skip(1).toList();
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(), // so pull-to-refresh works on short lists
       children: [
+        ?header,
         if (first != null) Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 8), child: first(context, items.first, reload)),
         if (rows.isNotEmpty)
           Material(

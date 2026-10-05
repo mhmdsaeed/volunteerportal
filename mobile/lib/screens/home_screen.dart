@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import 'events_screen.dart';
 import 'history_screen.dart';
+import 'initiatives_screen.dart';
 import 'notifications_screen.dart';
 import 'profile_screen.dart';
 import 'scan_screen.dart';
 
-/// The logged-in app: Events, Check in (scan), History and Notifications tabs.
+/// The logged-in app: Events, Initiatives, Check in (scan, in the middle), History and Notifications tabs.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.scannerBuilder = cameraScanner});
 
@@ -28,11 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final t = AppLocalizations.of(context);
     final tabs = [
       EventsScreen(key: ValueKey('events-$_refresh')),
+      const InitiativesScreen(),
       ScanScreen(scannerBuilder: widget.scannerBuilder, onCheckedIn: () => setState(() => _refresh++)),
       HistoryScreen(key: ValueKey('history-$_refresh')),
       const NotificationsScreen(),
     ];
-    final titles = [t.tabEvents, t.tabScan, t.tabHistory, t.tabNotifications];
+    final titles = [t.tabEvents, t.tabInitiatives, t.tabScan, t.tabHistory, t.tabNotifications];
 
     return Scaffold(
       appBar: AppBar(
@@ -53,9 +55,10 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (index) => setState(() => _tab = index),
         destinations: [
           NavigationDestination(icon: const Icon(Icons.event), label: t.tabEvents),
+          NavigationDestination(key: const Key('initiativesTab'), icon: const Icon(Icons.flag_outlined), label: t.tabInitiatives),
           NavigationDestination(key: const Key('scanTab'), icon: const Icon(Icons.qr_code_scanner), label: t.tabScanShort),
           NavigationDestination(icon: const Icon(Icons.history), label: t.tabHistory),
-          NavigationDestination(icon: const Icon(Icons.notifications), label: t.tabNotifications),
+          NavigationDestination(icon: const Icon(Icons.notifications), label: t.tabNotificationsShort),
         ],
       ),
     );

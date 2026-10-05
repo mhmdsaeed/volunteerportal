@@ -44,6 +44,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Taps a filter chip on the Initiatives tab, scrolling the chip row to it first (it scrolls sideways).
+  Future<void> showFilter(WidgetTester tester, String key) async {
+    await tester.ensureVisible(find.byKey(Key(key)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key(key)));
+  }
+
   setUp(() {
     server = FakeServer();
     store = MemorySessionStore();
@@ -158,6 +165,66 @@ void main() {
     expect(store.values[SessionStore.token], isNull);
   });
 
+  testWidgets('Initiatives opens on the ones I joined and filters by my membership', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+
+    await tester.tap(find.byKey(const Key('initiativesTab')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('initiative-487')), findsOneWidget);
+    expect(find.text('Demo Initiative'), findsOneWidget);
+    expect(find.text('Approved'), findsOneWidget);
+    expect(find.text('Library Reading'), findsNothing);
+    expect(find.descendant(of: find.byKey(const Key('filter-all')), matching: find.text('4')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('filter-joined')), matching: find.text('1')), findsOneWidget);
+
+    await showFilter(tester, 'filter-notJoined');
+    await tester.pumpAndSettle();
+    expect(find.text('Library Reading'), findsOneWidget);
+    expect(find.text('Demo Initiative'), findsNothing);
+    expect(find.text('To join one, open it on the website and answer its questions.'), findsOneWidget);
+
+    await showFilter(tester, 'filter-pending');
+    await tester.pumpAndSettle();
+    expect(find.text('Beach Clean-up'), findsOneWidget);
+
+    await showFilter(tester, 'filter-rejected');
+    await tester.pumpAndSettle();
+    expect(find.text('Food Bank'), findsOneWidget);
+    expect(find.text('Not approved'), findsNWidgets(2)); // the chip and the pill
+
+    await showFilter(tester, 'filter-all');
+    await tester.pumpAndSettle();
+    for (final id in [487, 488, 489, 490]) {
+      expect(find.byKey(Key('initiative-$id')), findsOneWidget);
+    }
+    // Switching filters reuses the loaded list
+    expect(server.requests.where((r) => r.url.path == '/api/initiatives'), hasLength(1));
+  });
+
+  testWidgets('with nothing joined, Initiatives points to the ones I can join', (tester) async {
+    server.initiatives = [
+      {'id': 490, 'name': 'Library Reading', 'description': null, 'office': null, 'membership': 'NONE'},
+    ];
+    await startApp(tester);
+    await logIn(tester);
+
+    await tester.tap(find.byKey(const Key('initiativesTab')));
+    await tester.pumpAndSettle();
+    expect(find.text("You haven't joined any initiatives yet."), findsOneWidget);
+    expect(find.text('Library Reading'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('showInitiativesToJoin')));
+    await tester.pumpAndSettle();
+    expect(find.text('Library Reading'), findsOneWidget);
+    expect(tester.widget<ChoiceChip>(find.byKey(const Key('filter-notJoined'))).selected, isTrue);
+
+    await showFilter(tester, 'filter-pending');
+    await tester.pumpAndSettle();
+    expect(find.text('No initiatives here.'), findsOneWidget);
+    expect(find.byKey(const Key('showInitiativesToJoin')), findsNothing);
+  });
+
   testWidgets('Arabic turns the layout right-to-left, translates the app and is sent to the server', (tester) async {
     await startApp(tester);
     await logIn(tester);
@@ -171,6 +238,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('الفعاليات'), findsWidgets);
+    expect(find.text('المبادرات'), findsOneWidget); // the Initiatives tab
     expect(Directionality.of(tester.element(find.text('Demo Event'))), TextDirection.rtl);
     // Arabic month and weekday names, but Western digits like the website
     expect(find.textContaining('23 سبتمبر'), findsOneWidget);

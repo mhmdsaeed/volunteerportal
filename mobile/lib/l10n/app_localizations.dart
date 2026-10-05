@@ -224,6 +224,102 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get tabNotifications;
 
+  /// Bottom tab label for the Notifications tab; five tabs share a 360-wide phone, so it must be short. The screen title uses tabNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get tabNotificationsShort;
+
+  /// No description provided for @tabInitiatives.
+  ///
+  /// In en, this message translates to:
+  /// **'Initiatives'**
+  String get tabInitiatives;
+
+  /// No description provided for @filterJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get filterJoined;
+
+  /// No description provided for @filterPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get filterPending;
+
+  /// No description provided for @filterRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get filterRejected;
+
+  /// No description provided for @filterNotJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Not joined'**
+  String get filterNotJoined;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @membershipNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not joined'**
+  String get membershipNone;
+
+  /// No description provided for @membershipPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get membershipPending;
+
+  /// No description provided for @membershipApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get membershipApproved;
+
+  /// No description provided for @membershipRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get membershipRejected;
+
+  /// No description provided for @noJoinedInitiatives.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t joined any initiatives yet.'**
+  String get noJoinedInitiatives;
+
+  /// No description provided for @noInitiativesHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No initiatives here.'**
+  String get noInitiativesHere;
+
+  /// No description provided for @noInitiativesOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'No initiatives are open right now.'**
+  String get noInitiativesOpen;
+
+  /// No description provided for @showInitiativesToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Show initiatives you can join'**
+  String get showInitiativesToJoin;
+
+  /// No description provided for @joinOnWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'To join one, open it on the website and answer its questions.'**
+  String get joinOnWebsite;
+
   /// No description provided for @profile.
   ///
   /// In en, this message translates to:

@@ -76,6 +76,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabNotifications => 'Notifications';
 
   @override
+  String get tabNotificationsShort => 'Alerts';
+
+  @override
+  String get tabInitiatives => 'Initiatives';
+
+  @override
+  String get filterJoined => 'Joined';
+
+  @override
+  String get filterPending => 'Pending';
+
+  @override
+  String get filterRejected => 'Not approved';
+
+  @override
+  String get filterNotJoined => 'Not joined';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get membershipNone => 'Not joined';
+
+  @override
+  String get membershipPending => 'Pending';
+
+  @override
+  String get membershipApproved => 'Approved';
+
+  @override
+  String get membershipRejected => 'Not approved';
+
+  @override
+  String get noJoinedInitiatives => 'You haven\'t joined any initiatives yet.';
+
+  @override
+  String get noInitiativesHere => 'No initiatives here.';
+
+  @override
+  String get noInitiativesOpen => 'No initiatives are open right now.';
+
+  @override
+  String get showInitiativesToJoin => 'Show initiatives you can join';
+
+  @override
+  String get joinOnWebsite =>
+      'To join one, open it on the website and answer its questions.';
+
+  @override
   String get profile => 'Profile';
 
   @override

@@ -75,6 +75,55 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tabNotifications => 'الإشعارات';
 
   @override
+  String get tabNotificationsShort => 'الإشعارات';
+
+  @override
+  String get tabInitiatives => 'المبادرات';
+
+  @override
+  String get filterJoined => 'المنضم إليها';
+
+  @override
+  String get filterPending => 'قيد الانتظار';
+
+  @override
+  String get filterRejected => 'غير مقبول';
+
+  @override
+  String get filterNotJoined => 'غير منضم';
+
+  @override
+  String get filterAll => 'الكل';
+
+  @override
+  String get membershipNone => 'غير منضم';
+
+  @override
+  String get membershipPending => 'قيد الانتظار';
+
+  @override
+  String get membershipApproved => 'مقبول';
+
+  @override
+  String get membershipRejected => 'غير مقبول';
+
+  @override
+  String get noJoinedInitiatives => 'لم تنضم إلى أي مبادرة بعد.';
+
+  @override
+  String get noInitiativesHere => 'لا توجد مبادرات هنا.';
+
+  @override
+  String get noInitiativesOpen => 'لا توجد مبادرات متاحة حالياً.';
+
+  @override
+  String get showInitiativesToJoin => 'عرض المبادرات المتاحة';
+
+  @override
+  String get joinOnWebsite =>
+      'للانضمام إلى مبادرة، افتحها على الموقع وأجب عن أسئلتها.';
+
+  @override
   String get profile => 'الملف الشخصي';
 
   @override
