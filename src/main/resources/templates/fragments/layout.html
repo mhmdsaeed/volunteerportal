@@ -11,18 +11,18 @@
           as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <script>
-        // Apply the saved sidebar state before first paint to avoid a flash of the wrong width
-        (function () {
+        // Apply the sidebar state before first paint to avoid a flash of the wrong width: collapsed on small
+        // screens, otherwise as the user left it. Also used when the window crosses that width (see below).
+        window.vpApplySidebarDefault = function () {
             var collapsed = window.matchMedia('(max-width: 767.98px)').matches;
             try {
                 if (!collapsed) {
                     collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
                 }
             } catch (e) { /* storage unavailable */ }
-            if (collapsed) {
-                document.documentElement.classList.add('sidebar-collapsed');
-            }
-        })();
+            document.documentElement.classList.toggle('sidebar-collapsed', collapsed);
+        };
+        window.vpApplySidebarDefault();
     </script>
 </head>
 <body>
@@ -92,6 +92,10 @@
             (function () {
                 var root = document.documentElement;
                 var smallScreen = window.matchMedia('(max-width: 767.98px)');
+
+                // Narrowing the window (or turning a tablet) below that width folds the menu away, as on a
+                // page loaded there; widening it again brings back the state the user chose
+                smallScreen.addEventListener('change', window.vpApplySidebarDefault);
 
                 document.getElementById('sidebarToggle').addEventListener('click', function () {
                     var collapsed = root.classList.toggle('sidebar-collapsed');
