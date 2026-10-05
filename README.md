@@ -5,7 +5,7 @@ Spring Boot 4.1.1 / Java 21 / Thymeleaf / Bootstrap / MySQL volunteer management
 | Folder | What's in it |
 |---|---|
 | `src/` | The Spring Boot server: website and mobile JSON API |
-| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, initiatives (with the same Joined/Pending/Not approved/Not joined/All filter as the website), QR check-in, history, notifications, profile; same look and English/Arabic as the website |
+| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, initiatives (with the same Joined/Pending/Not approved/Not joined/All filter as the website; join one by answering its questions, or withdraw a pending request), QR check-in, history, notifications, profile; same look and English/Arabic as the website |
 | [`deploy/`](deploy/README.md) | Production setup: Docker Compose with MySQL and Caddy (HTTPS), backups |
 
 ## Stack
@@ -102,6 +102,9 @@ JSON API for the volunteer mobile app under `/api` (the Flutter app itself is in
 | `POST /api/auth/logout` | — | `204`; the token is revoked |
 | `GET /api/me` | — | `{"id", "username", "email", "roles", "grade", "points"}` |
 | `GET /api/initiatives` | — | open initiatives with `office` and `membership`: `NONE` / `PENDING` / `APPROVED` / `REJECTED` (the app filters on it) |
+| `GET /api/initiatives/{id}` | — | one open initiative with my `membership` and its `questions`: `{"id", "text", "type", "choices"}`, `type` `YES_NO` / `ONE_CHOICE` / `MANY_CHOICES` / `TEXT`. `404` if it isn't open |
+| `POST /api/initiatives/{id}/join` | `{"answers": {"<question id>": ["..."]}}` (optional) | the initiative with `membership` `PENDING`. Values are what the website's join form sends: `"1"`/`"0"` for yes/no, choice numbers from 1, or the text; unanswered questions are left out. Answers go to `volunteer_initiative_answer` and the initiative's managers are notified, as from the website. `409 already_requested` if I already asked, `404` if it isn't open |
+| `POST /api/initiatives/{id}/withdraw` | — | `204`; my pending request and its answers are deleted. `409 already_reviewed` once a coordinator answered it, `404` if there is none |
 | `GET /api/events` | — | upcoming events of initiatives I'm an approved member of, with `requiresLocation` and `myStatus`: `NOT_CHECKED_IN` / `CHECKED_IN` / `CHECKED_OUT` |
 | `POST /api/checkin` | `{"qr": "<scanned text>", "latitude"?, "longitude"?}` | `{"result", "success", "eventId", "event", "message"}` — checks in, or out if already in; same rules as the web check-in. `400 invalid_qr` if it isn't an event check-in QR |
 | `GET /api/attendance` | — | my check-ins/outs, newest first |
