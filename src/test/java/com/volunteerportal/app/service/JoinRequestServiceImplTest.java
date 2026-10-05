@@ -12,11 +12,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.volunteerportal.app.dto.JoinRequestAnswerRow;
 import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.Office;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
+import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
+import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
+import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +46,12 @@ class JoinRequestServiceImplTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private InitiativeQuestionRepository initiativeQuestionRepository;
+
+    @Mock
+    private VolunteerInitiativeAnswerRepository answerRepository;
 
     @InjectMocks
     private JoinRequestServiceImpl joinRequestService;
@@ -180,6 +191,43 @@ class JoinRequestServiceImplTest {
 
         assertThat(joinRequestService.countPendingRequests(null)).isEqualTo(5L);
         assertThat(joinRequestService.countPendingRequests(7L)).isEqualTo(2L);
+    }
+
+    @Test
+    void findAnswers_listsEveryQuestionInOrder_withTheAnswerOrNone() {
+        Initiative initiative = new Initiative();
+        initiative.setId(5L);
+        VolunteerInitiative request = new VolunteerInitiative();
+        request.setId(77L);
+        request.setInitiative(initiative);
+        given(volunteerInitiativeRepository.findById(77L)).willReturn(Optional.of(request));
+        InitiativeQuestion yesNo = question(11L, 1, "Are you over 18?");
+        InitiativeQuestion text = question(12L, 4, "Tell us about yourself");
+        InitiativeQuestion blank = question(13L, 4, "Anything else?");
+        given(initiativeQuestionRepository.findByInitiativeId(5L)).willReturn(List.of(blank, text, yesNo));
+        given(answerRepository.findByVolunteerInitiativeId(77L)).willReturn(List.of(
+                answer(text, null, "I run a food bank"), answer(yesNo, 2, "No")));
+
+        assertThat(joinRequestService.findAnswers(77L)).containsExactly(
+                new JoinRequestAnswerRow("Are you over 18?", 1, 2, "No"),
+                new JoinRequestAnswerRow("Tell us about yourself", 4, null, "I run a food bank"),
+                new JoinRequestAnswerRow("Anything else?", 4, null, null));
+    }
+
+    private static InitiativeQuestion question(Long id, int typeId, String text) {
+        InitiativeQuestion question = new InitiativeQuestion();
+        question.setId(id);
+        question.setQuestionTypeId(typeId);
+        question.setQuestionText(text);
+        return question;
+    }
+
+    private static VolunteerInitiativeAnswer answer(InitiativeQuestion question, Integer choice, String text) {
+        VolunteerInitiativeAnswer answer = new VolunteerInitiativeAnswer();
+        answer.setInitiativeQuestion(question);
+        answer.setAnswerChoiceNumber(choice);
+        answer.setAnswerText(text);
+        return answer;
     }
 
     @Test

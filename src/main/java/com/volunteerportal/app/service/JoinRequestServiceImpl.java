@@ -1,7 +1,10 @@
 package com.volunteerportal.app.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -9,9 +12,14 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.volunteerportal.app.dto.JoinRequestAnswerRow;
 import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.VolunteerInitiative;
+import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
+import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
+import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 
 @Service
@@ -20,12 +28,17 @@ public class JoinRequestServiceImpl implements JoinRequestService {
     private final VolunteerInitiativeRepository volunteerInitiativeRepository;
     private final InitiativeRepository initiativeRepository;
     private final NotificationService notificationService;
+    private final InitiativeQuestionRepository initiativeQuestionRepository;
+    private final VolunteerInitiativeAnswerRepository answerRepository;
 
     public JoinRequestServiceImpl(VolunteerInitiativeRepository volunteerInitiativeRepository,
-            InitiativeRepository initiativeRepository, NotificationService notificationService) {
+            InitiativeRepository initiativeRepository, NotificationService notificationService,
+            InitiativeQuestionRepository initiativeQuestionRepository, VolunteerInitiativeAnswerRepository answerRepository) {
         this.volunteerInitiativeRepository = volunteerInitiativeRepository;
         this.initiativeRepository = initiativeRepository;
         this.notificationService = notificationService;
+        this.initiativeQuestionRepository = initiativeQuestionRepository;
+        this.answerRepository = answerRepository;
     }
 
     @Override
@@ -67,6 +80,25 @@ public class JoinRequestServiceImpl implements JoinRequestService {
     public VolunteerInitiative findById(Long id) {
         return volunteerInitiativeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Join request not found: " + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<JoinRequestAnswerRow> findAnswers(Long requestId) {
+        VolunteerInitiative request = findById(requestId);
+        Map<Long, VolunteerInitiativeAnswer> answers = new HashMap<>();
+        for (VolunteerInitiativeAnswer answer : answerRepository.findByVolunteerInitiativeId(request.getId())) {
+            answers.put(answer.getInitiativeQuestion().getId(), answer);
+        }
+        return initiativeQuestionRepository.findByInitiativeId(request.getInitiative().getId()).stream()
+                .sorted(Comparator.comparing(InitiativeQuestion::getId))
+                .map(question -> {
+                    VolunteerInitiativeAnswer answer = answers.get(question.getId());
+                    return new JoinRequestAnswerRow(question.getQuestionText(), question.getQuestionTypeId(),
+                            answer != null ? answer.getAnswerChoiceNumber() : null,
+                            answer != null ? answer.getAnswerText() : null);
+                })
+                .toList();
     }
 
     @Override

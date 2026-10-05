@@ -889,3 +889,24 @@ html.sidebar-collapsed .sidebar .nav-link .badge {
     color: var(--vp-ink);
     background-color: #fff;
 }
+
+/* A join request's answers, for the coordinator reviewing it: the question muted, the answer in full */
+.vp-answers .list-group-item {
+    padding-block: 0.85rem;
+}
+
+.vp-answer-question {
+    display: inline;
+    color: var(--vp-muted);
+}
+
+.vp-answer {
+    margin-top: 0.25rem;
+    font-weight: 500;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.vp-request-facts dd {
+    margin-bottom: 0.4rem;
+}

@@ -30,7 +30,8 @@
                         <span th:if="${request.responseJoinDttm != null and request.enabled == true}" class="badge text-bg-success" th:text="#{status.approved}">Approved</span>
                         <span th:if="${request.responseJoinDttm != null and request.enabled == false}" class="badge text-bg-danger" th:text="#{status.notApproved}">Not approved</span>
                     </td>
-                    <td th:text="${request.answerCount != null ? request.answerCount : 0}"></td>
+                    <td><a th:href="@{/coordinator/requests/{requestId}(requestId=${request.id},from='initiative')}"
+                           th:text="#{joinRequests.viewAnswers(${request.answerCount != null ? request.answerCount : 0})}">View answers (0)</a></td>
                     <td class="text-end" th:if="${request.responseJoinDttm == null}">
                         <form th:action="@{/coordinator/initiatives/{initiativeId}/requests/{requestId}/approve(initiativeId=${initiative.id},requestId=${request.id})}"
                               method="post" class="d-inline">

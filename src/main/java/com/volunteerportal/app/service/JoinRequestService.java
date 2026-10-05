@@ -2,6 +2,7 @@ package com.volunteerportal.app.service;
 
 import java.util.List;
 
+import com.volunteerportal.app.dto.JoinRequestAnswerRow;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.VolunteerInitiative;
 
@@ -25,6 +26,9 @@ public interface JoinRequestService {
     long countPendingRequests(Long managerId);
 
     VolunteerInitiative findById(Long id);
+
+    /** The request's initiative's questions, in order, each with the volunteer's answer (or none). */
+    List<JoinRequestAnswerRow> findAnswers(Long requestId);
 
     /** @throws IllegalStateException if the request has already been approved or rejected */
     VolunteerInitiative approve(Long id);

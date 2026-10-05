@@ -28,7 +28,8 @@
                            th:text="${request.initiative.name}"></a>
                     </td>
                     <td th:text="${request.requestJoinDttm != null ? #temporals.format(request.requestJoinDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
-                    <td th:text="${request.answerCount != null ? request.answerCount : 0}"></td>
+                    <td><a th:href="@{/coordinator/requests/{requestId}(requestId=${request.id})}"
+                           th:text="#{joinRequests.viewAnswers(${request.answerCount != null ? request.answerCount : 0})}">View answers (0)</a></td>
                     <td class="text-end text-nowrap">
                         <form th:action="@{/coordinator/requests/{requestId}/approve(requestId=${request.id})}" method="post" class="d-inline">
                             <button type="submit" class="btn btn-sm btn-success" th:text="#{joinRequests.approve}">Approve</button>

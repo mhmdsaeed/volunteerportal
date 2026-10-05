@@ -14,18 +14,22 @@ import com.volunteerportal.app.model.Attend;
 import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Grade;
 import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.Office;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
+import com.volunteerportal.app.model.VolunteerInitiativeAnswer;
 import com.volunteerportal.app.model.VolunteerProfile;
 import com.volunteerportal.app.repository.AttendRepository;
 import com.volunteerportal.app.repository.EventRepository;
 import com.volunteerportal.app.repository.GradeRepository;
+import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
 import com.volunteerportal.app.repository.OfficeRepository;
 import com.volunteerportal.app.repository.RoleRepository;
 import com.volunteerportal.app.repository.UserRepository;
+import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 import com.volunteerportal.app.repository.VolunteerProfileRepository;
 import com.volunteerportal.app.security.UserPrincipal;
@@ -79,6 +83,12 @@ class LazyAssociationRenderingTest {
 
     @Autowired
     private GradeRepository gradeRepository;
+
+    @Autowired
+    private InitiativeQuestionRepository initiativeQuestionRepository;
+
+    @Autowired
+    private VolunteerInitiativeAnswerRepository answerRepository;
 
     private UserPrincipal adminPrincipal() {
         return new UserPrincipal(userRepository.findByUsername("admin").orElseThrow());
@@ -235,6 +245,52 @@ class LazyAssociationRenderingTest {
                     .andExpect(content().string(containsString(volunteer.getUsername())));
         } finally {
             volunteerInitiativeRepository.delete(request);
+            initiativeRepository.delete(initiative);
+            userRepository.delete(volunteer);
+        }
+    }
+
+    @Test
+    void coordinatorRequestReview_withQuestionsAndAnswers_rendersWithoutError() throws Exception {
+        User volunteer = persistVolunteer("lazytest_reviewed_" + System.nanoTime());
+
+        Initiative initiative = new Initiative();
+        initiative.setName("Lazy Test Review Initiative " + System.nanoTime());
+        initiative.setEnabled(true);
+        initiative = initiativeRepository.save(initiative);
+
+        InitiativeQuestion question = new InitiativeQuestion();
+        question.setInitiative(initiative);
+        question.setQuestionText("Why do you want to help?");
+        question.setQuestionTypeId(4);
+        question = initiativeQuestionRepository.save(question);
+
+        VolunteerInitiative request = new VolunteerInitiative();
+        request.setUser(volunteer);
+        request.setInitiative(initiative);
+        request.setRequestJoinDttm(LocalDateTime.now());
+        request.setAnswerCount(1);
+        request = volunteerInitiativeRepository.save(request);
+
+        VolunteerInitiativeAnswer answer = new VolunteerInitiativeAnswer();
+        answer.setVolunteerInitiative(request);
+        answer.setInitiativeQuestion(question);
+        answer.setAnswerText("My neighbours need it");
+        answer.setAnswerDttm(LocalDateTime.now());
+        answer = answerRepository.save(answer);
+
+        try {
+            mockMvc.perform(get("/coordinator/requests/{id}", request.getId()).with(user(adminPrincipal())))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(volunteer.getUsername())))
+                    .andExpect(content().string(containsString(volunteer.getEmail())))
+                    .andExpect(content().string(containsString(initiative.getName())))
+                    .andExpect(content().string(containsString("Why do you want to help?")))
+                    .andExpect(content().string(containsString("My neighbours need it")));
+        } finally {
+            answerRepository.delete(answer);
+            volunteerInitiativeRepository.delete(request);
+            initiativeQuestionRepository.delete(question);
             initiativeRepository.delete(initiative);
             userRepository.delete(volunteer);
         }

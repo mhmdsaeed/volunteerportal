@@ -1,5 +1,6 @@
 package com.volunteerportal.app.controller;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.volunteerportal.app.config.SecurityConfig;
+import com.volunteerportal.app.dto.JoinRequestAnswerRow;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
@@ -21,6 +23,8 @@ import com.volunteerportal.app.service.InitiativeService;
 import com.volunteerportal.app.service.JoinRequestService;
 import com.volunteerportal.app.service.NotificationService;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -30,6 +34,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -239,6 +244,93 @@ class CoordinatorControllerTest {
         mockMvc.perform(post("/coordinator/requests/7/approve").with(user(admin)).with(csrf()))
                 .andExpect(redirectedUrl("/coordinator/requests"))
                 .andExpect(flash().attribute("decision", "alreadyDecided"));
+    }
+
+    /** A pending request from sara for initiative 5, with an answer for each kind of question and one left blank. */
+    private VolunteerInitiative givenRequestWithAnswers() {
+        Initiative initiative = initiative(5L);
+        VolunteerInitiative request = requestFor(77L, initiative);
+        User sara = new User();
+        sara.setId(9L);
+        sara.setUsername("sara");
+        sara.setEmail("sara@example.org");
+        request.setUser(sara);
+        request.setRequestJoinDttm(LocalDateTime.of(2026, 10, 5, 9, 30));
+        given(joinRequestService.findById(77L)).willReturn(request);
+        given(joinRequestService.findAnswers(77L)).willReturn(List.of(
+                new JoinRequestAnswerRow("Are you over 18?", 1, 1, "Yes"),
+                new JoinRequestAnswerRow("When can you come?", 2, 2, "Afternoon"),
+                new JoinRequestAnswerRow("What can you help with?", 3, 1, "Cooking, Driving"),
+                new JoinRequestAnswerRow("Tell us about yourself", 4, null, "I run a food bank"),
+                new JoinRequestAnswerRow("Anything else?", 4, null, null)));
+        return request;
+    }
+
+    @Test
+    void request_showsTheQuestionsWithTheVolunteersAnswers_toAManager() throws Exception {
+        UserPrincipal coordinator = userPrincipal(42L, "coord", "COORDINATOR");
+        VolunteerInitiative request = givenRequestWithAnswers();
+        given(joinRequestService.canManage(request.getInitiative(), 42L)).willReturn(true);
+
+        mockMvc.perform(get("/coordinator/requests/77").with(user(coordinator)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("coordinator/requests/detail"))
+                .andExpect(content().string(containsString("Join request from sara")))
+                .andExpect(content().string(containsString("sara@example.org")))
+                .andExpect(content().string(containsString("Are you over 18?")))
+                .andExpect(content().string(containsString("Afternoon")))
+                .andExpect(content().string(containsString("Cooking, Driving")))
+                .andExpect(content().string(containsString("I run a food bank")))
+                .andExpect(content().string(containsString("Not answered")))
+                // decided from here, the forms go back to the pending list
+                .andExpect(content().string(containsString("action=\"/coordinator/requests/77/approve\"")))
+                .andExpect(content().string(containsString("action=\"/coordinator/requests/77/reject\"")));
+    }
+
+    @Test
+    void request_yesNoAnswer_isShownInTheReviewersLanguage() throws Exception {
+        UserPrincipal admin = userPrincipal(1L, "admin", "ADMIN");
+        givenRequestWithAnswers();
+
+        mockMvc.perform(get("/coordinator/requests/77").param("lang", "ar").with(user(admin)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("نعم")))
+                .andExpect(content().string(containsString("لم يُجب عنه")));
+    }
+
+    @Test
+    void request_fromTheInitiativesList_decidesAndReturnsThere() throws Exception {
+        UserPrincipal admin = userPrincipal(1L, "admin", "ADMIN");
+        givenRequestWithAnswers();
+
+        mockMvc.perform(get("/coordinator/requests/77").param("from", "initiative").with(user(admin)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("action=\"/coordinator/initiatives/5/requests/77/approve\"")))
+                .andExpect(content().string(containsString("href=\"/coordinator/initiatives/5/requests\"")));
+    }
+
+    @Test
+    void request_alreadyDecided_hasNoButtons() throws Exception {
+        UserPrincipal admin = userPrincipal(1L, "admin", "ADMIN");
+        VolunteerInitiative request = givenRequestWithAnswers();
+        request.setResponseJoinDttm(LocalDateTime.of(2026, 10, 5, 10, 0));
+        request.setEnabled(true);
+
+        mockMvc.perform(get("/coordinator/requests/77").with(user(admin)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Approved")))
+                .andExpect(content().string(not(containsString("/approve"))));
+    }
+
+    @Test
+    void request_nonManagingCoordinator_isForbidden() throws Exception {
+        UserPrincipal coordinator = userPrincipal(42L, "coord", "COORDINATOR");
+        givenRequestWithAnswers();
+        given(joinRequestService.canManage(any(), anyLong())).willReturn(false);
+
+        mockMvc.perform(get("/coordinator/requests/77").with(user(coordinator)))
+                .andExpect(status().isForbidden());
+        verify(joinRequestService, never()).findAnswers(anyLong());
     }
 
     private Initiative initiative(Long initiativeId) {

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.volunteerportal.app.model.Initiative;
@@ -75,6 +76,23 @@ public class CoordinatorController {
     public String pendingRequests(@AuthenticationPrincipal UserPrincipal principal, Model model) {
         model.addAttribute("requests", joinRequestService.findPendingRequests(managerIdFor(principal)));
         return "coordinator/requests/pending";
+    }
+
+    /**
+     * One request with the initiative's questions and the volunteer's answers, to decide on. Opened from the
+     * pending list, or with {@code from=initiative} from the initiative's request list, which it returns to.
+     */
+    @GetMapping("/requests/{requestId}")
+    public String request(@PathVariable Long requestId,
+            @RequestParam(name = "from", required = false) String from,
+            @AuthenticationPrincipal UserPrincipal principal, Model model) {
+        VolunteerInitiative request = joinRequestService.findById(requestId);
+        assertCanManage(request.getInitiative(), principal);
+
+        model.addAttribute("request", request);
+        model.addAttribute("answers", joinRequestService.findAnswers(requestId));
+        model.addAttribute("fromInitiative", "initiative".equals(from));
+        return "coordinator/requests/detail";
     }
 
     @PostMapping("/requests/{requestId}/approve")
