@@ -182,7 +182,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Library Reading'), findsOneWidget);
     expect(find.text('Demo Initiative'), findsNothing);
-    expect(find.text('To join one, open it on the website and answer its questions.'), findsOneWidget);
+    expect(find.text('Tap an initiative to answer its questions and ask to join.'), findsOneWidget);
 
     await showFilter(tester, 'filter-pending');
     await tester.pumpAndSettle();
@@ -200,6 +200,100 @@ void main() {
     }
     // Switching filters reuses the loaded list
     expect(server.requests.where((r) => r.url.path == '/api/initiatives'), hasLength(1));
+  });
+
+  /// Opens an initiative from the Initiatives tab, under the given filter.
+  Future<void> openInitiative(WidgetTester tester, String filter, int id) async {
+    await tester.tap(find.byKey(const Key('initiativesTab')));
+    await tester.pumpAndSettle();
+    await showFilter(tester, filter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('initiative-$id')));
+    await tester.pumpAndSettle();
+  }
+
+  /// Taps something on the initiative screen, scrolling down to it first: the list only builds what is near the screen.
+  Future<void> tapVisible(WidgetTester tester, Key key) async {
+    await tester.dragUntilVisible(find.byKey(key), find.byType(ListView), const Offset(0, -200));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(key));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('joining from the app sends the answers, and the request then waits for review', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await openInitiative(tester, 'filter-notJoined', 490);
+
+    expect(find.text('Reading to children.'), findsOneWidget);
+    expect(find.text('Are you over 18?'), findsOneWidget);
+    await tapVisible(tester, const Key('answer-11-1')); // yes
+    await tapVisible(tester, const Key('answer-12-1'));
+    await tapVisible(tester, const Key('answer-12-2')); // one choice: Evening replaces Morning
+    await tapVisible(tester, const Key('answer-13-3'));
+    await tapVisible(tester, const Key('answer-13-1')); // many choices: Reading and Tidying
+    await tester.ensureVisible(find.byKey(const Key('answer-14')));
+    await tester.enterText(find.byKey(const Key('answer-14')), '  I like books ');
+    await tapVisible(tester, const Key('joinButton'));
+
+    expect(server.joinAnswers, {
+      '11': ['1'],
+      '12': ['2'],
+      '13': ['1', '3'],
+      '14': ['I like books'],
+    });
+    expect(find.text('Request sent. A coordinator will review it.'), findsOneWidget);
+    // Back on the list, reloaded: it is no longer under Not joined, but under Pending
+    expect(find.text('Library Reading'), findsNothing);
+    await showFilter(tester, 'filter-pending');
+    await tester.pumpAndSettle();
+    expect(find.text('Library Reading'), findsOneWidget);
+  });
+
+  testWidgets('a pending request can be withdrawn after confirming', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await openInitiative(tester, 'filter-pending', 488);
+
+    expect(find.byKey(const Key('joinButton')), findsNothing);
+    await tapVisible(tester, const Key('withdrawButton'));
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(server.requests.where((r) => r.url.path.endsWith('/withdraw')), isEmpty);
+
+    await tapVisible(tester, const Key('withdrawButton'));
+    await tester.tap(find.byKey(const Key('confirmWithdraw')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Request withdrawn.'), findsOneWidget);
+    expect(find.text('Beach Clean-up'), findsNothing);
+    await showFilter(tester, 'filter-notJoined');
+    await tester.pumpAndSettle();
+    expect(find.text('Beach Clean-up'), findsOneWidget);
+  });
+
+  testWidgets('a joined initiative says where its events are, with nothing to send', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await openInitiative(tester, 'filter-joined', 487);
+
+    expect(find.text("You're a member. This initiative's events are on the Events tab."), findsOneWidget);
+    expect(find.byKey(const Key('joinButton')), findsNothing);
+    expect(find.byKey(const Key('withdrawButton')), findsNothing);
+  });
+
+  testWidgets('a refused join request says why and stays on the initiative', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await openInitiative(tester, 'filter-notJoined', 490);
+    server.initiatives.firstWhere((i) => i['id'] == 490)['membership'] = 'PENDING'; // asked meanwhile, e.g. on the website
+
+    await tapVisible(tester, const Key('joinButton'));
+
+    expect(find.text("You've already asked to join this initiative."), findsOneWidget);
+    expect(find.byKey(const Key('joinButton')), findsOneWidget);
   });
 
   testWidgets('with nothing joined, Initiatives points to the ones I can join', (tester) async {

@@ -25,6 +25,19 @@ class FakeServer {
     {'id': 490, 'name': 'Library Reading', 'description': 'Reading to children.', 'office': 'Demo Office', 'membership': 'NONE'},
   ];
 
+  /// Join questions by initiative id, as GET /api/initiatives/{id} returns them.
+  Map<int, List<Map<String, Object?>>> questions = {
+    490: [
+      {'id': 11, 'text': 'Are you over 18?', 'type': 'YES_NO', 'choices': <String>[]},
+      {'id': 12, 'text': 'When can you come?', 'type': 'ONE_CHOICE', 'choices': ['Morning', 'Evening']},
+      {'id': 13, 'text': 'What can you help with?', 'type': 'MANY_CHOICES', 'choices': ['Reading', 'Games', 'Tidying']},
+      {'id': 14, 'text': 'Anything else?', 'type': 'TEXT', 'choices': <String>[]},
+    ],
+  };
+
+  /// The answers of the last join request, as sent.
+  Map<String, dynamic>? joinAnswers;
+
   late final http.Client client = MockClient((request) async {
     requests.add(request);
     return _handle(request);
@@ -49,6 +62,10 @@ class FakeServer {
     }
     if (request.headers['Authorization'] != 'Bearer $token' || tokenRevoked) {
       return _error(401, 'unauthorized');
+    }
+    final initiative = RegExp(r'^/api/initiatives/(\d+)(/join|/withdraw)?$').firstMatch(path);
+    if (initiative != null) {
+      return _initiative(int.parse(initiative.group(1)!), initiative.group(2), request);
     }
     switch (path) {
       case '/api/auth/logout':
@@ -89,6 +106,29 @@ class FakeServer {
         return http.Response('', 204);
     }
     return _error(404, 'not_found');
+  }
+
+  http.Response _initiative(int id, String? action, http.Request request) {
+    final item = initiatives.where((i) => i['id'] == id).firstOrNull;
+    if (item == null) {
+      return _error(404, 'not_found');
+    }
+    switch (action) {
+      case '/join':
+        if (item['membership'] != 'NONE') {
+          return _error(409, 'already_requested');
+        }
+        joinAnswers = request.body.isEmpty ? {} : (jsonDecode(request.body) as Map<String, dynamic>)['answers'] as Map<String, dynamic>;
+        item['membership'] = 'PENDING';
+        return _json(item);
+      case '/withdraw':
+        if (item['membership'] != 'PENDING') {
+          return _error(409, 'already_reviewed');
+        }
+        item['membership'] = 'NONE';
+        return http.Response('', 204);
+    }
+    return _json({...item, 'questions': questions[id] ?? const []});
   }
 
   http.Response _checkIn(Map<String, dynamic> body) {

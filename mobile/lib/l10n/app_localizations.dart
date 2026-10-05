@@ -314,11 +314,107 @@ abstract class AppLocalizations {
   /// **'Show initiatives you can join'**
   String get showInitiativesToJoin;
 
-  /// No description provided for @joinOnWebsite.
+  /// No description provided for @tapToJoin.
   ///
   /// In en, this message translates to:
-  /// **'To join one, open it on the website and answer its questions.'**
-  String get joinOnWebsite;
+  /// **'Tap an initiative to answer its questions and ask to join.'**
+  String get tapToJoin;
+
+  /// No description provided for @requestToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Request to join'**
+  String get requestToJoin;
+
+  /// No description provided for @joinQuestionsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer these questions, then send your request.'**
+  String get joinQuestionsIntro;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @yourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer'**
+  String get yourAnswer;
+
+  /// No description provided for @requestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent. A coordinator will review it.'**
+  String get requestSent;
+
+  /// No description provided for @pendingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request is waiting for review. Once it\'s approved, you can attend this initiative\'s events.'**
+  String get pendingHint;
+
+  /// No description provided for @withdrawRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw request'**
+  String get withdrawRequest;
+
+  /// No description provided for @withdrawConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw your request to join this initiative?'**
+  String get withdrawConfirm;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @requestWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Request withdrawn.'**
+  String get requestWithdrawn;
+
+  /// No description provided for @memberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re a member. This initiative\'s events are on the Events tab.'**
+  String get memberHint;
+
+  /// No description provided for @notApprovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request to join wasn\'t approved.'**
+  String get notApprovedHint;
+
+  /// No description provided for @alreadyRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve already asked to join this initiative.'**
+  String get alreadyRequested;
+
+  /// No description provided for @alreadyReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request has already been reviewed, so it can\'t be withdrawn.'**
+  String get alreadyReviewed;
+
+  /// No description provided for @initiativeClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'This initiative isn\'t open any more.'**
+  String get initiativeClosed;
 
   /// No description provided for @profile.
   ///

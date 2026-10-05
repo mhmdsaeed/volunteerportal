@@ -3,6 +3,7 @@ package com.volunteerportal.app.api;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -10,19 +11,27 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.volunteerportal.app.api.ApiDtos.AttendanceItem;
 import com.volunteerportal.app.api.ApiDtos.CheckInResponse;
 import com.volunteerportal.app.api.ApiDtos.EventItem;
+import com.volunteerportal.app.api.ApiDtos.InitiativeDetail;
 import com.volunteerportal.app.api.ApiDtos.InitiativeItem;
 import com.volunteerportal.app.api.ApiDtos.Me;
 import com.volunteerportal.app.api.ApiDtos.NotificationItem;
+import com.volunteerportal.app.api.ApiDtos.QuestionItem;
 import com.volunteerportal.app.model.Event;
+import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
@@ -87,6 +96,82 @@ public class MobileApiService {
                         i.getOffice() != null ? i.getOffice().getName() : null,
                         membershipStatus(memberships.get(i.getId()))))
                 .toList();
+    }
+
+    /** An open initiative with my membership and its questions; 404 when it isn't open. */
+    @Transactional(readOnly = true)
+    public InitiativeDetail initiative(Long initiativeId, Long userId) {
+        Initiative initiative = openInitiative(initiativeId);
+        VolunteerInitiative membership = volunteerInitiativeService.findMembership(userId, initiativeId).orElse(null);
+        List<QuestionItem> questions = volunteerInitiativeService.findQuestions(initiativeId).stream()
+                .map(q -> new QuestionItem(q.getId(), q.getQuestionText(), questionType(q.getQuestionTypeId()),
+                        questionChoices(q)))
+                .toList();
+        return new InitiativeDetail(initiative.getId(), initiative.getName(), initiative.getDescription(),
+                officeName(initiative), membershipStatus(membership), questions);
+    }
+
+    /**
+     * Asks to join an initiative with answers to its questions, as the website's join form does (the same
+     * service saves the answers and tells the initiative's managers). Refused with already_requested when I
+     * already asked, and not_found when the initiative isn't open.
+     */
+    @Transactional
+    public InitiativeItem join(Long initiativeId, User user, Map<String, List<String>> answers) {
+        Initiative initiative = openInitiative(initiativeId);
+        if (volunteerInitiativeService.findMembership(user.getId(), initiativeId).isPresent()) {
+            throw new ApiConflictException("already_requested", "You already asked to join this initiative");
+        }
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        if (answers != null) {
+            answers.forEach((questionId, values) -> form.put("answer_" + questionId, values == null ? List.of() : values));
+        }
+        VolunteerInitiative membership = volunteerInitiativeService.join(initiativeId, user, form);
+        return new InitiativeItem(initiative.getId(), initiative.getName(), initiative.getDescription(),
+                officeName(initiative), membershipStatus(membership));
+    }
+
+    /** Withdraws my join request; refused with already_reviewed once a coordinator has answered it. */
+    @Transactional
+    public void withdraw(Long initiativeId, Long userId) {
+        VolunteerInitiative membership = volunteerInitiativeService.findMembership(userId, initiativeId)
+                .orElseThrow(() -> new EntityNotFoundException("You haven't asked to join this initiative"));
+        if (membership.getResponseJoinDttm() != null) {
+            throw new ApiConflictException("already_reviewed", "This request has already been reviewed");
+        }
+        volunteerInitiativeService.withdraw(initiativeId, userId);
+    }
+
+    private Initiative openInitiative(Long initiativeId) {
+        Initiative initiative = volunteerInitiativeService.findInitiativeDetail(initiativeId);
+        if (!Boolean.TRUE.equals(initiative.getEnabled())) {
+            throw new EntityNotFoundException("Initiative not found: " + initiativeId);
+        }
+        return initiative;
+    }
+
+    private static String officeName(Initiative initiative) {
+        return initiative.getOffice() != null ? initiative.getOffice().getName() : null;
+    }
+
+    /** question_type_id 1-4, as on the website's join form (anything else is free text there too). */
+    private static String questionType(Integer typeId) {
+        return switch (typeId == null ? 4 : typeId) {
+            case 1 -> "YES_NO";
+            case 2 -> "ONE_CHOICE";
+            case 3 -> "MANY_CHOICES";
+            default -> "TEXT";
+        };
+    }
+
+    /** The comma-separated choices, numbered from 1 as the answers refer to them. */
+    private static List<String> questionChoices(InitiativeQuestion question) {
+        int typeId = question.getQuestionTypeId() == null ? 4 : question.getQuestionTypeId();
+        String text = question.getQuestionChoicesText();
+        if ((typeId != 2 && typeId != 3) || text == null || text.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(text.split(",")).map(String::trim).toList();
     }
 
     @Transactional(readOnly = true)

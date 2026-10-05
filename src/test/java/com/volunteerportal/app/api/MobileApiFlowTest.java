@@ -1,6 +1,7 @@
 package com.volunteerportal.app.api;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,16 +21,19 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.jayway.jsonpath.JsonPath;
 import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
 import com.volunteerportal.app.model.VolunteerInitiative;
 import com.volunteerportal.app.repository.ApiTokenRepository;
 import com.volunteerportal.app.repository.AttendRepository;
 import com.volunteerportal.app.repository.EventRepository;
+import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
 import com.volunteerportal.app.repository.NotificationRepository;
 import com.volunteerportal.app.repository.RoleRepository;
 import com.volunteerportal.app.repository.UserRepository;
+import com.volunteerportal.app.repository.VolunteerInitiativeAnswerRepository;
 import com.volunteerportal.app.repository.VolunteerInitiativeRepository;
 import com.volunteerportal.app.service.CheckInCodes;
 import com.volunteerportal.app.service.NotificationService;
@@ -89,6 +93,12 @@ class MobileApiFlowTest {
     private CheckInCodes checkInCodes;
 
     @Autowired
+    private InitiativeQuestionRepository initiativeQuestionRepository;
+
+    @Autowired
+    private VolunteerInitiativeAnswerRepository answerRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private final String suffix = String.valueOf(System.nanoTime());
@@ -99,6 +109,8 @@ class MobileApiFlowTest {
     private Event pendingEvent;
     private VolunteerInitiative approved;
     private VolunteerInitiative pending;
+    private Initiative toJoin;
+    private final List<InitiativeQuestion> questions = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -116,14 +128,24 @@ class MobileApiFlowTest {
         pendingEvent = event(pendingIn, "API Pending Event " + suffix);
         approved = membership(memberOf, true);
         pending = membership(pendingIn, false);
+        toJoin = initiative("API Open Initiative " + suffix);
     }
 
     @AfterEach
     void cleanUp() {
+        volunteerInitiativeRepository.findByUserIdAndInitiativeId(volunteer.getId(), toJoin.getId()).ifPresent(vi -> {
+            answerRepository.deleteAll(answerRepository.findAll().stream()
+                    .filter(a -> a.getVolunteerInitiative().getId().equals(vi.getId())).toList());
+            volunteerInitiativeRepository.delete(vi);
+        });
+        initiativeQuestionRepository.deleteAll(questions);
+        // Asking to join tells the admins; remove those notifications about this test volunteer
+        notificationRepository.deleteAll(notificationRepository.findAll().stream()
+                .filter(n -> n.getMessageArgs().contains(volunteer.getUsername())).toList());
         attendRepository.deleteAll(attendRepository.findByEventId(memberEvent.getId()));
         volunteerInitiativeRepository.deleteAll(List.of(approved, pending));
         eventRepository.deleteAll(List.of(memberEvent, pendingEvent));
-        initiativeRepository.deleteAll(List.of(memberOf, pendingIn));
+        initiativeRepository.deleteAll(List.of(memberOf, pendingIn, toJoin));
         notificationRepository.deleteAll(notificationRepository.findByUserIdOrderByCreatedDttmDesc(volunteer.getId()));
         apiTokenRepository.findAll().stream()
                 .filter(t -> t.getUser().getId().equals(volunteer.getId()))
@@ -201,6 +223,96 @@ class MobileApiFlowTest {
 
         assertThat(JsonPath.<List<String>>read(json, "$[?(@.id == " + memberOf.getId() + ")].membership")).containsExactly("APPROVED");
         assertThat(JsonPath.<List<String>>read(json, "$[?(@.id == " + pendingIn.getId() + ")].membership")).containsExactly("PENDING");
+    }
+
+    @Test
+    void initiative_showsItsQuestionsWithTheirChoices() throws Exception {
+        givenQuestionsOfEveryType();
+        String token = login();
+
+        api(get("/api/initiatives/{id}", toJoin.getId()), token)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(toJoin.getName()))
+                .andExpect(jsonPath("$.membership").value("NONE"))
+                .andExpect(jsonPath("$.questions", hasSize(4)))
+                .andExpect(jsonPath("$.questions[0].type").value("YES_NO"))
+                .andExpect(jsonPath("$.questions[0].choices", hasSize(0)))
+                .andExpect(jsonPath("$.questions[1].type").value("ONE_CHOICE"))
+                .andExpect(jsonPath("$.questions[1].choices[1]").value("Afternoon"))
+                .andExpect(jsonPath("$.questions[2].type").value("MANY_CHOICES"))
+                .andExpect(jsonPath("$.questions[2].choices", hasSize(3)))
+                .andExpect(jsonPath("$.questions[3].type").value("TEXT"));
+
+        api(get("/api/initiatives/{id}", memberOf.getId()), token)
+                .andExpect(jsonPath("$.membership").value("APPROVED"));
+    }
+
+    @Test
+    void join_savesTheAnswersLikeTheWebsite_andWaitsForReview() throws Exception {
+        givenQuestionsOfEveryType();
+        String token = login();
+        String answers = "{\"answers\":{"
+                + "\"" + questions.get(0).getId() + "\":[\"1\"],"
+                + "\"" + questions.get(1).getId() + "\":[\"2\"],"
+                + "\"" + questions.get(2).getId() + "\":[\"1\",\"3\"],"
+                + "\"" + questions.get(3).getId() + "\":[\"I drive\"]}}";
+
+        api(post("/api/initiatives/{id}/join", toJoin.getId()).contentType(MediaType.APPLICATION_JSON).content(answers), token)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(toJoin.getId()))
+                .andExpect(jsonPath("$.membership").value("PENDING"));
+
+        VolunteerInitiative request = volunteerInitiativeRepository
+                .findByUserIdAndInitiativeId(volunteer.getId(), toJoin.getId()).orElseThrow();
+        assertThat(request.getAnswerCount()).isEqualTo(4);
+        assertThat(answerRepository.findAll().stream()
+                .filter(a -> a.getVolunteerInitiative().getId().equals(request.getId()))
+                .map(a -> a.getAnswerText()))
+                .containsExactlyInAnyOrder("Yes", "Afternoon", "Cooking, Driving", "I drive");
+
+        api(post("/api/initiatives/{id}/join", toJoin.getId()).contentType(MediaType.APPLICATION_JSON).content(answers), token)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("already_requested"));
+    }
+
+    @Test
+    void join_withoutQuestions_needsNoBody() throws Exception {
+        String token = login();
+
+        api(post("/api/initiatives/{id}/join", toJoin.getId()), token)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.membership").value("PENDING"));
+    }
+
+    @Test
+    void join_aClosedInitiative_isNotFound() throws Exception {
+        toJoin.setEnabled(false);
+        toJoin = initiativeRepository.save(toJoin);
+        String token = login();
+
+        api(post("/api/initiatives/{id}/join", toJoin.getId()), token).andExpect(status().isNotFound());
+        api(get("/api/initiatives/{id}", toJoin.getId()), token).andExpect(status().isNotFound());
+        assertThat(volunteerInitiativeRepository.findByUserIdAndInitiativeId(volunteer.getId(), toJoin.getId())).isEmpty();
+    }
+
+    @Test
+    void withdraw_removesAPendingRequestAndItsAnswers_butNotAReviewedOne() throws Exception {
+        givenQuestionsOfEveryType();
+        String token = login();
+        api(post("/api/initiatives/{id}/join", toJoin.getId()).contentType(MediaType.APPLICATION_JSON)
+                .content("{\"answers\":{\"" + questions.get(3).getId() + "\":[\"Hello\"]}}"), token)
+                .andExpect(status().isOk());
+        Long requestId = volunteerInitiativeRepository
+                .findByUserIdAndInitiativeId(volunteer.getId(), toJoin.getId()).orElseThrow().getId();
+
+        api(post("/api/initiatives/{id}/withdraw", toJoin.getId()), token).andExpect(status().isNoContent());
+
+        assertThat(volunteerInitiativeRepository.findById(requestId)).isEmpty();
+        assertThat(answerRepository.findAll()).noneMatch(a -> a.getVolunteerInitiative().getId().equals(requestId));
+        api(post("/api/initiatives/{id}/withdraw", toJoin.getId()), token).andExpect(status().isNotFound());
+        api(post("/api/initiatives/{id}/withdraw", memberOf.getId()), token)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("already_reviewed"));
     }
 
     @Test
@@ -311,6 +423,23 @@ class MobileApiFlowTest {
         initiative.setName(name);
         initiative.setEnabled(true);
         return initiativeRepository.save(initiative);
+    }
+
+    /** Yes/no, one choice, many choices and free text, in that order, on the initiative to join. */
+    private void givenQuestionsOfEveryType() {
+        questions.add(question(1, "Are you over 18?", null));
+        questions.add(question(2, "When can you come?", "Morning, Afternoon, Evening"));
+        questions.add(question(3, "What can you help with?", "Cooking, Cleaning, Driving"));
+        questions.add(question(4, "Anything else?", null));
+    }
+
+    private InitiativeQuestion question(int typeId, String text, String choices) {
+        InitiativeQuestion question = new InitiativeQuestion();
+        question.setInitiative(toJoin);
+        question.setQuestionText(text);
+        question.setQuestionTypeId(typeId);
+        question.setQuestionChoicesText(choices);
+        return initiativeQuestionRepository.save(question);
     }
 
     private Event event(Initiative initiative, String name) {

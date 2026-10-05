@@ -2,6 +2,7 @@ package com.volunteerportal.app.api;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /** JSON shapes of the mobile app API (see "Mobile app API" in README.md). */
 public final class ApiDtos {
@@ -20,6 +21,24 @@ public final class ApiDtos {
 
     /** membership: NONE, PENDING, APPROVED or REJECTED. */
     public record InitiativeItem(Long id, String name, String description, String office, String membership) {
+    }
+
+    /**
+     * An initiative with my membership and the questions to answer when asking to join. type: YES_NO, ONE_CHOICE,
+     * MANY_CHOICES or TEXT; choices are numbered from 1 in that order.
+     */
+    public record InitiativeDetail(Long id, String name, String description, String office, String membership,
+            List<QuestionItem> questions) {
+    }
+
+    public record QuestionItem(Long id, String text, String type, List<String> choices) {
+    }
+
+    /**
+     * answers: question id -> values. YES_NO: "1" (yes) or "0" (no); ONE_CHOICE: one choice number; MANY_CHOICES:
+     * any choice numbers; TEXT: the text. Unanswered questions can be left out.
+     */
+    public record JoinRequest(Map<String, List<String>> answers) {
     }
 
     /** myStatus: NOT_CHECKED_IN, CHECKED_IN or CHECKED_OUT. */

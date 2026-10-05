@@ -69,6 +69,19 @@ class ApiClient {
   Future<List<InitiativeItem>> initiatives() async =>
       _list(await _send('GET', '/api/initiatives')).map(InitiativeItem.fromJson).toList();
 
+  Future<InitiativeDetail> initiative(int id) async =>
+      InitiativeDetail.fromJson(await _send('GET', '/api/initiatives/$id') as Map<String, dynamic>);
+
+  /// Asks to join with answers: question id -> values ("1"/"0" for yes/no, choice numbers from 1, or the text).
+  Future<InitiativeItem> join(int id, Map<int, List<String>> answers) async {
+    final json = await _send('POST', '/api/initiatives/$id/join', body: {
+      'answers': {for (final entry in answers.entries) '${entry.key}': entry.value},
+    });
+    return InitiativeItem.fromJson(json as Map<String, dynamic>);
+  }
+
+  Future<void> withdraw(int id) => _send('POST', '/api/initiatives/$id/withdraw');
+
   Future<List<EventItem>> events() async =>
       _list(await _send('GET', '/api/events')).map(EventItem.fromJson).toList();
 

@@ -4,6 +4,7 @@ import '../api/models.dart';
 import '../app_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
+import 'initiative_screen.dart';
 import 'widgets.dart';
 
 /// The options above the initiatives list, as on the website's Initiatives page (`?show=`).
@@ -23,8 +24,8 @@ enum InitiativeFilter {
       };
 }
 
-/// Open initiatives with my membership in each, opening on the ones I've joined. View only: joining
-/// (and answering the initiative's questions) happens on the website.
+/// Open initiatives with my membership in each, opening on the ones I've joined. Tapping one opens it, to ask
+/// to join (answering its questions) or withdraw a pending request.
 class InitiativesScreen extends StatefulWidget {
   const InitiativesScreen({super.key});
 
@@ -37,7 +38,8 @@ class _InitiativesScreenState extends State<InitiativesScreen> {
 
   // One key per chip, to scroll the chosen one into view: the row scrolls sideways on phones
   final _chipKeys = {for (final filter in InitiativeFilter.values) filter: GlobalKey()};
-  final _chipRow = ScrollController(keepScrollOffset: false);
+  // The row is built again (at the start) whenever the list reloads, e.g. after joining: show the chosen chip then too
+  late final _chipRow = ScrollController(keepScrollOffset: false, onAttach: (_) => _revealChosen(animate: false));
 
   @override
   void dispose() {
@@ -47,10 +49,16 @@ class _InitiativesScreenState extends State<InitiativesScreen> {
 
   void _show(InitiativeFilter filter) {
     setState(() => _filter = filter);
+    _revealChosen();
+  }
+
+  /// Scrolls the chip row so the chosen chip is in view, after this frame (when it has been laid out).
+  void _revealChosen({bool animate = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final chip = _chipKeys[filter]!.currentContext;
+      final chip = _chipKeys[_filter]!.currentContext;
       if (chip != null && chip.mounted) {
-        Scrollable.ensureVisible(chip, alignment: 0.5, duration: const Duration(milliseconds: 200));
+        Scrollable.ensureVisible(chip,
+            alignment: 0.5, duration: animate ? const Duration(milliseconds: 200) : Duration.zero);
       }
     });
   }
@@ -75,8 +83,16 @@ class _InitiativesScreenState extends State<InitiativesScreen> {
               child: Text(t.showInitiativesToJoin),
             )
           : null,
-      itemBuilder: (context, initiative, _) => ListTile(
+      itemBuilder: (context, initiative, reload) => ListTile(
         key: Key('initiative-${initiative.id}'),
+        onTap: () async {
+          final changed = await Navigator.of(context).push<bool>(MaterialPageRoute(
+            builder: (_) => InitiativeScreen(initiativeId: initiative.id, title: initiative.name),
+          ));
+          if (changed == true) {
+            reload();
+          }
+        },
         title: Text(initiative.name),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +110,7 @@ class _InitiativesScreenState extends State<InitiativesScreen> {
 }
 
 /// One chip per filter with its count; the chosen one is filled navy, as on the website. Under Not joined,
-/// a line says where to join.
+/// a line says how to join.
 class _FilterBar extends StatelessWidget {
   const _FilterBar({required this.selected, required this.all, required this.onSelected, required this.chipKeys, required this.chipRow});
 
@@ -140,7 +156,7 @@ class _FilterBar extends StatelessWidget {
         if (selected == InitiativeFilter.notJoined)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Text(t.joinOnWebsite, style: const TextStyle(color: VpColors.muted)),
+            child: Text(t.tapToJoin, style: const TextStyle(color: VpColors.muted)),
           ),
       ],
     );

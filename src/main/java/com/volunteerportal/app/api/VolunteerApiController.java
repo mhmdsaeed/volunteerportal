@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.volunteerportal.app.api.ApiDtos.AttendanceItem;
 import com.volunteerportal.app.api.ApiDtos.CheckInRequest;
 import com.volunteerportal.app.api.ApiDtos.EventItem;
+import com.volunteerportal.app.api.ApiDtos.InitiativeDetail;
 import com.volunteerportal.app.api.ApiDtos.InitiativeItem;
+import com.volunteerportal.app.api.ApiDtos.JoinRequest;
 import com.volunteerportal.app.api.ApiDtos.Me;
 import com.volunteerportal.app.api.ApiDtos.NotificationItem;
 import com.volunteerportal.app.security.UserPrincipal;
@@ -44,6 +46,26 @@ public class VolunteerApiController {
     @GetMapping("/initiatives")
     public List<InitiativeItem> initiatives(@AuthenticationPrincipal UserPrincipal principal) {
         return mobileApiService.initiatives(principal.getUser().getId());
+    }
+
+    /** An open initiative with my membership and the questions to answer when asking to join. */
+    @GetMapping("/initiatives/{id}")
+    public InitiativeDetail initiative(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+        return mobileApiService.initiative(id, principal.getUser().getId());
+    }
+
+    /** Ask to join, with answers to the initiative's questions; the request then waits for a coordinator. */
+    @PostMapping("/initiatives/{id}/join")
+    public InitiativeItem join(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody(required = false) JoinRequest request) {
+        return mobileApiService.join(id, principal.getUser(), request != null ? request.answers() : null);
+    }
+
+    /** Withdraw my join request while no coordinator has answered it yet. */
+    @PostMapping("/initiatives/{id}/withdraw")
+    public ResponseEntity<Void> withdraw(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+        mobileApiService.withdraw(id, principal.getUser().getId());
+        return ResponseEntity.noContent().build();
     }
 
     /** Upcoming events of initiatives I'm an approved member of, with my check-in status. */

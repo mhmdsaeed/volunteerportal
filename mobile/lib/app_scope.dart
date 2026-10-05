@@ -29,8 +29,13 @@ String describeError(BuildContext context, Object error) {
     if (error.isUnreachable) {
       return t.cannotReachServer;
     }
-    if (error.error == 'invalid_credentials') {
-      return t.wrongCredentials;
+    switch (error.error) {
+      case 'invalid_credentials':
+        return t.wrongCredentials;
+      case 'already_requested':
+        return t.alreadyRequested;
+      case 'already_reviewed':
+        return t.alreadyReviewed;
     }
   }
   return t.somethingWentWrong;

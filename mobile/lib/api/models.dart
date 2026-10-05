@@ -82,6 +82,70 @@ class InitiativeItem {
       );
 }
 
+/// How a join question is answered: yes or no, one of its choices, any of its choices, or in words.
+enum QuestionType {
+  yesNo,
+  oneChoice,
+  manyChoices,
+  text;
+
+  static QuestionType parse(String? value) => switch (value) {
+        'YES_NO' => yesNo,
+        'ONE_CHOICE' => oneChoice,
+        'MANY_CHOICES' => manyChoices,
+        _ => text,
+      };
+}
+
+class Question {
+  const Question({required this.id, required this.text, required this.type, required this.choices});
+
+  final int id;
+  final String text;
+  final QuestionType type;
+
+  /// Numbered from 1 in the answers: choice `n` is `choices[n - 1]`.
+  final List<String> choices;
+
+  factory Question.fromJson(Map<String, dynamic> json) => Question(
+        id: json['id'] as int,
+        text: json['text'] as String? ?? '',
+        type: QuestionType.parse(json['type'] as String?),
+        choices: (json['choices'] as List? ?? const []).cast<String>(),
+      );
+}
+
+/// An initiative with my membership and the questions to answer when asking to join.
+class InitiativeDetail {
+  const InitiativeDetail({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.office,
+    required this.membership,
+    required this.questions,
+  });
+
+  final int id;
+  final String name;
+  final String? description;
+  final String? office;
+  final Membership membership;
+  final List<Question> questions;
+
+  factory InitiativeDetail.fromJson(Map<String, dynamic> json) => InitiativeDetail(
+        id: json['id'] as int,
+        name: json['name'] as String? ?? '',
+        description: json['description'] as String?,
+        office: json['office'] as String?,
+        membership: Membership.parse(json['membership'] as String?),
+        questions: (json['questions'] as List? ?? const [])
+            .cast<Map<String, dynamic>>()
+            .map(Question.fromJson)
+            .toList(),
+      );
+}
+
 /// My check-in status for an event.
 enum EventStatus { notCheckedIn, checkedIn, checkedOut }
 

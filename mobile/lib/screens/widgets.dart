@@ -50,7 +50,10 @@ class AsyncListState<T> extends State<AsyncList<T>> {
 
   Future<List<T>> _fetch() => AppScope.read(context).guard(widget.load);
 
-  void reload() => setState(() => _items = _fetch());
+  // A block body: an arrow would return the new Future from the setState callback, which Flutter rejects
+  void reload() => setState(() {
+        _items = _fetch();
+      });
 
   @override
   Widget build(BuildContext context) {

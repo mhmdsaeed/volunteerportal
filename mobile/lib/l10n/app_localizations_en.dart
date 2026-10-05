@@ -121,8 +121,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showInitiativesToJoin => 'Show initiatives you can join';
 
   @override
-  String get joinOnWebsite =>
-      'To join one, open it on the website and answer its questions.';
+  String get tapToJoin =>
+      'Tap an initiative to answer its questions and ask to join.';
+
+  @override
+  String get requestToJoin => 'Request to join';
+
+  @override
+  String get joinQuestionsIntro =>
+      'Answer these questions, then send your request.';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get yourAnswer => 'Your answer';
+
+  @override
+  String get requestSent => 'Request sent. A coordinator will review it.';
+
+  @override
+  String get pendingHint =>
+      'Your request is waiting for review. Once it\'s approved, you can attend this initiative\'s events.';
+
+  @override
+  String get withdrawRequest => 'Withdraw request';
+
+  @override
+  String get withdrawConfirm =>
+      'Withdraw your request to join this initiative?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get requestWithdrawn => 'Request withdrawn.';
+
+  @override
+  String get memberHint =>
+      'You\'re a member. This initiative\'s events are on the Events tab.';
+
+  @override
+  String get notApprovedHint => 'Your request to join wasn\'t approved.';
+
+  @override
+  String get alreadyRequested =>
+      'You\'ve already asked to join this initiative.';
+
+  @override
+  String get alreadyReviewed =>
+      'Your request has already been reviewed, so it can\'t be withdrawn.';
+
+  @override
+  String get initiativeClosed => 'This initiative isn\'t open any more.';
 
   @override
   String get profile => 'Profile';

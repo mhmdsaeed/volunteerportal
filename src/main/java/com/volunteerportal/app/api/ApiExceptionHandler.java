@@ -30,6 +30,11 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(new Error("bad_request", "Request body is missing or not valid JSON"));
     }
 
+    @ExceptionHandler(ApiConflictException.class)
+    public ResponseEntity<Error> conflict(ApiConflictException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new Error(e.getError(), e.getMessage()));
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Error> conflict(IllegalStateException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new Error("conflict", e.getMessage()));

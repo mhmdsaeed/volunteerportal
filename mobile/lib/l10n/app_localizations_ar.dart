@@ -120,8 +120,57 @@ class AppLocalizationsAr extends AppLocalizations {
   String get showInitiativesToJoin => 'عرض المبادرات المتاحة';
 
   @override
-  String get joinOnWebsite =>
-      'للانضمام إلى مبادرة، افتحها على الموقع وأجب عن أسئلتها.';
+  String get tapToJoin => 'اضغط على مبادرة للإجابة عن أسئلتها وطلب الانضمام.';
+
+  @override
+  String get requestToJoin => 'طلب الانضمام';
+
+  @override
+  String get joinQuestionsIntro => 'أجب عن هذه الأسئلة، ثم أرسل طلبك.';
+
+  @override
+  String get yes => 'نعم';
+
+  @override
+  String get no => 'لا';
+
+  @override
+  String get yourAnswer => 'إجابتك';
+
+  @override
+  String get requestSent => 'تم إرسال طلبك. سيراجعه أحد المنسقين.';
+
+  @override
+  String get pendingHint =>
+      'طلبك قيد المراجعة. بعد قبوله، يمكنك حضور فعاليات هذه المبادرة.';
+
+  @override
+  String get withdrawRequest => 'سحب الطلب';
+
+  @override
+  String get withdrawConfirm => 'هل تريد سحب طلب انضمامك إلى هذه المبادرة؟';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get requestWithdrawn => 'تم سحب الطلب.';
+
+  @override
+  String get memberHint =>
+      'أنت عضو في هذه المبادرة، وتجد فعالياتها في تبويب الفعاليات.';
+
+  @override
+  String get notApprovedHint => 'لم يُقبل طلب انضمامك.';
+
+  @override
+  String get alreadyRequested => 'لقد طلبت الانضمام إلى هذه المبادرة من قبل.';
+
+  @override
+  String get alreadyReviewed => 'تمت مراجعة طلبك، لذا لا يمكن سحبه.';
+
+  @override
+  String get initiativeClosed => 'هذه المبادرة لم تعد متاحة.';
 
   @override
   String get profile => 'الملف الشخصي';
