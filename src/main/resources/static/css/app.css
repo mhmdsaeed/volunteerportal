@@ -840,3 +840,52 @@ html.sidebar-collapsed .sidebar .nav-link .badge {
         font-size: 1.953rem;
     }
 }
+
+/* Filter options above a list (the volunteer's initiatives): outlined pills, the chosen one filled navy */
+.vp-filter {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    --bs-nav-pills-border-radius: 999px;
+    --bs-nav-pills-link-active-color: #fff;
+    --bs-nav-pills-link-active-bg: var(--vp-ink);
+}
+
+.vp-filter .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-block: 0.35rem;
+    padding-inline: 0.9rem;
+    color: var(--vp-ink);
+    background-color: var(--vp-surface);
+    border: 1px solid var(--vp-line);
+    font-weight: 500;
+}
+
+.vp-filter .nav-link:hover {
+    border-color: var(--vp-ink);
+}
+
+.vp-filter .nav-link.active {
+    border-color: var(--vp-ink);
+}
+
+.vp-filter .nav-link:focus-visible {
+    box-shadow: var(--vp-focus-ring);
+}
+
+.vp-filter-count {
+    min-width: 1.5rem;
+    padding-inline: 0.4rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--vp-muted);
+    background-color: var(--vp-slate-tint);
+}
+
+.vp-filter .nav-link.active .vp-filter-count {
+    color: var(--vp-ink);
+    background-color: #fff;
+}

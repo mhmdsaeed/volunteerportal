@@ -98,7 +98,7 @@ class HomeControllerTest {
         mockMvc.perform(get("/home").with(user(userPrincipal(42L, "vol1"))))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("You have no upcoming events.")))
-                .andExpect(content().string(containsString("href=\"/initiatives\"")))
+                .andExpect(content().string(containsString("href=\"/initiatives?show=notJoined\"")))
                 .andExpect(content().string(containsString("No grade yet")))
                 .andExpect(content().string(not(containsString("Your next event"))))
                 .andExpect(content().string(not(containsString("Later events"))));

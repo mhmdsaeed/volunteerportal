@@ -1,6 +1,8 @@
 package com.volunteerportal.app.controller;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -12,8 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.VolunteerInitiative;
 import com.volunteerportal.app.security.UserPrincipal;
+import com.volunteerportal.app.service.MembershipFilter;
 import com.volunteerportal.app.service.VolunteerInitiativeService;
 
 @Controller
@@ -27,9 +31,24 @@ public class VolunteerInitiativeController {
     }
 
     @GetMapping
-    public String list(@AuthenticationPrincipal UserPrincipal principal, Model model) {
-        model.addAttribute("initiatives", volunteerInitiativeService.findAvailableInitiatives());
-        model.addAttribute("memberships", volunteerInitiativeService.findMembershipsForUser(principal.getUser().getId()));
+    public String list(@AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(name = "show", required = false) String show, Model model) {
+        MembershipFilter filter = MembershipFilter.from(show);
+        List<Initiative> initiatives = volunteerInitiativeService.findAvailableInitiatives();
+        Map<Long, VolunteerInitiative> memberships =
+                volunteerInitiativeService.findMembershipsForUser(principal.getUser().getId());
+
+        Map<MembershipFilter, Long> counts = new EnumMap<>(MembershipFilter.class);
+        for (MembershipFilter option : MembershipFilter.values()) {
+            counts.put(option, initiatives.stream().filter(i -> option.matches(memberships.get(i.getId()))).count());
+        }
+
+        model.addAttribute("initiatives",
+                initiatives.stream().filter(i -> filter.matches(memberships.get(i.getId()))).toList());
+        model.addAttribute("memberships", memberships);
+        model.addAttribute("filter", filter);
+        model.addAttribute("filters", MembershipFilter.values());
+        model.addAttribute("counts", counts);
         return "initiatives/list";
     }
 

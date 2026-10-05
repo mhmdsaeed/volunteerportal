@@ -5,7 +5,20 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <div class="container">
-        <h2 class="mb-4" th:text="#{initiatives.title}">Initiatives</h2>
+        <h2 class="mb-3" th:text="#{initiatives.title}">Initiatives</h2>
+
+        <nav class="mb-4" th:aria-label="#{initiatives.filter.label}">
+            <ul class="nav nav-pills vp-filter">
+                <li class="nav-item" th:each="option : ${filters}">
+                    <a class="nav-link" th:classappend="${option == filter} ? 'active'"
+                       th:attr="aria-current=${option == filter} ? 'page'"
+                       th:href="@{/initiatives(show=${option.param})}">
+                        <span th:text="#{'initiatives.filter.' + ${option.param}}">Joined</span>
+                        <span class="vp-filter-count" th:text="${counts.get(option)}">0</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
         <div class="row row-cols-1 row-cols-md-2 g-3">
             <div class="col" th:each="initiative : ${initiatives}">
@@ -25,8 +38,14 @@
                     </div>
                 </div>
             </div>
-            <div class="col" th:if="${#lists.isEmpty(initiatives)}">
-                <p class="text-muted" th:text="#{initiatives.empty}">No initiatives are open right now.</p>
+            <div class="col" th:if="${#lists.isEmpty(initiatives)}" th:switch="${filter.name()}">
+                <th:block th:case="'JOINED'">
+                    <p class="text-muted mb-2" th:text="#{initiatives.emptyJoined}">You haven't joined any initiatives yet.</p>
+                    <a class="btn btn-primary btn-sm" th:href="@{/initiatives(show='notJoined')}"
+                       th:text="#{initiatives.browseNotJoined}">Browse initiatives you can join</a>
+                </th:block>
+                <p th:case="'ALL'" class="text-muted" th:text="#{initiatives.empty}">No initiatives are open right now.</p>
+                <p th:case="*" class="text-muted" th:text="#{initiatives.emptyFilter}">No initiatives here.</p>
             </div>
         </div>
     </div>

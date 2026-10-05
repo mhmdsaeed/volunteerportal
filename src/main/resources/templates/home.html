@@ -44,7 +44,7 @@
 
         <section th:if="${nextEvent == null}" class="vp-empty">
             <p th:text="#{home.noEvents}">You have no upcoming events. Join an initiative to see its events here.</p>
-            <a class="btn btn-primary" th:href="@{/initiatives}" th:text="#{home.browseInitiatives}">Browse initiatives</a>
+            <a class="btn btn-primary" th:href="@{/initiatives(show='notJoined')}" th:text="#{home.browseInitiatives}">Browse initiatives</a>
         </section>
 
         <div class="row g-4">
@@ -76,7 +76,7 @@
                     </ul>
                     <p class="text-muted" th:if="${#lists.isEmpty(requests)}">
                         <span th:text="#{home.noRequests}">You haven't asked to join an initiative yet.</span>
-                        <a th:href="@{/initiatives}" th:text="#{home.browseInitiatives}">Browse initiatives</a>
+                        <a th:href="@{/initiatives(show='notJoined')}" th:text="#{home.browseInitiatives}">Browse initiatives</a>
                     </p>
                 </section>
             </div>
