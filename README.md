@@ -93,6 +93,27 @@ SPRING_PROFILES_ACTIVE=dev,https ./mvnw spring-boot:run      # PowerShell: $env:
 
 The phone warns about the self-signed certificate once; continue anyway (or install `dev-certs/dev-cert.crt`, exported with `keytool -exportcert -rfc`, as a trusted certificate). If the phone can't connect, allow Java through Windows Firewall on private networks.
 
+## Trying the office filter
+
+The volunteer's Initiatives page (and the app's Initiatives tab) groups initiatives by office and can show one office (see [What's implemented](#whats-implemented)). To try it, run with the `dev` profile (see [Run](#run)).
+
+**Give some initiatives an office first.** The `dev` demo data has none, so as `admin`: **Admin → Offices → New Office** (two offices), then **Admin → Initiatives**, edit a few enabled initiatives and choose an office for each, leaving one without.
+
+**On the website**, log in as `demo_volunteer` and open **Initiatives**:
+
+| Try | Expect |
+|---|---|
+| Click **All** | Cards grouped under office headings (by name, each with a count), "No office" last; each card shows its office under the name |
+| Choose an office in **Office**, click **Show** | Only that office's initiatives; the pill counts are for that office |
+| Click another pill (e.g. **Not joined**) | The office stays chosen (`&office=` stays in the address) |
+| Choose **No office** | Only the initiatives without an office |
+| **Joined** in an office where you joined nothing | "No initiatives here.", without the "Browse initiatives you can join" button |
+| Keyboard: Tab to the dropdown, arrow keys, Tab to **Show**, Enter | The arrows don't reload the page; Enter applies the choice |
+| Switch to العربية | Mirrored layout; office names and descriptions keep their punctuation in place |
+| Change the address to `?office=999` | All offices are shown |
+
+**In the app**, see "What to try" in [`mobile/README.md`](mobile/README.md#3-what-to-try). If you close an initiative for testing, enable it again afterwards.
+
 ## Mobile app API
 
 JSON API for the volunteer mobile app under `/api` (the Flutter app itself is in [`mobile/`](mobile/README.md)). Log in once for a **bearer token** (valid 30 days, `app.api.token-validity`), then send it on every request as `Authorization: Bearer <token>`. Tokens are random and stored only as a SHA-256 hash (`api_token` table); logging out deletes the token, so it stops working immediately. The API ignores the website's session cookie (it has its own stateless security chain, `ApiSecurityConfig`), so CSRF tokens aren't needed. Messages come back in the phone's language from `Accept-Language` (`en` or `ar`). Errors are JSON: `{"error": "...", "message": "..."}`.
