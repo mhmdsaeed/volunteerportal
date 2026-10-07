@@ -259,4 +259,63 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get cameraUnavailable =>
       'الكاميرا غير متاحة. اسمح بالوصول إلى الكاميرا من إعدادات هاتفك.';
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور؟';
+
+  @override
+  String get forgotPasswordTitle => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get forgotPasswordIntro =>
+      'أدخل البريد الإلكتروني لحسابك، وسنرسل إليك رابطاً لاختيار كلمة مرور جديدة على الموقع.';
+
+  @override
+  String get email => 'البريد الإلكتروني';
+
+  @override
+  String get invalidEmail => 'أدخل بريداً إلكترونياً صحيحاً';
+
+  @override
+  String get sendResetLink => 'إرسال رابط إعادة التعيين';
+
+  @override
+  String get resetLinkSent =>
+      'إذا كان هناك حساب فعّال بهذا البريد، فسيصله رابط لإعادة تعيين كلمة المرور. تحقق من صندوق الوارد ومجلد الرسائل غير المرغوب فيها؛ الرابط صالح لمرة واحدة فقط.';
+
+  @override
+  String get resetUnavailable =>
+      'لا يستطيع هذا الخادم إرسال البريد الإلكتروني. اطلب من أحد المسؤولين تعيين كلمة مرور جديدة لك.';
+
+  @override
+  String get backToLogin => 'العودة إلى تسجيل الدخول';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get changePasswordHelp =>
+      '8 أحرف على الأقل. ستبقى مسجلاً هنا، وسيتم تسجيل خروجك من الموقع ومن أجهزتك الأخرى.';
+
+  @override
+  String get passwordTooShort => 'يجب ألا تقل كلمة المرور عن 8 أحرف';
+
+  @override
+  String get passwordsDontMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get wrongCurrentPassword => 'كلمة المرور الحالية غير صحيحة.';
+
+  @override
+  String get passwordChanged =>
+      'تم تغيير كلمة المرور، وتم تسجيل خروجك من الموقع ومن أجهزتك الأخرى.';
 }

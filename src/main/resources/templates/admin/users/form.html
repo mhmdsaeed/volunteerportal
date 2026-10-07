@@ -35,6 +35,29 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{/admin/users}" th:text="#{common.cancel}">Cancel</a>
         </form>
+
+        <section class="mt-5" aria-labelledby="setPasswordHeading">
+            <h3 class="h5 mb-2" id="setPasswordHeading" th:text="#{users.setPassword.heading}">Set a new password</h3>
+            <p class="small text-muted" th:if="${isSelf}">
+                <a th:href="@{/profile#password}" th:text="#{users.setPassword.self}">To change your own password, use My Profile.</a>
+            </p>
+            <form th:unless="${isSelf}" th:action="@{/admin/users/{id}/password(id=${user.id})}" th:object="${passwordForm}" method="post">
+                <p class="small text-muted" th:text="#{users.setPassword.help}">For someone who forgot their password.</p>
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label" th:text="#{profile.password.new}">New password</label>
+                    <input type="password" class="form-control" id="newPassword" th:field="*{newPassword}"
+                           autocomplete="new-password" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label" th:text="#{profile.password.confirm}">Confirm new password</label>
+                    <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}"
+                           autocomplete="new-password" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                </div>
+                <button type="submit" class="btn btn-outline-primary" th:text="#{users.setPassword.submit}">Set password</button>
+            </form>
+        </section>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

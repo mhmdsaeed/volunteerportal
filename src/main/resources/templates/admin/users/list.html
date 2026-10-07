@@ -16,6 +16,7 @@
         <div class="alert alert-success" th:if="${savedUser != null}" th:text="#{users.saved(${savedUser})}">Saved.</div>
         <div class="alert alert-success" th:if="${activatedUser != null}" th:text="#{users.activated(${activatedUser})}">Activated.</div>
         <div class="alert alert-warning" th:if="${deactivatedUser != null}" th:text="#{users.deactivated(${deactivatedUser})}">Deactivated.</div>
+        <div class="alert alert-success" th:if="${passwordSetUser != null}" th:text="#{users.passwordSet(${passwordSetUser})}">Password set.</div>
         <div class="alert alert-danger" th:if="${errorKey != null}" th:text="${#messages.msg(errorKey)}">Error.</div>
 
         <table class="table table-striped align-middle">

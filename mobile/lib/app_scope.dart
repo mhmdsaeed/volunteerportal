@@ -36,6 +36,12 @@ String describeError(BuildContext context, Object error) {
         return t.alreadyRequested;
       case 'already_reviewed':
         return t.alreadyReviewed;
+      case 'wrong_password':
+        return t.wrongCurrentPassword;
+      case 'password_too_short':
+        return t.passwordTooShort;
+      case 'reset_unavailable':
+        return t.resetUnavailable;
     }
   }
   return t.somethingWentWrong;

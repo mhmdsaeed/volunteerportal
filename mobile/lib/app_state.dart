@@ -86,6 +86,14 @@ class AppState extends ChangeNotifier {
         notifyListeners();
       });
 
+  /// Changes the password; this login stays valid, the user's other logins end.
+  Future<void> changePassword(String currentPassword, String newPassword) =>
+      guard(() => api.changePassword(currentPassword, newPassword));
+
+  /// Asks the server to email a password reset link. Works without logging in.
+  Future<void> forgotPassword(String serverUrl, String email) =>
+      (_clientFactory(serverUrl)..language = _language).forgotPassword(email.trim());
+
   Future<void> setLanguage(String language) async {
     _language = language;
     _api?.language = language;

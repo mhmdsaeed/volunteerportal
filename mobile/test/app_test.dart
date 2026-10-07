@@ -36,11 +36,18 @@ void main() {
     return state;
   }
 
+  /// The test screen (800x600) is shorter than a phone, so the button sits below the fold: scroll to it first.
+  Future<void> tapLogin(WidgetTester tester) async {
+    await tester.ensureVisible(find.byKey(const Key('loginButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('loginButton')));
+  }
+
   Future<void> logIn(WidgetTester tester, {String password = 'demo12345'}) async {
     await tester.enterText(find.byKey(const Key('server')), 'portal.example.org');
     await tester.enterText(find.byKey(const Key('username')), 'demo_volunteer');
     await tester.enterText(find.byKey(const Key('password')), password);
-    await tester.tap(find.byKey(const Key('loginButton')));
+    await tapLogin(tester);
     await tester.pumpAndSettle();
   }
 
@@ -81,7 +88,7 @@ void main() {
   testWidgets('empty fields are required', (tester) async {
     await startApp(tester);
 
-    await tester.tap(find.byKey(const Key('loginButton')));
+    await tapLogin(tester);
     await tester.pumpAndSettle();
 
     expect(find.text('Required'), findsNWidgets(3));
@@ -361,5 +368,81 @@ void main() {
     expect(server.tokenRevoked, isTrue);
     expect(store.values[SessionStore.token], isNull);
     expect(store.values[SessionStore.serverUrl], 'https://portal.example.org'); // kept for next login
+  });
+
+  testWidgets('changing my password from Profile keeps me logged in', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await tester.tap(find.byKey(const Key('profileButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('changePasswordButton')));
+    await tester.pumpAndSettle();
+
+    // Checked in the app first: too short, then not the same twice
+    await tester.enterText(find.byKey(const Key('currentPassword')), 'demo12345');
+    await tester.enterText(find.byKey(const Key('newPassword')), 'short');
+    await tester.enterText(find.byKey(const Key('confirmNewPassword')), 'other');
+    await tester.tap(find.byKey(const Key('savePassword')));
+    await tester.pumpAndSettle();
+    expect(find.text('Password must be at least 8 characters'), findsOneWidget);
+    expect(find.text('Passwords do not match'), findsOneWidget);
+    expect(server.requests.where((r) => r.url.path == '/api/auth/password'), isEmpty);
+
+    // The server refuses a wrong current password
+    await tester.enterText(find.byKey(const Key('currentPassword')), 'not-it');
+    await tester.enterText(find.byKey(const Key('newPassword')), 'brand-new-pass');
+    await tester.enterText(find.byKey(const Key('confirmNewPassword')), 'brand-new-pass');
+    await tester.tap(find.byKey(const Key('savePassword')));
+    await tester.pumpAndSettle();
+    expect(find.text('Your current password is wrong.'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('currentPassword')), 'demo12345');
+    await tester.tap(find.byKey(const Key('savePassword')));
+    await tester.pumpAndSettle();
+
+    expect(server.password, 'brand-new-pass');
+    expect(find.textContaining('Password changed.'), findsOneWidget);
+    expect(find.byKey(const Key('logoutButton')), findsOneWidget); // back on Profile, still logged in
+    expect(store.values[SessionStore.token], FakeServer.token);
+  });
+
+  testWidgets('a forgotten password: the login screen asks the server to email a reset link', (tester) async {
+    await startApp(tester);
+    await tester.enterText(find.byKey(const Key('server')), 'portal.example.org');
+    await tester.tap(find.byKey(const Key('forgotPassword')));
+    await tester.pumpAndSettle();
+
+    // The server typed on the login screen is carried over
+    expect(find.widgetWithText(TextFormField, 'portal.example.org'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('resetEmail')), 'not-an-email');
+    await tester.tap(find.byKey(const Key('sendResetLink')));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter a valid email address'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('resetEmail')), ' volunteer@example.org ');
+    await tester.tap(find.byKey(const Key('sendResetLink')));
+    await tester.pumpAndSettle();
+
+    expect(server.resetEmail, 'volunteer@example.org');
+    expect(server.requests.last.url.toString(), 'https://portal.example.org/api/auth/forgot-password');
+    expect(find.byKey(const Key('resetSent')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('backToLogin')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('loginButton')), findsOneWidget);
+  });
+
+  testWidgets('a server that cannot send email says to ask an administrator', (tester) async {
+    server.resetAvailable = false;
+    await startApp(tester);
+    await tester.tap(find.byKey(const Key('forgotPassword')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('resetServer')), 'portal.example.org');
+    await tester.enterText(find.byKey(const Key('resetEmail')), 'volunteer@example.org');
+    await tester.tap(find.byKey(const Key('sendResetLink')));
+    await tester.pumpAndSettle();
+
+    expect(find.text("This server can't send email. Ask an administrator to set a new password for you."), findsOneWidget);
+    expect(find.byKey(const Key('resetSent')), findsNothing);
   });
 }

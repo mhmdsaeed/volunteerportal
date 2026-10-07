@@ -64,6 +64,14 @@ class ApiClient {
 
   Future<void> logout() => _send('POST', '/api/auth/logout');
 
+  /// Changes my password. This login stays; my other app logins and website sessions end.
+  Future<void> changePassword(String currentPassword, String newPassword) => _send('POST', '/api/auth/password',
+      body: {'currentPassword': currentPassword, 'newPassword': newPassword});
+
+  /// Asks the server to email a reset link (for its website) to the account with this email. No login needed.
+  Future<void> forgotPassword(String email) =>
+      _send('POST', '/api/auth/forgot-password', body: {'email': email}, authenticated: false);
+
   Future<Me> me() async => Me.fromJson(await _send('GET', '/api/me') as Map<String, dynamic>);
 
   Future<List<InitiativeItem>> initiatives() async =>

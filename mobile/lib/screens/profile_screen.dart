@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
 import '../l10n/app_localizations.dart';
+import 'change_password_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -40,6 +41,13 @@ class ProfileScreen extends StatelessWidget {
           ],
           ListTile(leading: const Icon(Icons.dns), title: Text(t.serverUrl), subtitle: Text(state.serverUrl ?? '', textDirection: TextDirection.ltr)),
           const SizedBox(height: 24),
+          OutlinedButton.icon(
+            key: const Key('changePasswordButton'),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ChangePasswordScreen())),
+            icon: const Icon(Icons.password),
+            label: Text(t.changePassword),
+          ),
+          const SizedBox(height: 12),
           OutlinedButton.icon(
             key: const Key('logoutButton'),
             onPressed: () async {

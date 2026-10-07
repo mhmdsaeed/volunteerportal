@@ -7,7 +7,8 @@ import 'package:http/testing.dart';
 class FakeServer {
   FakeServer({this.password = 'demo12345', this.eventNeedsLocation = false});
 
-  final String password;
+  /// Changes when the app changes it (POST /api/auth/password).
+  String password;
   final bool eventNeedsLocation;
   static const token = 'vp_test-token';
 
@@ -35,6 +36,10 @@ class FakeServer {
     ],
   };
 
+  /// Whether the server can email reset links (POST /api/auth/forgot-password), and who asked for one.
+  bool resetAvailable = true;
+  String? resetEmail;
+
   /// The answers of the last join request, as sent.
   Map<String, dynamic>? joinAnswers;
 
@@ -60,6 +65,13 @@ class FakeServer {
       }
       return _error(401, 'invalid_credentials');
     }
+    if (path == '/api/auth/forgot-password') {
+      if (!resetAvailable) {
+        return _error(409, 'reset_unavailable');
+      }
+      resetEmail = (jsonDecode(request.body) as Map<String, dynamic>)['email'] as String?;
+      return http.Response('', 202);
+    }
     if (request.headers['Authorization'] != 'Bearer $token' || tokenRevoked) {
       return _error(401, 'unauthorized');
     }
@@ -70,6 +82,16 @@ class FakeServer {
     switch (path) {
       case '/api/auth/logout':
         tokenRevoked = true;
+        return http.Response('', 204);
+      case '/api/auth/password':
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        if (body['currentPassword'] != password) {
+          return _error(400, 'wrong_password');
+        }
+        if ((body['newPassword'] as String).length < 8) {
+          return _error(400, 'password_too_short');
+        }
+        password = body['newPassword'] as String;
         return http.Response('', 204);
       case '/api/me':
         return _json(_me);

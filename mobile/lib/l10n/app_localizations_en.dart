@@ -264,4 +264,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cameraUnavailable =>
       'The camera isn\'t available. Allow camera access in your phone\'s settings.';
+
+  @override
+  String get forgotPassword => 'Forgot your password?';
+
+  @override
+  String get forgotPasswordTitle => 'Reset password';
+
+  @override
+  String get forgotPasswordIntro =>
+      'Enter the email address of your account. We\'ll email you a link to choose a new password on the website.';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get invalidEmail => 'Enter a valid email address';
+
+  @override
+  String get sendResetLink => 'Send reset link';
+
+  @override
+  String get resetLinkSent =>
+      'If an active account uses that email, a link to reset its password is on its way. Check your inbox and spam folder; the link works only once.';
+
+  @override
+  String get resetUnavailable =>
+      'This server can\'t send email. Ask an administrator to set a new password for you.';
+
+  @override
+  String get backToLogin => 'Back to login';
+
+  @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get currentPassword => 'Current password';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get confirmNewPassword => 'Confirm new password';
+
+  @override
+  String get changePasswordHelp =>
+      'At least 8 characters. You\'ll stay logged in here, and be logged out of the website and your other devices.';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 8 characters';
+
+  @override
+  String get passwordsDontMatch => 'Passwords do not match';
+
+  @override
+  String get wrongCurrentPassword => 'Your current password is wrong.';
+
+  @override
+  String get passwordChanged =>
+      'Password changed. You\'ve been logged out of the website and your other devices.';
 }

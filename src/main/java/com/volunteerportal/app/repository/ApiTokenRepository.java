@@ -37,4 +37,10 @@ public interface ApiTokenRepository extends JpaRepository<ApiToken, Long> {
     @Transactional
     @Query("delete from ApiToken t where t.user.id = :userId")
     int deleteByUserId(@Param("userId") Long userId);
+
+    /** Logs the user out of the app everywhere except the login with this token (after changing the password in it). */
+    @Modifying
+    @Transactional
+    @Query("delete from ApiToken t where t.user.id = :userId and t.tokenHash <> :keepHash")
+    int deleteByUserIdExcept(@Param("userId") Long userId, @Param("keepHash") String keepHash);
 }

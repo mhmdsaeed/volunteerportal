@@ -50,6 +50,37 @@
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
         </form>
+
+        <section id="password" class="mt-5" aria-labelledby="passwordHeading">
+            <h3 class="h5 mb-3" id="passwordHeading" th:text="#{profile.password.heading}">Change password</h3>
+
+            <div class="alert alert-success" th:if="${param.passwordChanged != null}" th:text="#{profile.password.changed}">
+                Password changed.
+            </div>
+
+            <form th:action="@{/profile/password}" th:object="${passwordForm}" method="post">
+                <div class="mb-3">
+                    <label for="currentPassword" class="form-label" th:text="#{profile.password.current}">Current password</label>
+                    <input type="password" class="form-control" id="currentPassword" th:field="*{currentPassword}"
+                           autocomplete="current-password" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="newPassword" class="form-label" th:text="#{profile.password.new}">New password</label>
+                    <input type="password" class="form-control" id="newPassword" th:field="*{newPassword}"
+                           autocomplete="new-password" required aria-describedby="newPasswordHelp">
+                    <div class="form-text" id="newPasswordHelp" th:text="#{profile.password.help}">At least 8 characters.</div>
+                    <div class="text-danger" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label" th:text="#{profile.password.confirm}">Confirm new password</label>
+                    <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}"
+                           autocomplete="new-password" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" th:text="#{profile.password.submit}">Change password</button>
+            </form>
+        </section>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

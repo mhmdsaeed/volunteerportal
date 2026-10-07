@@ -38,7 +38,7 @@ public class ApiSecurityConfig {
             .securityMatcher("/api/**")
             .cors(cors -> cors.configurationSource(corsSource(corsOrigins)))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/forgot-password").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

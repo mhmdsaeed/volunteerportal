@@ -21,6 +21,12 @@
                 <div class="alert alert-info" th:if="${param.logout}" th:text="#{login.loggedOut}">
                     You have been logged out.
                 </div>
+                <div class="alert alert-success" th:if="${param.reset}" th:text="#{login.reset}">
+                    Your password has been reset.
+                </div>
+                <div class="alert alert-warning" th:if="${param.passwordChanged}" th:text="#{login.passwordChanged}">
+                    Your password was changed, so you were logged out.
+                </div>
 
                 <form th:action="@{/login}" method="post">
                     <div class="mb-3">
@@ -29,7 +35,9 @@
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label" th:text="#{common.password}">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <input type="password" class="form-control" id="password" name="password" required
+                               autocomplete="current-password">
+                        <a class="d-inline-block mt-2 small" th:href="@{/forgot-password}" th:text="#{login.forgotLink}">Forgot your password?</a>
                     </div>
                     <button type="submit" class="btn btn-primary w-100" th:text="#{login.submit}">Login</button>
                 </form>

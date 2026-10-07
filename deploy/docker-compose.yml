@@ -40,6 +40,12 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:?Set ADMIN_DEFAULT_PASSWORD in deploy/.env}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.org}
+      # Email for "Forgot your password?" links (optional; empty MAIL_HOST = off, admins set passwords instead)
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
       TZ: ${TZ:-UTC}
       JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
     # No ports: only Caddy reaches the app

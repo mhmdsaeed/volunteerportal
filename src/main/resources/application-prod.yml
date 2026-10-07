@@ -21,6 +21,8 @@ app:
     cors-allowed-origin-patterns:
   checkin:
     show-link: false
+  password-reset:
+    log-links: false
   demo-data:
     enabled: false
 

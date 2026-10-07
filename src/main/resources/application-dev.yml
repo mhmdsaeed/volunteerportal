@@ -7,6 +7,9 @@ app:
   checkin:
     # Show the check-in link (with copy/open buttons) under the QR code, to test without a phone
     show-link: true
+  password-reset:
+    # Write "Forgot your password?" links to the server log, so the reset can be tried without a mail server
+    log-links: true
   demo-data:
     # Create demo users, an initiative and events on startup (see DemoDataInitializer)
     enabled: true

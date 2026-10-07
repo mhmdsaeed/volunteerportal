@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
+import 'forgot_password_screen.dart';
 import 'profile_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -88,14 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       autocorrect: false,
                       textDirection: TextDirection.ltr,
                       decoration: InputDecoration(labelText: t.serverUrl, hintText: t.serverUrlHint),
-                      validator: (v) {
-                        final value = (v ?? '').trim();
-                        if (value.isEmpty) {
-                          return t.required;
-                        }
-                        final uri = Uri.tryParse(value.contains('://') ? value : 'https://$value');
-                        return uri == null || uri.host.isEmpty || !uri.scheme.startsWith('http') ? t.invalidServerUrl : null;
-                      },
+                      validator: (v) => validateServerUrl(t, v),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -114,6 +108,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       onFieldSubmitted: (_) => _submit(),
                       decoration: InputDecoration(labelText: t.password),
                       validator: (v) => (v ?? '').isEmpty ? t.required : null,
+                    ),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: TextButton(
+                        key: const Key('forgotPassword'),
+                        onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                            builder: (_) => ForgotPasswordScreen(serverUrl: _server.text))),
+                        child: Text(t.forgotPassword),
+                      ),
                     ),
                     if (error != null) ...[
                       const SizedBox(height: 16),
@@ -137,6 +140,16 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+
+/// The server address field's check, shared by the login and forgot-password screens.
+String? validateServerUrl(AppLocalizations t, String? v) {
+  final value = (v ?? '').trim();
+  if (value.isEmpty) {
+    return t.required;
+  }
+  final uri = Uri.tryParse(value.contains('://') ? value : 'https://$value');
+  return uri == null || uri.host.isEmpty || !uri.scheme.startsWith('http') ? t.invalidServerUrl : null;
 }
 
 /// The portal's name on navy under the yellow lanyard band, like the website's sign-in page.

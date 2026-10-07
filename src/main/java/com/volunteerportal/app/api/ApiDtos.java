@@ -16,6 +16,14 @@ public final class ApiDtos {
     public record LoginResponse(String token, LocalDateTime expiresAt, Me user) {
     }
 
+    /** Changing your own password: the current one and the new one (at least 8 characters). */
+    public record PasswordChangeRequest(String currentPassword, String newPassword) {
+    }
+
+    /** "Forgot your password?": the account's email; a reset link is emailed if it belongs to an active account. */
+    public record ForgotPasswordRequest(String email) {
+    }
+
     public record Me(Long id, String username, String email, List<String> roles, String grade, long points) {
     }
 

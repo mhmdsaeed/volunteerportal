@@ -18,10 +18,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
+    Optional<User> findByEmail(String email);
+
     List<User> findByRoles_Name(String roleName);
 
-    /** Whether the account exists and is active (checked on every website request, see DisabledAccountFilter). */
-    boolean existsByIdAndEnabledTrue(Long id);
+    /**
+     * The password hash of an active account, empty if it is deactivated or gone (checked on every website
+     * request, so a session ends once the password changes elsewhere; see StaleSessionFilter).
+     */
+    @Query("select u.password from User u where u.id = :id and u.enabled = true")
+    Optional<String> findActivePasswordHash(@Param("id") Long id);
 
     /** Active users having any of the given roles, by username (e.g. who may supervise an initiative). */
     @Query("select distinct u from User u join u.roles r where r.name in :roleNames and u.enabled = true order by u.username")
