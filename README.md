@@ -97,7 +97,7 @@ The phone warns about the self-signed certificate once; continue anyway (or inst
 
 The volunteer's Initiatives page (and the app's Initiatives tab) groups initiatives by office and can show one office (see [What's implemented](#whats-implemented)). To try it, run with the `dev` profile (see [Run](#run)).
 
-**Give some initiatives an office first.** The `dev` demo data has none, so as `admin`: **Admin → Offices → New Office** (two offices), then **Admin → Initiatives**, edit a few enabled initiatives and choose an office for each, leaving one without.
+**Give some initiatives an office first.** The `dev` demo data has none, so as `admin`: **Admin → Manage Offices → New Office** (two offices), then **Admin → Manage Initiatives**, **Edit** a few enabled initiatives and choose an **Office** for each, leaving one without.
 
 **On the website**, log in as `demo_volunteer` and open **Initiatives**:
 
