@@ -7,46 +7,80 @@
     <div class="container">
         <h2 class="mb-3" th:text="#{initiatives.title}">Initiatives</h2>
 
-        <nav class="mb-4" th:aria-label="#{initiatives.filter.label}">
-            <ul class="nav nav-pills vp-filter">
-                <li class="nav-item" th:each="option : ${filters}">
-                    <a class="nav-link" th:classappend="${option == filter} ? 'active'"
-                       th:attr="aria-current=${option == filter} ? 'page'"
-                       th:href="@{/initiatives(show=${option.param})}">
-                        <span th:text="#{'initiatives.filter.' + ${option.param}}">Joined</span>
-                        <span class="vp-filter-count" th:text="${counts.get(option)}">0</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <div class="vp-filters mb-4">
+            <nav th:aria-label="#{initiatives.filter.label}">
+                <ul class="nav nav-pills vp-filter">
+                    <li class="nav-item" th:each="option : ${filters}">
+                        <a class="nav-link" th:classappend="${option == filter} ? 'active'"
+                           th:attr="aria-current=${option == filter} ? 'page'"
+                           th:href="${office == null} ? @{/initiatives(show=${option.param})}
+                                                      : @{/initiatives(show=${option.param},office=${office})}">
+                            <span th:text="#{'initiatives.filter.' + ${option.param}}">Joined</span>
+                            <span class="vp-filter-count" th:text="${counts.get(option)}">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
 
-        <div class="row row-cols-1 row-cols-md-2 g-3">
-            <div class="col" th:each="initiative : ${initiatives}">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title" th:text="${initiative.name}"></h5>
-                        <p class="card-text" th:text="${initiative.description}"></p>
+            <!-- By office: picking one reloads the page (the button is for browsers without JavaScript) -->
+            <form class="vp-office-filter" method="get" th:action="@{/initiatives}"
+                  th:if="${!#lists.isEmpty(offices) or anyWithoutOffice}">
+                <input type="hidden" name="show" th:value="${filter.param}">
+                <label for="office" class="form-label" th:text="#{initiatives.office.label}">Office</label>
+                <div class="d-flex gap-2">
+                    <select id="office" name="office" class="form-select" onchange="this.form.submit()">
+                        <option value="" th:selected="${office == null}" th:text="#{initiatives.office.all}">All offices</option>
+                        <option th:each="o : ${offices}" th:value="${o.id}" th:selected="${office == '' + o.id}"
+                                th:text="${o.name}">Office</option>
+                        <option th:if="${anyWithoutOffice}" th:value="${noOffice}" th:selected="${office == noOffice}"
+                                th:text="#{initiatives.office.none}">No office</option>
+                    </select>
+                    <noscript><button type="submit" class="btn btn-outline-primary" th:text="#{initiatives.office.apply}">Show</button></noscript>
+                </div>
+            </form>
+        </div>
 
-                        <p th:with="membership=${memberships.get(initiative.id)}">
-                            <span th:if="${membership == null}" class="badge text-bg-secondary" th:text="#{status.notJoined}">Not joined</span>
-                            <span th:if="${membership != null and membership.responseJoinDttm == null}" class="badge text-bg-warning" th:text="#{status.pending}">Pending</span>
-                            <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == true}" class="badge text-bg-success" th:text="#{status.approved}">Approved</span>
-                            <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == false}" class="badge text-bg-danger" th:text="#{status.notApproved}">Not approved</span>
-                        </p>
+        <section class="vp-office-group" th:each="group : ${groups}"
+                 th:with="officeName=${group.office() != null ? group.office().name : #messages.msg('initiatives.office.none')}">
+            <h3 class="vp-office-heading">
+                <i class="bi bi-building" aria-hidden="true"></i>
+                <span th:text="${officeName}">Office</span>
+                <span class="vp-filter-count" th:text="${#lists.size(group.initiatives())}">0</span>
+            </h3>
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+                <div class="col" th:each="initiative : ${group.initiatives()}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${initiative.name}"></h5>
+                            <p class="vp-card-office" th:if="${initiative.office != null}">
+                                <i class="bi bi-building" aria-hidden="true"></i>
+                                <span class="visually-hidden" th:text="#{common.office} + ':'">Office:</span>
+                                <span th:text="${initiative.office.name}">Office</span>
+                            </p>
+                            <p class="card-text" th:text="${initiative.description}"></p>
 
-                        <a class="btn btn-primary btn-sm" th:href="@{/initiatives/{id}(id=${initiative.id})}" th:text="#{common.view}">View</a>
+                            <p th:with="membership=${memberships.get(initiative.id)}">
+                                <span th:if="${membership == null}" class="badge text-bg-secondary" th:text="#{status.notJoined}">Not joined</span>
+                                <span th:if="${membership != null and membership.responseJoinDttm == null}" class="badge text-bg-warning" th:text="#{status.pending}">Pending</span>
+                                <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == true}" class="badge text-bg-success" th:text="#{status.approved}">Approved</span>
+                                <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == false}" class="badge text-bg-danger" th:text="#{status.notApproved}">Not approved</span>
+                            </p>
+
+                            <a class="btn btn-primary btn-sm" th:href="@{/initiatives/{id}(id=${initiative.id})}" th:text="#{common.view}">View</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col" th:if="${#lists.isEmpty(initiatives)}" th:switch="${filter.name()}">
-                <th:block th:case="'JOINED'">
-                    <p class="text-muted mb-2" th:text="#{initiatives.emptyJoined}">You haven't joined any initiatives yet.</p>
-                    <a class="btn btn-primary btn-sm" th:href="@{/initiatives(show='notJoined')}"
-                       th:text="#{initiatives.browseNotJoined}">Browse initiatives you can join</a>
-                </th:block>
-                <p th:case="'ALL'" class="text-muted" th:text="#{initiatives.empty}">No initiatives are open right now.</p>
-                <p th:case="*" class="text-muted" th:text="#{initiatives.emptyFilter}">No initiatives here.</p>
-            </div>
+        </section>
+
+        <div th:if="${#lists.isEmpty(initiatives)}" th:switch="${office == null ? filter.name() : 'OFFICE'}">
+            <th:block th:case="'JOINED'">
+                <p class="text-muted mb-2" th:text="#{initiatives.emptyJoined}">You haven't joined any initiatives yet.</p>
+                <a class="btn btn-primary btn-sm" th:href="@{/initiatives(show='notJoined')}"
+                   th:text="#{initiatives.browseNotJoined}">Browse initiatives you can join</a>
+            </th:block>
+            <p th:case="'ALL'" class="text-muted" th:text="#{initiatives.empty}">No initiatives are open right now.</p>
+            <p th:case="*" class="text-muted" th:text="#{initiatives.emptyFilter}">No initiatives here.</p>
         </div>
     </div>
 

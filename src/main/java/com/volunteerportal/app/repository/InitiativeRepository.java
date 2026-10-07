@@ -12,6 +12,8 @@ import com.volunteerportal.app.model.Initiative;
 
 public interface InitiativeRepository extends JpaRepository<Initiative, Long> {
 
+    /** The open initiatives, with their office (the volunteer's list shows and groups by it). */
+    @EntityGraph(attributePaths = {"office"})
     List<Initiative> findByEnabledTrue();
 
     Optional<Initiative> findFirstByName(String name);

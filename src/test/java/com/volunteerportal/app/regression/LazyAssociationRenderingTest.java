@@ -179,6 +179,31 @@ class LazyAssociationRenderingTest {
     }
 
     @Test
+    void volunteerFacingInitiativeList_groupedByOffice_rendersWithoutError() throws Exception {
+        Office office = new Office();
+        office.setName("Lazy Test List Office " + System.nanoTime());
+        office = officeRepository.save(office);
+
+        Initiative initiative = new Initiative();
+        initiative.setName("Lazy Test List Initiative " + System.nanoTime());
+        initiative.setOffice(office);
+        initiative.setEnabled(true);
+        initiative = initiativeRepository.save(initiative);
+
+        try {
+            // The office name is on the card, in the group heading and in the office picker
+            mockMvc.perform(get("/initiatives").param("show", "all").param("office", String.valueOf(office.getId()))
+                            .with(user(adminPrincipal())))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString(initiative.getName())))
+                    .andExpect(content().string(containsString(office.getName())));
+        } finally {
+            initiativeRepository.delete(initiative);
+            officeRepository.delete(office);
+        }
+    }
+
+    @Test
     void adminVolunteersList_withGradeAssigned_rendersWithoutError() throws Exception {
         Grade grade = gradeRepository.save(newGrade("LazyTestGrade " + System.nanoTime()));
         User volunteer = persistVolunteer("lazytest_volunteer_admin_" + System.nanoTime());
