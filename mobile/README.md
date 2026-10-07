@@ -100,7 +100,19 @@ In the app, use server **`http://10.0.2.2:8080`**: inside the emulator that addr
 
 Plain `http://` works because these are debug builds (`android/app/src/debug/AndroidManifest.xml` allows it); release builds need `https`. An iPhone needs a Mac with Xcode.
 
-**To test check-in by scanning:** on the website as `demo_coordinator`, open Coordinator → *Demo Initiative* → Events → *Demo Event* → **Check-in QR**, and scan it from the app's Check in tab as `demo_volunteer`.
+### 3. What to try
+
+| Feature | How |
+|---|---|
+| Events | Log in as `demo_volunteer`: *Demo Event* is shown as your next event |
+| Check-in | On the website as `demo_coordinator`, open Coordinator → *Demo Initiative* → Events → *Demo Event* → **Check-in QR**, and scan it from the app's Check in tab as `demo_volunteer` (a real phone; scan again to check out). Without a camera, open the test link under the QR in a browser logged in to the website as `demo_volunteer`: the app's Events and History then show the check-in |
+| Initiatives and joining | Register a new account on the website and log in to the app with it. Initiatives → **Not joined** → open one → answer its questions → **Request to join**. Approve or reject it on the website as `demo_coordinator` (Join Requests), then pull to refresh |
+| Change password | Profile (the account button at the top) → **Change password**. The app stays logged in; a website session of the same account is logged out |
+| Forgot password | Log out, then **Forgot your password?** on the login screen. The `dev` server has no mail server, so it prints the link in its window (`Password reset link for <user>: ...`); open it in a browser on the PC (from the emulator, change `10.0.2.2` in it to `localhost`) |
+| Arabic | The translate button at the top: the whole app turns right-to-left, and server messages come back in Arabic |
+| History and Alerts | After checking in, or after a coordinator decides your join request |
+
+To start over as someone else, log out in Profile; to test joining or approval again, register another account (the demo accounts keep their state between starts).
 
 ## Code map
 
