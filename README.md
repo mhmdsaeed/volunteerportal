@@ -5,7 +5,7 @@ Spring Boot 4.1.1 / Java 21 / Thymeleaf / Bootstrap / MySQL volunteer management
 | Folder | What's in it |
 |---|---|
 | `src/` | The Spring Boot server: website and mobile JSON API |
-| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, initiatives (with the same Joined/Pending/Not approved/Not joined/All filter as the website; join one by answering its questions, or withdraw a pending request), QR check-in, history, notifications, profile with change password, and "Forgot your password?" on login; same look and English/Arabic as the website |
+| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, initiatives (with the same Joined/Pending/Not approved/Not joined/All filter, office grouping and office picker as the website; join one by answering its questions, or withdraw a pending request), QR check-in, history, notifications, profile with change password, and "Forgot your password?" on login; same look and English/Arabic as the website |
 | [`deploy/`](deploy/README.md) | Production setup: Docker Compose with MySQL and Caddy (HTTPS), backups |
 
 ## Stack
@@ -104,7 +104,7 @@ JSON API for the volunteer mobile app under `/api` (the Flutter app itself is in
 | `POST /api/auth/password` | `{"currentPassword", "newPassword"}` | `204`; this token stays valid, my other app logins are revoked and my website sessions end. `400 wrong_password` or `400 password_too_short` (under 8 characters) |
 | `POST /api/auth/forgot-password` | `{"email"}` | `202` whether or not the email has an account (no token needed); the reset link is emailed in the `Accept-Language` language and opens the website's reset page. `409 reset_unavailable` when the server has no mail set up |
 | `GET /api/me` | — | `{"id", "username", "email", "roles", "grade", "points"}` |
-| `GET /api/initiatives` | — | open initiatives with `office` and `membership`: `NONE` / `PENDING` / `APPROVED` / `REJECTED` (the app filters on it) |
+| `GET /api/initiatives` | — | open initiatives with `office` (name), `officeId` (both `null` without an office; the app filters and groups by the id, as two offices may share a name) and `membership`: `NONE` / `PENDING` / `APPROVED` / `REJECTED` (the app filters on it) |
 | `GET /api/initiatives/{id}` | — | one open initiative with my `membership` and its `questions`: `{"id", "text", "type", "choices"}`, `type` `YES_NO` / `ONE_CHOICE` / `MANY_CHOICES` / `TEXT`. `404` if it isn't open |
 | `POST /api/initiatives/{id}/join` | `{"answers": {"<question id>": ["..."]}}` (optional) | the initiative with `membership` `PENDING`. Values are what the website's join form sends: `"1"`/`"0"` for yes/no, choice numbers from 1, or the text; unanswered questions are left out. Answers go to `volunteer_initiative_answer` and the initiative's managers are notified, as from the website. `409 already_requested` if I already asked, `404` if it isn't open |
 | `POST /api/initiatives/{id}/withdraw` | — | `204`; my pending request and its answers are deleted. `409 already_reviewed` once a coordinator answered it, `404` if there is none |
