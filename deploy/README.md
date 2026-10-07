@@ -104,7 +104,13 @@ MAIL_FROM=yourname@gmail.com
 docker compose up -d
 ```
 
-Compose recreates only the app container with the new settings (no rebuild); the database and Caddy keep running. It is back after about 20 seconds.
+Compose recreates only the app container with the new settings (no rebuild); the database and Caddy keep running. It is back after about 20 seconds. Check that it picked the settings up:
+
+```bash
+docker compose logs app | grep "Password reset emails"
+```
+
+It should say `Password reset emails are on: sent through smtp.gmail.com:587 from yourname@gmail.com` (your host and address). `Password reset emails are off: MAIL_HOST is not set` means the settings didn't reach the app: check the `MAIL_*` lines in `.env` and run `docker compose up -d` again.
 
 ### Test it
 
@@ -118,10 +124,11 @@ Compose recreates only the app container with the new settings (no rebuild); the
 
 | Log line | Meaning |
 |---|---|
-| `Could not send the password reset email ...: Authentication failed` | Wrong username or password (for Gmail: use the app password) |
-| `... Connection timed out` / `Couldn't connect to host` | Wrong host or port; use 587, not 25 or 465 |
-| `Password reset requested for ..., but mail is not set up (MAIL_HOST)` | `MAIL_HOST` didn't reach the app: check `.env` and run `docker compose up -d` again |
-| Nothing at all | The email has no active account, or you asked again within 2 minutes; both are silent on purpose |
+| `Could not send the password reset email to <user>: Authentication failed` | Wrong or missing username or password (for Gmail: the app password, not the account password) |
+| `... Mail server connection failed ... Couldn't connect to host, port: <host>, <port>` | Wrong host or port, or the server can't reach it: use the host from the table above and port 587 (not 25) |
+| `... Mail server connection failed ... Exception reading response` | Something answered but not as a mail server expects: check the port is 587 (not 465) |
+| `Password reset emails are off: MAIL_HOST is not set` (at startup), and the page says "This site can't send email" | `MAIL_HOST` didn't reach the app: check `.env` and run `docker compose up -d` again |
+| Nothing at all | The email has no active account, or you asked again within 2 minutes; both are silent on purpose. A failed send is logged a few seconds after the request (it runs in the background), so wait before checking |
 
 **Landing in spam?** Gmail through Gmail usually doesn't. With Brevo and a single verified sender it can; the lasting fix is a domain of your own (instead of DuckDNS) with Brevo's SPF and DKIM records added to its DNS.
 

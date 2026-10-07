@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.MessageSource;
+import org.springframework.context.event.EventListener;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,15 +31,18 @@ public class PasswordResetMailer {
     private final ObjectProvider<JavaMailSender> mailSender;
     private final MessageSource messageSource;
     private final String host;
+    private final int port;
     private final String from;
     private final boolean logLinks;
 
     public PasswordResetMailer(ObjectProvider<JavaMailSender> mailSender, MessageSource messageSource,
-            @Value("${spring.mail.host:}") String host, @Value("${app.mail.from:}") String from,
+            @Value("${spring.mail.host:}") String host, @Value("${spring.mail.port:25}") int port,
+            @Value("${app.mail.from:}") String from,
             @Value("${app.password-reset.log-links:false}") boolean logLinks) {
         this.mailSender = mailSender;
         this.messageSource = messageSource;
         this.host = host;
+        this.port = port;
         this.from = from;
         this.logLinks = logLinks;
     }
@@ -50,16 +55,24 @@ public class PasswordResetMailer {
         return mailConfigured() || logLinks;
     }
 
+    /** Says once at startup whether reset emails are on, so an admin can check the mail settings in the log. */
+    @EventListener(ApplicationReadyEvent.class)
+    public void logStatus() {
+        if (mailConfigured()) {
+            log.info("Password reset emails are on: sent through {}:{} from {}", host, port,
+                    StringUtils.hasText(from) ? from : "(MAIL_FROM not set)");
+        } else {
+            log.info("Password reset emails are off: MAIL_HOST is not set{}", logLinks ? " (links are written to this log instead)" : "");
+        }
+    }
+
     @Async
     public void send(String username, String email, String link, Duration validity, Locale locale) {
         if (logLinks) {
             log.info("Password reset link for {} (logged because app.password-reset.log-links is on): {}", username, link);
         }
         if (!mailConfigured()) {
-            if (!logLinks) {
-                log.warn("Password reset requested for {}, but mail is not set up (MAIL_HOST); no email sent", username);
-            }
-            return;
+            return; // only reached with log-links on: available() is false without mail otherwise
         }
         SimpleMailMessage message = new SimpleMailMessage();
         if (StringUtils.hasText(from)) {
