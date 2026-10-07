@@ -22,20 +22,20 @@
                 </ul>
             </nav>
 
-            <!-- By office: picking one reloads the page (the button is for browsers without JavaScript) -->
+            <!-- By office. No submit-on-change: that would reload the page on every arrow key for keyboard users -->
             <form class="vp-office-filter" method="get" th:action="@{/initiatives}"
                   th:if="${!#lists.isEmpty(offices) or anyWithoutOffice}">
                 <input type="hidden" name="show" th:value="${filter.param}">
                 <label for="office" class="form-label" th:text="#{initiatives.office.label}">Office</label>
                 <div class="d-flex gap-2">
-                    <select id="office" name="office" class="form-select" onchange="this.form.submit()">
+                    <select id="office" name="office" class="form-select">
                         <option value="" th:selected="${office == null}" th:text="#{initiatives.office.all}">All offices</option>
                         <option th:each="o : ${offices}" th:value="${o.id}" th:selected="${office == '' + o.id}"
                                 th:text="${o.name}">Office</option>
                         <option th:if="${anyWithoutOffice}" th:value="${noOffice}" th:selected="${office == noOffice}"
                                 th:text="#{initiatives.office.none}">No office</option>
                     </select>
-                    <noscript><button type="submit" class="btn btn-outline-primary" th:text="#{initiatives.office.apply}">Show</button></noscript>
+                    <button type="submit" class="btn btn-outline-primary" th:text="#{initiatives.office.apply}">Show</button>
                 </div>
             </form>
         </div>
@@ -44,20 +44,20 @@
                  th:with="officeName=${group.office() != null ? group.office().name : #messages.msg('initiatives.office.none')}">
             <h3 class="vp-office-heading">
                 <i class="bi bi-building" aria-hidden="true"></i>
-                <span th:text="${officeName}">Office</span>
+                <bdi th:text="${officeName}">Office</bdi>
                 <span class="vp-filter-count" th:text="${#lists.size(group.initiatives())}">0</span>
             </h3>
             <div class="row row-cols-1 row-cols-md-2 g-3">
                 <div class="col" th:each="initiative : ${group.initiatives()}">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title" th:text="${initiative.name}"></h5>
+                            <h5 class="card-title"><bdi th:text="${initiative.name}">Name</bdi></h5>
                             <p class="vp-card-office" th:if="${initiative.office != null}">
                                 <i class="bi bi-building" aria-hidden="true"></i>
                                 <span class="visually-hidden" th:text="#{common.office} + ':'">Office:</span>
-                                <span th:text="${initiative.office.name}">Office</span>
+                                <bdi th:text="${initiative.office.name}">Office</bdi>
                             </p>
-                            <p class="card-text" th:text="${initiative.description}"></p>
+                            <p class="card-text" th:if="${initiative.description != null}"><bdi th:text="${initiative.description}">Description</bdi></p>
 
                             <p th:with="membership=${memberships.get(initiative.id)}">
                                 <span th:if="${membership == null}" class="badge text-bg-secondary" th:text="#{status.notJoined}">Not joined</span>
