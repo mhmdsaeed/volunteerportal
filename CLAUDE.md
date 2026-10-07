@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Volunteer management portal: a Spring Boot 4.1.1 / Java 21 / Thymeleaf / MySQL website and JSON API (`src/`), a Flutter volunteer app (`mobile/`), and a Docker Compose + Caddy production setup (`deploy/`). `README.md` describes the features, the API and the run/test setup; keep it up to date when you add or change features.
+Volunteer management portal: a Spring Boot 4.1.1 / Java 21 / Thymeleaf / MySQL website and JSON API (`src/`), a Flutter volunteer app (`mobile/`), and a Docker Compose + Caddy production setup (`deploy/`). `README.md` describes the features, the API and the run/test setup; keep it up to date when you add or change features. In step-by-step instructions, name buttons and links by the label the page shows (the `messages.properties` text the template uses, e.g. Admin → **Manage Offices** → **New Office**, not "Offices"), and check it in the template or the running page.
 
 ## Commands
 
