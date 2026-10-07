@@ -45,7 +45,7 @@ The website is then at http://localhost:8080. The `dev` profile lets `http://loc
 | `demo_pending` | See a pending request |
 | `demo_coordinator` | Approve or reject requests on the website, and show the event's check-in QR |
 
-These are the accounts as first created. The demo setup only adds what is missing, so once you approve `demo_pending`'s request (or change the demo event) it stays that way on later starts; register new accounts to try those steps again.
+These are the accounts as first created. The demo setup only adds what is missing, so once you approve `demo_pending`'s request it stays approved on later starts; register new accounts to try those steps again. Only *Demo Event* is reset on every start (enabled, all day today).
 
 To try **joining an initiative**, register a new account at http://localhost:8080/register, then log in to the app with it.
 
