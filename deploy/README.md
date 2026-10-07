@@ -49,7 +49,7 @@ docker compose up -d --build     # first build takes a few minutes
 docker compose logs -f app       # wait for "Started VolunteerPortalApplication", Ctrl+C to stop following
 ```
 
-**Email (optional).** "Forgot your password?" emails a reset link only if `MAIL_HOST` is set in `.env`, with `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` and `MAIL_FROM` (an address the mail service lets you send as). Use your email provider's SMTP settings or a transactional service (Brevo, Mailgun, Amazon SES, ...); Oracle Cloud blocks outgoing port 25, so use port 587. Without it, users who forget their password ask an admin, who sets a new one under Admin → Users → **Roles and password**. To check it works, use "Forgot your password?" with your own account and watch `docker compose logs app` for mail errors.
+**Email (optional)**: to let users reset a forgotten password by email, fill in the `MAIL_*` lines; see [5. Email for password resets](#5-email-for-password-resets-optional). You can do it later.
 
 If the GitHub repository is private, clone with a [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) or a read-only access token instead.
 
@@ -61,6 +61,69 @@ Open `https://<your-domain>`. On the first start Flyway creates the database tab
 2. Change the password straight away on My Profile → **Change password** (the account password is only the initial one).
 3. Optionally set `SEED_ADMIN=false` in `.env` and run `docker compose up -d`.
 4. Never set `SPRING_PROFILES_ACTIVE=dev` on the server: it creates demo accounts with a known password.
+
+## 5. Email for password resets (optional)
+
+"Forgot your password?" (on the login page and in the app) emails a reset link only when the server has a mail service. Without one, users who forget their password ask an admin, who sets a new one under Admin → Users → **Roles and password**.
+
+### Choose a mail service
+
+Use port **587**: Oracle Cloud blocks outgoing port 25. A DuckDNS domain can't hold the DNS records (SPF, DKIM) that mail services use to verify a domain, so send from a single address you verify instead.
+
+| Option | Good for | Settings |
+|---|---|---|
+| **Gmail** (simplest) | A small organisation; about 500 emails a day | `smtp.gmail.com`, port 587. Username and `MAIL_FROM` are your Gmail address; the password is an **app password**, not your Gmail password |
+| **Brevo** (free, 300 a day) | Not tied to a personal mailbox | `smtp-relay.brevo.com`, port 587. Username is the SMTP login Brevo shows (`...@smtp-brevo.com`), password is an SMTP key, `MAIL_FROM` is a sender address you verified in Brevo |
+| **Your organisation's mail** | You already have Microsoft 365 or Google Workspace | Microsoft 365: `smtp.office365.com`, port 587 (an admin must turn on SMTP AUTH for that mailbox). Google Workspace: as Gmail |
+
+- **Gmail app password**: turn on 2-Step Verification for the Google account, then open <https://myaccount.google.com/apppasswords>, create one named "Volunteer Portal" and copy the 16 characters (without spaces).
+- **Brevo**: sign up, add and confirm your address under *Senders, Domains & Dedicated IPs → Senders*, then create a key under *SMTP & API → SMTP*.
+
+### Put the settings in `.env`
+
+```bash
+cd /opt/volunteerportal/deploy
+nano .env
+```
+
+Fill in the mail lines (add them if your `.env` was copied before they existed). For Gmail:
+
+```
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=yourname@gmail.com
+MAIL_PASSWORD=abcdefghijklmnop
+MAIL_FROM=yourname@gmail.com
+```
+
+`MAIL_SMTP_AUTH` and `MAIL_STARTTLS` default to `true`, which all three services need. If the password contains a `$`, write it as `$$` (Docker Compose would read it as a variable).
+
+### Restart the app
+
+```bash
+docker compose up -d
+```
+
+Compose recreates only the app container with the new settings (no rebuild); the database and Caddy keep running. It is back after about 20 seconds.
+
+### Test it
+
+1. Log out, click **Forgot your password?** on the login page, and enter your own account's email address.
+2. The email arrives within a minute (check spam too), with a link starting `https://<your-domain>/reset-password?token=`.
+3. If nothing arrives, check the log:
+
+   ```bash
+   docker compose logs app | grep -i "reset\|mail"
+   ```
+
+| Log line | Meaning |
+|---|---|
+| `Could not send the password reset email ...: Authentication failed` | Wrong username or password (for Gmail: use the app password) |
+| `... Connection timed out` / `Couldn't connect to host` | Wrong host or port; use 587, not 25 or 465 |
+| `Password reset requested for ..., but mail is not set up (MAIL_HOST)` | `MAIL_HOST` didn't reach the app: check `.env` and run `docker compose up -d` again |
+| Nothing at all | The email has no active account, or you asked again within 2 minutes; both are silent on purpose |
+
+**Landing in spam?** Gmail through Gmail usually doesn't. With Brevo and a single verified sender it can; the lasting fix is a domain of your own (instead of DuckDNS) with Brevo's SPF and DKIM records added to its DNS.
 
 ## Backups
 
