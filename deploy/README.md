@@ -42,12 +42,14 @@ sudo git clone https://github.com/mhmdsaeed/volunteerportal.git /opt/volunteerpo
 sudo chown -R ubuntu: /opt/volunteerportal
 cd /opt/volunteerportal/deploy
 cp .env.example .env
-nano .env        # set DOMAIN, ACME_EMAIL and the secrets (openssl rand -base64 32 for each)
+nano .env        # set DOMAIN, ACME_EMAIL and the secrets (openssl rand -base64 32 for each); MAIL_* optional
 chmod 600 .env
 
 docker compose up -d --build     # first build takes a few minutes
 docker compose logs -f app       # wait for "Started VolunteerPortalApplication", Ctrl+C to stop following
 ```
+
+**Email (optional).** "Forgot your password?" emails a reset link only if `MAIL_HOST` is set in `.env`, with `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` and `MAIL_FROM` (an address the mail service lets you send as). Use your email provider's SMTP settings or a transactional service (Brevo, Mailgun, Amazon SES, ...); Oracle Cloud blocks outgoing port 25, so use port 587. Without it, users who forget their password ask an admin, who sets a new one under Admin → Users → **Roles and password**. To check it works, use "Forgot your password?" with your own account and watch `docker compose logs app` for mail errors.
 
 If the GitHub repository is private, clone with a [deploy key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) or a read-only access token instead.
 
@@ -56,7 +58,7 @@ Open `https://<your-domain>`. On the first start Flyway creates the database tab
 ## 4. First login
 
 1. Log in as `ADMIN_USERNAME` with `ADMIN_DEFAULT_PASSWORD`.
-2. Change the password straight away (the account password is only the initial one).
+2. Change the password straight away on My Profile → **Change password** (the account password is only the initial one).
 3. Optionally set `SEED_ADMIN=false` in `.env` and run `docker compose up -d`.
 4. Never set `SPRING_PROFILES_ACTIVE=dev` on the server: it creates demo accounts with a known password.
 
