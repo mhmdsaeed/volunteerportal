@@ -318,4 +318,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get passwordChanged =>
       'تم تغيير كلمة المرور، وتم تسجيل خروجك من الموقع ومن أجهزتك الأخرى.';
+
+  @override
+  String get officeFilter => 'المكتب';
+
+  @override
+  String get allOffices => 'جميع المكاتب';
+
+  @override
+  String get noOffice => 'بدون مكتب';
 }

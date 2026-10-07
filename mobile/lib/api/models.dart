@@ -64,6 +64,7 @@ class InitiativeItem {
     required this.name,
     required this.description,
     required this.office,
+    this.officeId,
     required this.membership,
   });
 
@@ -71,6 +72,10 @@ class InitiativeItem {
   final String name;
   final String? description;
   final String? office;
+
+  /// The office's id (null when it belongs to no office), for filtering: two offices may share a name.
+  final int? officeId;
+
   final Membership membership;
 
   factory InitiativeItem.fromJson(Map<String, dynamic> json) => InitiativeItem(
@@ -78,6 +83,7 @@ class InitiativeItem {
         name: json['name'] as String? ?? '',
         description: json['description'] as String?,
         office: json['office'] as String?,
+        officeId: json['officeId'] as int?,
         membership: Membership.parse(json['membership'] as String?),
       );
 }

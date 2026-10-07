@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.jayway.jsonpath.JsonPath;
 import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
+import com.volunteerportal.app.model.Office;
 import com.volunteerportal.app.model.InitiativeQuestion;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
@@ -30,6 +31,7 @@ import com.volunteerportal.app.repository.AttendRepository;
 import com.volunteerportal.app.repository.EventRepository;
 import com.volunteerportal.app.repository.InitiativeQuestionRepository;
 import com.volunteerportal.app.repository.InitiativeRepository;
+import com.volunteerportal.app.repository.OfficeRepository;
 import com.volunteerportal.app.repository.NotificationRepository;
 import com.volunteerportal.app.repository.RoleRepository;
 import com.volunteerportal.app.repository.UserRepository;
@@ -100,6 +102,9 @@ class MobileApiFlowTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private OfficeRepository officeRepository;
 
     private final String suffix = String.valueOf(System.nanoTime());
     private User volunteer;
@@ -223,6 +228,29 @@ class MobileApiFlowTest {
 
         assertThat(JsonPath.<List<String>>read(json, "$[?(@.id == " + memberOf.getId() + ")].membership")).containsExactly("APPROVED");
         assertThat(JsonPath.<List<String>>read(json, "$[?(@.id == " + pendingIn.getId() + ")].membership")).containsExactly("PENDING");
+    }
+
+    @Test
+    void initiatives_sayWhichOfficeEachBelongsTo_byNameAndId() throws Exception {
+        Office office = new Office();
+        office.setName("API Office " + suffix);
+        office = officeRepository.save(office);
+        toJoin.setOffice(office);
+        toJoin = initiativeRepository.save(toJoin);
+        try {
+            String json = api(get("/api/initiatives"), login()).andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            assertThat(JsonPath.<List<String>>read(json, "$[?(@.id == " + toJoin.getId() + ")].office")).containsExactly(office.getName());
+            assertThat(JsonPath.<List<Integer>>read(json, "$[?(@.id == " + toJoin.getId() + ")].officeId"))
+                    .containsExactly(office.getId().intValue());
+            // Without an office, both are null
+            assertThat(JsonPath.<List<Object>>read(json, "$[?(@.id == " + memberOf.getId() + ")].officeId")).containsExactly((Object) null);
+        } finally {
+            toJoin.setOffice(null);
+            toJoin = initiativeRepository.save(toJoin);
+            officeRepository.delete(office);
+        }
     }
 
     @Test

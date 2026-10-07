@@ -323,4 +323,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get passwordChanged =>
       'Password changed. You\'ve been logged out of the website and your other devices.';
+
+  @override
+  String get officeFilter => 'Office';
+
+  @override
+  String get allOffices => 'All offices';
+
+  @override
+  String get noOffice => 'No office';
 }

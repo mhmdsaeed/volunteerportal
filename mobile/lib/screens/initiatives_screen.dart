@@ -24,6 +24,27 @@ enum InitiativeFilter {
       };
 }
 
+/// The `office` choice meaning initiatives that belong to no office, as on the website (`?office=none`).
+const noOffice = 'none';
+
+/// Whether [initiative] is in the chosen office: null means all offices, [noOffice] those without one, else an
+/// office id. The same rule as the website's Initiatives page (`VolunteerInitiativeController`).
+bool inOffice(InitiativeItem initiative, String? office) => switch (office) {
+      null => true,
+      noOffice => initiative.officeId == null,
+      _ => initiative.officeId?.toString() == office,
+    };
+
+/// The offices of [initiatives] as (id, name), by name, each once.
+List<(int, String)> officesOf(List<InitiativeItem> initiatives) {
+  final byId = <int, String>{
+    for (final i in initiatives)
+      if (i.officeId != null) i.officeId!: i.office ?? '',
+  };
+  return byId.entries.map((e) => (e.key, e.value)).toList()
+    ..sort((a, b) => a.$2.toLowerCase().compareTo(b.$2.toLowerCase()));
+}
+
 /// Open initiatives with my membership in each, opening on the ones I've joined. Tapping one opens it, to ask
 /// to join (answering its questions) or withdraw a pending request.
 class InitiativesScreen extends StatefulWidget {
@@ -35,6 +56,9 @@ class InitiativesScreen extends StatefulWidget {
 
 class _InitiativesScreenState extends State<InitiativesScreen> {
   InitiativeFilter _filter = InitiativeFilter.joined;
+
+  /// null: all offices; [noOffice]; or an office id.
+  String? _office;
 
   // One key per chip, to scroll the chosen one into view: the row scrolls sideways on phones
   final _chipKeys = {for (final filter in InitiativeFilter.values) filter: GlobalKey()};
@@ -69,14 +93,46 @@ class _InitiativesScreenState extends State<InitiativesScreen> {
     return AsyncList<InitiativeItem>(
       key: const PageStorageKey('initiatives'),
       load: () => AppScope.read(context).api.initiatives(),
-      where: (initiative) => _filter.matches(initiative.membership),
-      headerBuilder: (context, all) => _FilterBar(selected: _filter, all: all, onSelected: _show, chipKeys: _chipKeys, chipRow: _chipRow),
+      where: (initiative) => _filter.matches(initiative.membership) && inOffice(initiative, _office),
+      headerBuilder: (context, all) {
+        final offices = officesOf(all);
+        final anyWithoutOffice = all.any((i) => i.officeId == null);
+        final known = _office == null ||
+            (_office == noOffice ? anyWithoutOffice : offices.any((o) => o.$1.toString() == _office));
+        if (!known) {
+          // The chosen office has no open initiative any more (after a reload): back to all offices
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _office = null);
+          });
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // The counts are for the chosen office, as on the website
+            _FilterBar(
+                selected: _filter,
+                all: all.where((i) => inOffice(i, _office)).toList(),
+                onSelected: _show,
+                chipKeys: _chipKeys,
+                chipRow: _chipRow),
+            if (offices.isNotEmpty)
+              _OfficePicker(
+                offices: offices,
+                anyWithoutOffice: anyWithoutOffice,
+                selected: known ? _office : null,
+                onSelected: (office) => setState(() => _office = office),
+              ),
+          ],
+        );
+      },
+      groups: (context, items) => _byOffice(context, items),
       emptyText: switch (_filter) {
+        _ when _office != null => t.noInitiativesHere,
         InitiativeFilter.joined => t.noJoinedInitiatives,
         InitiativeFilter.all => t.noInitiativesOpen,
         _ => t.noInitiativesHere,
       },
-      emptyAction: _filter == InitiativeFilter.joined
+      emptyAction: _filter == InitiativeFilter.joined && _office == null
           ? FilledButton(
               key: const Key('showInitiativesToJoin'),
               onPressed: () => _show(InitiativeFilter.notJoined),
@@ -104,6 +160,95 @@ class _InitiativesScreenState extends State<InitiativesScreen> {
         ),
         isThreeLine: initiative.office != null && (initiative.description ?? '').isNotEmpty,
         trailing: MembershipPill(initiative.membership),
+      ),
+    );
+  }
+
+  /// One section per office, by office name, under a heading with its count; those without an office last.
+  List<ListGroup<InitiativeItem>> _byOffice(BuildContext context, List<InitiativeItem> items) {
+    final t = AppLocalizations.of(context);
+    final groups = [
+      for (final (id, name) in officesOf(items))
+        (key: 'office-$id', name: name, items: items.where((i) => i.officeId == id).toList()),
+      if (items.any((i) => i.officeId == null))
+        (key: 'office-$noOffice', name: t.noOffice, items: items.where((i) => i.officeId == null).toList()),
+    ];
+    return [
+      for (final group in groups)
+        ListGroup(
+          header: _OfficeHeading(key: Key('heading-${group.key}'), name: group.name, count: group.items.length),
+          items: group.items,
+        ),
+    ];
+  }
+}
+
+/// An office's name over its initiatives, with how many there are.
+class _OfficeHeading extends StatelessWidget {
+  const _OfficeHeading({super.key, required this.name, required this.count});
+
+  final String name;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 16, 16, 8),
+      child: Row(
+        children: [
+          const Icon(Icons.apartment, size: 20, color: VpColors.ink),
+          const SizedBox(width: 8),
+          Flexible(child: Text(name, style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600))),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+            decoration: const ShapeDecoration(color: VpColors.slateTint, shape: StadiumBorder()),
+            child: Text('$count', style: text.labelLarge?.copyWith(color: VpColors.muted)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Chooses the office to show: all, one, or (if some have none) those without an office.
+class _OfficePicker extends StatelessWidget {
+  const _OfficePicker({required this.offices, required this.anyWithoutOffice, required this.selected, required this.onSelected});
+
+  final List<(int, String)> offices;
+  final bool anyWithoutOffice;
+  final String? selected;
+  final ValueChanged<String?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      // A plain DropdownButton (not the FormField one): it shows [selected] on every build, also when the
+      // screen resets it
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: t.officeFilter,
+          prefixIcon: const Icon(Icons.apartment),
+          contentPadding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String?>(
+            key: const Key('officeFilter'),
+            value: selected,
+            isExpanded: true,
+            items: [
+              DropdownMenuItem(key: const Key('office-all'), value: null, child: Text(t.allOffices)),
+              for (final (id, name) in offices)
+                DropdownMenuItem(key: Key('office-$id'), value: '$id', child: Text(name, overflow: TextOverflow.ellipsis)),
+              if (anyWithoutOffice)
+                DropdownMenuItem(key: const Key('office-$noOffice'), value: noOffice, child: Text(t.noOffice)),
+            ],
+            onChanged: onSelected,
+          ),
+        ),
       ),
     );
   }

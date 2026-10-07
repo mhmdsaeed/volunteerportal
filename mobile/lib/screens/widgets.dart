@@ -17,6 +17,7 @@ class AsyncList<T> extends StatefulWidget {
     this.where,
     this.headerBuilder,
     this.emptyAction,
+    this.groups,
   });
 
   final Future<List<T>> Function() load;
@@ -34,6 +35,10 @@ class AsyncList<T> extends StatefulWidget {
 
   /// A button under [emptyText].
   final Widget? emptyAction;
+
+  /// Splits the shown items into sections, each on its own sheet under a heading (e.g. initiatives by office).
+  /// Not combined with [firstItemBuilder].
+  final List<ListGroup<T>> Function(BuildContext context, List<T> items)? groups;
 
   @override
   State<AsyncList<T>> createState() => AsyncListState<T>();
@@ -95,6 +100,16 @@ class AsyncListState<T> extends State<AsyncList<T>> {
 
   /// The items as rows on a white sheet; with [AsyncList.firstItemBuilder], the first item sits above it.
   Widget _list(BuildContext context, List<T> items, Widget? header) {
+    final groups = widget.groups;
+    if (groups != null) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          ?header,
+          for (final group in groups(context, items)) ...[group.header, _sheet(context, group.items)],
+        ],
+      );
+    }
     final first = widget.firstItemBuilder;
     final rows = first == null ? items : items.skip(1).toList();
     return ListView(
@@ -102,19 +117,29 @@ class AsyncListState<T> extends State<AsyncList<T>> {
       children: [
         ?header,
         if (first != null) Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 8), child: first(context, items.first, reload)),
-        if (rows.isNotEmpty)
-          Material(
-            color: VpColors.surface, // a Material, so tapped rows still show their ripple
-            child: Column(children: [
-              for (final (index, item) in rows.indexed) ...[
-                if (index > 0) const Divider(height: 1),
-                widget.itemBuilder(context, item, reload),
-              ],
-            ]),
-          ),
+        if (rows.isNotEmpty) _sheet(context, rows),
       ],
     );
   }
+
+  /// Rows on a white sheet, divided by lines.
+  Widget _sheet(BuildContext context, List<T> rows) => Material(
+        color: VpColors.surface, // a Material, so tapped rows still show their ripple
+        child: Column(children: [
+          for (final (index, item) in rows.indexed) ...[
+            if (index > 0) const Divider(height: 1),
+            widget.itemBuilder(context, item, reload),
+          ],
+        ]),
+      );
+}
+
+/// A section of an [AsyncList]: a heading and the items under it.
+class ListGroup<T> {
+  const ListGroup({required this.header, required this.items});
+
+  final Widget header;
+  final List<T> items;
 }
 
 /// A centered icon + text (+ optional button), for empty and error states.

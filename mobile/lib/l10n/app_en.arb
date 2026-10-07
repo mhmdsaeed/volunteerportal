@@ -100,5 +100,8 @@
   "passwordTooShort": "Password must be at least 8 characters",
   "passwordsDontMatch": "Passwords do not match",
   "wrongCurrentPassword": "Your current password is wrong.",
-  "passwordChanged": "Password changed. You've been logged out of the website and your other devices."
+  "passwordChanged": "Password changed. You've been logged out of the website and your other devices.",
+  "officeFilter": "Office",
+  "allOffices": "All offices",
+  "noOffice": "No office"
 }

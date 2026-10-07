@@ -109,10 +109,10 @@ class HomeControllerTest {
         givenMe(null, 0);
         given(mobileApiService.upcomingEvents(42L)).willReturn(List.of());
         given(mobileApiService.initiatives(42L)).willReturn(List.of(
-                new InitiativeItem(5L, "Coast initiative", null, null, "PENDING"),
-                new InitiativeItem(6L, "Food bank", null, null, "APPROVED"),
-                new InitiativeItem(7L, "Library helpers", null, null, "REJECTED"),
-                new InitiativeItem(8L, "Not joined initiative", null, null, "NONE")));
+                new InitiativeItem(5L, "Coast initiative", null, null, null, "PENDING"),
+                new InitiativeItem(6L, "Food bank", null, null, null, "APPROVED"),
+                new InitiativeItem(7L, "Library helpers", null, null, null, "REJECTED"),
+                new InitiativeItem(8L, "Not joined initiative", null, null, null, "NONE")));
         given(mobileApiService.notifications(eq(42L), any())).willReturn(List.of(
                 new NotificationItem(1L, "Your request was approved.", "/initiatives/6", false, LocalDateTime.now()),
                 new NotificationItem(2L, "An old message you already read.", null, true, LocalDateTime.now())));

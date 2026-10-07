@@ -27,8 +27,9 @@ public final class ApiDtos {
     public record Me(Long id, String username, String email, List<String> roles, String grade, long points) {
     }
 
-    /** membership: NONE, PENDING, APPROVED or REJECTED. */
-    public record InitiativeItem(Long id, String name, String description, String office, String membership) {
+    /** membership: NONE, PENDING, APPROVED or REJECTED. office / officeId: null when it belongs to no office. */
+    public record InitiativeItem(Long id, String name, String description, String office, Long officeId,
+            String membership) {
     }
 
     /**

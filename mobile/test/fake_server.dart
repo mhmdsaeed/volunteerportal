@@ -19,11 +19,12 @@ class FakeServer {
   bool notificationRead = false;
 
   /// Open initiatives with my membership in each: one of every kind, as GET /api/initiatives returns them.
+  /// Offices: Coast Office (8) has the food bank, Demo Office (7) the demo initiative and library; the beach has none.
   List<Map<String, Object?>> initiatives = [
-    {'id': 487, 'name': 'Demo Initiative', 'description': 'Created by the dev profile.', 'office': 'Demo Office', 'membership': 'APPROVED'},
+    {'id': 487, 'name': 'Demo Initiative', 'description': 'Created by the dev profile.', 'office': 'Demo Office', 'officeId': 7, 'membership': 'APPROVED'},
     {'id': 488, 'name': 'Beach Clean-up', 'description': null, 'office': null, 'membership': 'PENDING'},
-    {'id': 489, 'name': 'Food Bank', 'description': 'Sorting donations.', 'office': null, 'membership': 'REJECTED'},
-    {'id': 490, 'name': 'Library Reading', 'description': 'Reading to children.', 'office': 'Demo Office', 'membership': 'NONE'},
+    {'id': 489, 'name': 'Food Bank', 'description': 'Sorting donations.', 'office': 'Coast Office', 'officeId': 8, 'membership': 'REJECTED'},
+    {'id': 490, 'name': 'Library Reading', 'description': 'Reading to children.', 'office': 'Demo Office', 'officeId': 7, 'membership': 'NONE'},
   ];
 
   /// Join questions by initiative id, as GET /api/initiatives/{id} returns them.

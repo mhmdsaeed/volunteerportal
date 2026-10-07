@@ -691,6 +691,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password changed. You\'ve been logged out of the website and your other devices.'**
   String get passwordChanged;
+
+  /// No description provided for @officeFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Office'**
+  String get officeFilter;
+
+  /// No description provided for @allOffices.
+  ///
+  /// In en, this message translates to:
+  /// **'All offices'**
+  String get allOffices;
+
+  /// No description provided for @noOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'No office'**
+  String get noOffice;
 }
 
 class _AppLocalizationsDelegate

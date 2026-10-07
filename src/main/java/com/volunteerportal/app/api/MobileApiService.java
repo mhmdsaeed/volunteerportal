@@ -93,7 +93,7 @@ public class MobileApiService {
         Map<Long, VolunteerInitiative> memberships = volunteerInitiativeService.findMembershipsForUser(userId);
         return volunteerInitiativeService.findAvailableInitiatives().stream()
                 .map(i -> new InitiativeItem(i.getId(), i.getName(), i.getDescription(),
-                        i.getOffice() != null ? i.getOffice().getName() : null,
+                        officeName(i), officeId(i),
                         membershipStatus(memberships.get(i.getId()))))
                 .toList();
     }
@@ -128,7 +128,7 @@ public class MobileApiService {
         }
         VolunteerInitiative membership = volunteerInitiativeService.join(initiativeId, user, form);
         return new InitiativeItem(initiative.getId(), initiative.getName(), initiative.getDescription(),
-                officeName(initiative), membershipStatus(membership));
+                officeName(initiative), officeId(initiative), membershipStatus(membership));
     }
 
     /** Withdraws my join request; refused with already_reviewed once a coordinator has answered it. */
@@ -152,6 +152,10 @@ public class MobileApiService {
 
     private static String officeName(Initiative initiative) {
         return initiative.getOffice() != null ? initiative.getOffice().getName() : null;
+    }
+
+    private static Long officeId(Initiative initiative) {
+        return initiative.getOffice() != null ? initiative.getOffice().getId() : null;
     }
 
     /** question_type_id 1-4, as on the website's join form (anything else is free text there too). */

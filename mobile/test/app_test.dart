@@ -58,6 +58,12 @@ void main() {
     await tester.tap(find.byKey(Key(key)));
   }
 
+  /// Scrolls the list until the widget with [key] is built and on screen (long lists only build what is near it).
+  Future<void> scrollTo(WidgetTester tester, Key key) async {
+    await tester.dragUntilVisible(find.byKey(key), find.byType(ListView).first, const Offset(0, -200));
+    await tester.pumpAndSettle();
+  }
+
   setUp(() {
     server = FakeServer();
     store = MemorySessionStore();
@@ -202,7 +208,8 @@ void main() {
 
     await showFilter(tester, 'filter-all');
     await tester.pumpAndSettle();
-    for (final id in [487, 488, 489, 490]) {
+    for (final id in [489, 487, 490, 488]) { // in office order: Coast, Demo (two), then no office
+      await scrollTo(tester, Key('initiative-$id'));
       expect(find.byKey(Key('initiative-$id')), findsOneWidget);
     }
     // Switching filters reuses the loaded list
@@ -444,5 +451,77 @@ void main() {
 
     expect(find.text("This server can't send email. Ask an administrator to set a new password for you."), findsOneWidget);
     expect(find.byKey(const Key('resetSent')), findsNothing);
+  });
+
+  testWidgets('Initiatives are grouped by office, with an office picker that the counts follow', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await tester.tap(find.byKey(const Key('initiativesTab')));
+    await tester.pumpAndSettle();
+    await showFilter(tester, 'filter-all');
+    await tester.pumpAndSettle();
+
+    // Offices by name, those without one last
+    final coast = tester.getTopLeft(find.byKey(const Key('heading-office-8'))).dy;
+    final demo = tester.getTopLeft(find.byKey(const Key('heading-office-7'))).dy;
+    expect(coast, lessThan(demo));
+    await scrollTo(tester, const Key('heading-office-none'));
+    expect(find.descendant(of: find.byKey(const Key('heading-office-none')), matching: find.text('No office')), findsOneWidget);
+    await tester.drag(find.byType(ListView).first, const Offset(0, 2000)); // back to the top
+    await tester.pumpAndSettle();
+
+    // Demo Office only: two initiatives, and the chips count within it
+    await tester.tap(find.byKey(const Key('officeFilter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('office-7')).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('initiative-487')), findsOneWidget);
+    expect(find.byKey(const Key('initiative-490')), findsOneWidget);
+    expect(find.byKey(const Key('initiative-489')), findsNothing);
+    expect(find.byKey(const Key('heading-office-8')), findsNothing);
+    expect(find.descendant(of: find.byKey(const Key('filter-all')), matching: find.text('2')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('filter-pending')), matching: find.text('0')), findsOneWidget);
+
+    // The membership chips keep the office
+    await showFilter(tester, 'filter-joined');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('initiative-487')), findsOneWidget);
+    expect(find.byKey(const Key('initiative-490')), findsNothing);
+
+    // No office: the beach clean-up, which is pending
+    await tester.tap(find.byKey(const Key('officeFilter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('office-none')).last);
+    await tester.pumpAndSettle();
+    expect(find.text('No initiatives here.'), findsOneWidget); // nothing joined there, and no "nothing joined" hint
+    expect(find.byKey(const Key('showInitiativesToJoin')), findsNothing);
+    await showFilter(tester, 'filter-pending');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('initiative-488')), findsOneWidget);
+
+    // Picking is filtering of the loaded list: no new request
+    expect(server.requests.where((r) => r.url.path == '/api/initiatives'), hasLength(1));
+  });
+
+  testWidgets('an office that no longer has open initiatives falls back to all offices', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+    await tester.tap(find.byKey(const Key('initiativesTab')));
+    await tester.pumpAndSettle();
+    await showFilter(tester, 'filter-all');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('officeFilter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('office-8')).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('initiative-489')), findsOneWidget);
+
+    // Coast Office's only initiative closes; pulling to refresh reloads the list
+    server.initiatives.removeWhere((i) => i['id'] == 489);
+    await tester.fling(find.byType(ListView).first, const Offset(0, 400), 1000);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('initiative-487')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('officeFilter')), matching: find.text('All offices')), findsOneWidget);
   });
 }
