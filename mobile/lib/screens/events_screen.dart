@@ -6,8 +6,9 @@ import '../l10n/app_localizations.dart';
 import '../theme.dart';
 import 'widgets.dart';
 
-/// Upcoming events of initiatives I'm an approved member of, with my check-in status.
-/// The next one is shown as a pass, like on the website's home page.
+/// My grade and points, then the upcoming events of initiatives I'm an approved member of, with my check-in
+/// status. The next one is shown as a pass, like on the website's home page. Loading (or pulling to refresh)
+/// also refreshes my grade and points, which an admin can change at any time.
 class EventsScreen extends StatelessWidget {
   const EventsScreen({super.key});
 
@@ -16,7 +17,13 @@ class EventsScreen extends StatelessWidget {
     final t = AppLocalizations.of(context);
     return AsyncList<EventItem>(
       key: const PageStorageKey('events'),
-      load: () => AppScope.read(context).api.events(),
+      load: () async {
+        final state = AppScope.read(context);
+        final events = state.api.events();
+        await state.refreshMe();
+        return events;
+      },
+      headerBuilder: (context, _) => const _Standing(),
       emptyText: t.noEvents,
       firstItemBuilder: (context, event, _) => _NextEventPass(event),
       itemBuilder: (context, event, _) => ListTile(
@@ -34,6 +41,91 @@ class EventsScreen extends StatelessWidget {
         isThreeLine: true,
         trailing: StatusPillFor(event.status),
       ),
+    );
+  }
+}
+
+/// My grade and points, as "Your grade and points" on the website's home page: what my volunteering has earned.
+class _Standing extends StatelessWidget {
+  const _Standing();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final me = AppScope.of(context).me;
+    if (me == null) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Container(
+        key: const Key('standing'),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        decoration: BoxDecoration(
+          color: VpColors.surface,
+          border: Border.all(color: VpColors.line),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(t.yourStanding, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: VpColors.muted)),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // A grade name can be long (and wrap); points are a short number
+                Expanded(
+                  flex: 3,
+                  child: _Figure(
+                      key: const Key('grade'), icon: Icons.military_tech, label: t.grade, value: me.grade ?? t.unranked, maxLines: 2),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                    flex: 2, child: _Figure(key: const Key('points'), icon: Icons.star, label: t.points, value: '${me.points}')),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One figure of my standing: a yellow badge (yellow means mine), the label, and the value large.
+class _Figure extends StatelessWidget {
+  const _Figure({super.key, required this.icon, required this.label, required this.value, this.maxLines = 1});
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: const BoxDecoration(color: VpColors.vestTint, shape: BoxShape.circle),
+          child: Icon(icon, color: VpColors.ink),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: text.labelMedium?.copyWith(color: VpColors.muted)),
+              Text(value,
+                  maxLines: maxLines,
+                  overflow: TextOverflow.ellipsis,
+                  style: text.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: VpColors.ink)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

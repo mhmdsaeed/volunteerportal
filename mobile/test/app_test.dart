@@ -524,4 +524,41 @@ void main() {
     expect(find.byKey(const Key('initiative-487')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('officeFilter')), matching: find.text('All offices')), findsOneWidget);
   });
+
+  testWidgets('the main page shows my grade and points, and refreshing brings new points', (tester) async {
+    server.grade = 'Bronze';
+    server.points = 120;
+    await startApp(tester);
+    await logIn(tester);
+
+    // Events is the first tab after login; the standing sits above the next event
+    final standing = find.byKey(const Key('standing'));
+    expect(standing, findsOneWidget);
+    expect(find.descendant(of: standing, matching: find.text('Your grade and points')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('grade')), matching: find.text('Bronze')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('points')), matching: find.text('120')), findsOneWidget);
+    expect(tester.getTopLeft(standing).dy, lessThan(tester.getTopLeft(find.byKey(const Key('event-112'))).dy));
+
+    // An admin awards points and a grade; pulling to refresh shows them
+    server.grade = 'Silver';
+    server.points = 150;
+    await tester.fling(find.byType(ListView).first, const Offset(0, 400), 1000);
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byKey(const Key('grade')), matching: find.text('Silver')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('points')), matching: find.text('150')), findsOneWidget);
+  });
+
+  testWidgets('without a grade the main page says unranked, also in Arabic with Western digits', (tester) async {
+    server.points = 35;
+    final state = await startApp(tester);
+    await logIn(tester);
+
+    expect(find.descendant(of: find.byKey(const Key('grade')), matching: find.text('Unranked')), findsOneWidget);
+
+    await state.setLanguage('ar'); // what the translate button on Profile does
+    await tester.pumpAndSettle();
+    expect(find.text('درجتك ونقاطك'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('grade')), matching: find.text('بدون درجة')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('points')), matching: find.text('35')), findsOneWidget);
+  });
 }

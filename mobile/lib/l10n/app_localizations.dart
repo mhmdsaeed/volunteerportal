@@ -709,6 +709,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No office'**
   String get noOffice;
+
+  /// No description provided for @yourStanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Your grade and points'**
+  String get yourStanding;
 }
 
 class _AppLocalizationsDelegate

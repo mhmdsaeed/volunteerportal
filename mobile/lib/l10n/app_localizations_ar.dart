@@ -327,4 +327,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noOffice => 'بدون مكتب';
+
+  @override
+  String get yourStanding => 'درجتك ونقاطك';
 }

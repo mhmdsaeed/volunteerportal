@@ -332,4 +332,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noOffice => 'No office';
+
+  @override
+  String get yourStanding => 'Your grade and points';
 }

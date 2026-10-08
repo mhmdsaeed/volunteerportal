@@ -103,5 +103,6 @@
   "passwordChanged": "Password changed. You've been logged out of the website and your other devices.",
   "officeFilter": "Office",
   "allOffices": "All offices",
-  "noOffice": "No office"
+  "noOffice": "No office",
+  "yourStanding": "Your grade and points"
 }

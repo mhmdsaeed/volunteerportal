@@ -179,14 +179,18 @@ class FakeServer {
   http.Response _result(String result, bool success, String message) =>
       _json({'result': result, 'success': success, 'eventId': 112, 'event': 'Demo Event', 'message': message});
 
-  static const Map<String, Object?> _me = {
-    'id': 648,
-    'username': 'demo_volunteer',
-    'email': 'demo_volunteer@demo.volunteerportal.local',
-    'roles': ['VOLUNTEER'],
-    'grade': null,
-    'points': 0,
-  };
+  /// My grade (null: unranked) and points, which an admin may change while the app is open.
+  String? grade;
+  int points = 0;
+
+  Map<String, Object?> get _me => {
+        'id': 648,
+        'username': 'demo_volunteer',
+        'email': 'demo_volunteer@demo.volunteerportal.local',
+        'roles': ['VOLUNTEER'],
+        'grade': grade,
+        'points': points,
+      };
 
   static const validQr = 'https://192.168.100.11:8443/checkin/112?code=59672954-abc';
 }
