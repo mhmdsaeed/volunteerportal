@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.util.MultiValueMap;
 
+import com.volunteerportal.app.dto.MemberCounts;
 import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.InitiativeQuestion;
@@ -23,6 +24,9 @@ public interface VolunteerInitiativeService {
     Optional<VolunteerInitiative> findMembership(Long userId, Long initiativeId);
 
     Map<Long, VolunteerInitiative> findMembershipsForUser(Long userId);
+
+    /** Approved members and pending requests per initiative id; an initiative nobody has asked to join is missing. */
+    Map<Long, MemberCounts> countMembersByInitiative();
 
     /** Enabled events of the initiative, soonest first - shown to approved members. */
     List<Event> findOpenEvents(Long initiativeId);

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 
+import com.volunteerportal.app.dto.MemberCounts;
 import com.volunteerportal.app.model.Event;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.InitiativeQuestion;
@@ -88,6 +89,13 @@ public class VolunteerInitiativeServiceImpl implements VolunteerInitiativeServic
     public Map<Long, VolunteerInitiative> findMembershipsForUser(Long userId) {
         return volunteerInitiativeRepository.findByUserId(userId).stream()
                 .collect(Collectors.toMap(vi -> vi.getInitiative().getId(), vi -> vi));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, MemberCounts> countMembersByInitiative() {
+        return volunteerInitiativeRepository.countMembersByInitiative().stream()
+                .collect(Collectors.toMap(MemberCounts::initiativeId, c -> c));
     }
 
     @Override

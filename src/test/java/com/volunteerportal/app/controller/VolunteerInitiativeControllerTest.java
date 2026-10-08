@@ -15,6 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.volunteerportal.app.config.SecurityConfig;
+import com.volunteerportal.app.dto.MemberCounts;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.Office;
 import com.volunteerportal.app.model.Role;
@@ -246,5 +247,22 @@ class VolunteerInitiativeControllerTest {
                 .andExpect(model().attribute("initiatives", empty()))
                 .andExpect(content().string(containsString("No initiatives here.")))
                 .andExpect(content().string(not(containsStringIgnoringCase("You haven&#39;t joined"))));
+    }
+
+    @Test
+    void list_showsEachInitiativesMembersAndPendingRequests_andZeroForNoRequests() throws Exception {
+        givenMemberships();
+        given(volunteerInitiativeService.countMembersByInitiative())
+                .willReturn(Map.of(1L, new MemberCounts(1L, 12L, 3L)));
+
+        mockMvc.perform(get("/initiatives").param("show", "all").with(user(volunteer())))
+                .andExpect(status().isOk())
+                .andExpect(content().string(stringContainsInOrder("Beach clean-up",
+                        "Members", "<span class=\"vp-filter-count\">12</span>",
+                        "Pending requests", "<span class=\"vp-filter-count\">3</span>", "Food bank")))
+                // The park has no requests at all, so it has no row: shown as 0
+                .andExpect(content().string(stringContainsInOrder("Park planting",
+                        "Members", "<span class=\"vp-filter-count\">0</span>",
+                        "Pending requests", "<span class=\"vp-filter-count\">0</span>")));
     }
 }

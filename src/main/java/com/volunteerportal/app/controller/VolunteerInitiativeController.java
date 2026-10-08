@@ -82,6 +82,7 @@ public class VolunteerInitiativeController {
         model.addAttribute("office", officeParam);
         model.addAttribute("noOffice", NO_OFFICE);
         model.addAttribute("memberships", memberships);
+        model.addAttribute("memberCounts", volunteerInitiativeService.countMembersByInitiative());
         model.addAttribute("filter", filter);
         model.addAttribute("filters", MembershipFilter.values());
         model.addAttribute("counts", counts);

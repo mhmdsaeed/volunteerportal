@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.volunteerportal.app.dto.MemberCounts;
 import com.volunteerportal.app.model.VolunteerInitiative;
 
 public interface VolunteerInitiativeRepository extends JpaRepository<VolunteerInitiative, Long> {
@@ -43,6 +44,17 @@ public interface VolunteerInitiativeRepository extends JpaRepository<VolunteerIn
     long countByInitiativeIdAndEnabledFalse(Long initiativeId);
 
     long countByInitiativeIdAndEnabledIsNull(Long initiativeId);
+
+    /**
+     * Approved members and pending requests of every initiative that has any, in one query (for lists). An
+     * initiative nobody has asked to join has no row.
+     */
+    @Query("""
+            select new com.volunteerportal.app.dto.MemberCounts(vi.initiative.id,
+                sum(case when vi.responseJoinDttm is not null and vi.enabled = true then 1L else 0L end),
+                sum(case when vi.responseJoinDttm is null then 1L else 0L end))
+            from VolunteerInitiative vi group by vi.initiative.id""")
+    List<MemberCounts> countMembersByInitiative();
 
     /** Every request still awaiting a decision, oldest first (admin view). */
     @EntityGraph(attributePaths = {"user", "initiative"})

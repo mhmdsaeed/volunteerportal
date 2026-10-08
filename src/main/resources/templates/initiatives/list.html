@@ -58,6 +58,18 @@
                                 <bdi th:text="${initiative.office.name}">Office</bdi>
                             </p>
                             <p class="card-text" th:if="${initiative.description != null}"><bdi th:text="${initiative.description}">Description</bdi></p>
+                            <p class="vp-card-counts" th:with="c=${memberCounts.get(initiative.id)}">
+                                <span>
+                                    <i class="bi bi-people" aria-hidden="true"></i>
+                                    <span th:text="#{initiatives.counts.members}">Members</span>
+                                    <span class="vp-filter-count" th:text="${c != null ? c.members() : 0}">0</span>
+                                </span>
+                                <span>
+                                    <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                                    <span th:text="#{initiatives.counts.pending}">Pending requests</span>
+                                    <span class="vp-filter-count" th:text="${c != null ? c.pending() : 0}">0</span>
+                                </span>
+                            </p>
 
                             <p th:with="membership=${memberships.get(initiative.id)}">
                                 <span th:if="${membership == null}" class="badge text-bg-secondary" th:text="#{status.notJoined}">Not joined</span>

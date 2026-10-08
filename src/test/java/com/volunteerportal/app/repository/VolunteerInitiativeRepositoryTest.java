@@ -12,6 +12,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
+import com.volunteerportal.app.dto.MemberCounts;
 import com.volunteerportal.app.model.Initiative;
 import com.volunteerportal.app.model.Role;
 import com.volunteerportal.app.model.User;
@@ -56,6 +57,39 @@ class VolunteerInitiativeRepositoryTest {
         List<VolunteerInitiative> memberships = volunteerInitiativeRepository.findByUserId(user.getId());
 
         assertThat(memberships).hasSize(2);
+    }
+
+    @Test
+    void countMembersByInitiative_countsApprovedMembersAndPendingRequests_asTheFiltersDo() {
+        String suffix = String.valueOf(System.nanoTime());
+        Initiative busy = persistInitiative("Counted IT " + suffix);
+        Initiative quiet = persistInitiative("Nobody asked IT " + suffix);
+        LocalDateTime decided = LocalDateTime.now();
+        persistMembership(persistUser("cnt_a" + suffix, "cnt_a" + suffix + "@example.com"), busy, decided, true);
+        persistMembership(persistUser("cnt_b" + suffix, "cnt_b" + suffix + "@example.com"), busy, decided, true);
+        persistMembership(persistUser("cnt_c" + suffix, "cnt_c" + suffix + "@example.com"), busy, null, null);
+        // Turned down: neither a member nor pending
+        persistMembership(persistUser("cnt_d" + suffix, "cnt_d" + suffix + "@example.com"), busy, decided, false);
+
+        List<MemberCounts> counts = volunteerInitiativeRepository.countMembersByInitiative();
+
+        assertThat(counts).filteredOn(c -> c.initiativeId().equals(busy.getId()))
+                .singleElement()
+                .satisfies(c -> {
+                    assertThat(c.members()).isEqualTo(2L);
+                    assertThat(c.pending()).isEqualTo(1L);
+                });
+        assertThat(counts).noneMatch(c -> c.initiativeId().equals(quiet.getId()));
+    }
+
+    private void persistMembership(User user, Initiative initiative, LocalDateTime respondedAt, Boolean enabled) {
+        VolunteerInitiative membership = new VolunteerInitiative();
+        membership.setUser(user);
+        membership.setInitiative(initiative);
+        membership.setRequestJoinDttm(LocalDateTime.now());
+        membership.setResponseJoinDttm(respondedAt);
+        membership.setEnabled(enabled);
+        entityManager.persistAndFlush(membership);
     }
 
     private void persistMembership(User user, Initiative initiative) {
