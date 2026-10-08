@@ -5,7 +5,7 @@ Spring Boot 4.1.1 / Java 21 / Thymeleaf / Bootstrap / MySQL volunteer management
 | Folder | What's in it |
 |---|---|
 | `src/` | The Spring Boot server: website and mobile JSON API |
-| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events, initiatives (with the same Joined/Pending/Not approved/Not joined/All filter, office grouping and office picker as the website; join one by answering its questions, or withdraw a pending request), QR check-in, history, notifications, profile with change password, and "Forgot your password?" on login; same look and English/Arabic as the website |
+| [`mobile/`](mobile/README.md) | Flutter app (Android/iPhone) for volunteers: events (under your grade and points), initiatives (with the same Joined/Pending/Not approved/Not joined/All filter, office grouping and office picker as the website; join one by answering its questions, or withdraw a pending request), QR check-in, history, notifications, profile with change password, and "Forgot your password?" on login; same look and English/Arabic as the website |
 | [`deploy/`](deploy/README.md) | Production setup: Docker Compose with MySQL and Caddy (HTTPS), backups |
 
 ## Stack
