@@ -64,7 +64,7 @@ Open `https://<your-domain>`. On the first start Flyway creates the database tab
 
 ## 5. Email for password resets (optional)
 
-"Forgot your password?" (on the login page and in the app) emails a reset link only when the server has a mail service. Without one, users who forget their password ask an admin, who sets a new one under Admin → Users → **Roles and password**.
+"Forgot your password?" (on the login page and in the app) emails a reset link only when the server has a mail service. Without one, users who forget their password ask an admin, who sets a new one under Admin → **Manage Users** → **Roles and password**.
 
 ### Choose a mail service
 
