@@ -108,6 +108,29 @@ class AuthControllerTest {
     }
 
     @Test
+    void loginPage_afterFailedLogin_linksTheMessageToTheUsername() throws Exception {
+        // The username field has focus, so a screen reader reads why the login failed with it
+        mockMvc.perform(get("/login").param("error", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"loginError\"")))
+                .andExpect(content().string(containsString("aria-describedby=\"loginError\"")));
+    }
+
+    @Test
+    void loginPage_deactivatedAccount_linksThatMessageInstead() throws Exception {
+        mockMvc.perform(get("/login").param("disabled", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("aria-describedby=\"loginDisabled\"")));
+    }
+
+    @Test
+    void loginPage_withoutAMessage_describesNothing() throws Exception {
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("aria-describedby=\"login"))));
+    }
+
+    @Test
     void forgotPasswordPage_asksForTheEmail_whenMailIsSetUp() throws Exception {
         given(passwordService.resetByEmailAvailable()).willReturn(true);
 

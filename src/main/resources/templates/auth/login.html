@@ -12,10 +12,10 @@
                 <div class="alert alert-success" th:if="${param.registered}" th:text="#{login.registered}">
                     Registration successful. Please log in.
                 </div>
-                <div class="alert alert-danger" th:if="${param.error}" th:text="#{login.error}">
+                <div class="alert alert-danger" id="loginError" th:if="${param.error}" th:text="#{login.error}">
                     Invalid username or password.
                 </div>
-                <div class="alert alert-warning" th:if="${param.disabled}" th:text="#{login.disabled}">
+                <div class="alert alert-warning" id="loginDisabled" th:if="${param.disabled}" th:text="#{login.disabled}">
                     Your account has been deactivated.
                 </div>
                 <div class="alert alert-info" th:if="${param.logout}" th:text="#{login.loggedOut}">
@@ -29,9 +29,13 @@
                 </div>
 
                 <form th:action="@{/login}" method="post">
-                    <div class="mb-3">
+                    <!-- After a failed attempt the message above is read with the username field, which has focus. (Thymeleaf
+                         won't read request parameters in th:aria-describedby, so they are resolved in th:with.) -->
+                    <div class="mb-3" th:with="loginNote=${param.error != null ? 'loginError' : (param.disabled != null ? 'loginDisabled' : null)}">
                         <label for="username" class="form-label" th:text="#{common.username}">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus
+                               autocomplete="username" autocapitalize="none" spellcheck="false"
+                               th:aria-describedby="${loginNote}">
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label" th:text="#{common.password}">Password</label>
