@@ -63,7 +63,7 @@ class GradeControllerTest {
                 .andExpect(view().name("admin/grades/form"))
                 .andExpect(model().attributeExists("gradeForm"))
                 // no error yet, so nothing is marked invalid
-                .andExpect(content().string(not(containsString("aria-invalid"))));
+                .andExpect(content().string(not(containsString("is-invalid"))));
     }
 
     @Test

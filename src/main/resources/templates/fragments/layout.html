@@ -148,6 +148,18 @@
 
     <div th:fragment="scripts">
         <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+        <script>
+            // After a submit that failed validation the page reloads at the top, where the errors can be out of
+            // sight on a phone. Go to the first field with an error instead: it's centred so its label shows, and
+            // focusing it has screen readers read its message (linked with aria-describedby).
+            (function () {
+                var invalid = document.querySelector('main [aria-invalid="true"]');
+                if (invalid) {
+                    invalid.focus({ preventScroll: true });
+                    invalid.scrollIntoView({ block: 'center' });
+                }
+            })();
+        </script>
     </div>
 </body>
 </html>
