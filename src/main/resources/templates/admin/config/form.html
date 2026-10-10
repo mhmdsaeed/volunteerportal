@@ -18,14 +18,16 @@
 
             <div class="mb-3">
                 <label for="configsetKey" class="form-label" th:text="#{common.key}">Key</label>
-                <input type="text" class="form-control" id="configsetKey" th:field="*{configsetKey}" dir="ltr">
-                <div class="text-danger" th:if="${#fields.hasErrors('configsetKey')}" th:errors="*{configsetKey}"></div>
+                <input type="text" class="form-control" id="configsetKey" th:field="*{configsetKey}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('configsetKey')} ? 'true'" th:aria-describedby="${#fields.hasErrors('configsetKey')} ? 'configsetKey-error'" dir="ltr">
+                <div class="text-danger" id="configsetKey-error" th:if="${#fields.hasErrors('configsetKey')}" th:errors="*{configsetKey}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="configsetValue" class="form-label" th:text="#{common.value}">Value</label>
-                <input type="text" class="form-control" id="configsetValue" th:field="*{configsetValue}" dir="auto">
-                <div class="text-danger" th:if="${#fields.hasErrors('configsetValue')}" th:errors="*{configsetValue}"></div>
+                <input type="text" class="form-control" id="configsetValue" th:field="*{configsetValue}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('configsetValue')} ? 'true'" th:aria-describedby="${#fields.hasErrors('configsetValue')} ? 'configsetValue-error'" dir="auto">
+                <div class="text-danger" id="configsetValue-error" th:if="${#fields.hasErrors('configsetValue')}" th:errors="*{configsetValue}"></div>
             </div>
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>

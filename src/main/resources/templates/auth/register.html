@@ -12,23 +12,27 @@
                 <form th:action="@{/register}" th:object="${registrationForm}" method="post">
                     <div class="mb-3">
                         <label for="username" class="form-label" th:text="#{common.username}">Username</label>
-                        <input type="text" class="form-control" id="username" th:field="*{username}">
-                        <div class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                        <input type="text" class="form-control" id="username" th:field="*{username}" th:errorclass="is-invalid"
+                               th:aria-invalid="${#fields.hasErrors('username')} ? 'true'" th:aria-describedby="${#fields.hasErrors('username')} ? 'username-error'">
+                        <div class="text-danger" id="username-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label" th:text="#{common.email}">Email</label>
-                        <input type="email" class="form-control" id="email" th:field="*{email}" dir="ltr">
-                        <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        <input type="email" class="form-control" id="email" th:field="*{email}" th:errorclass="is-invalid"
+                               th:aria-invalid="${#fields.hasErrors('email')} ? 'true'" th:aria-describedby="${#fields.hasErrors('email')} ? 'email-error'" dir="ltr">
+                        <div class="text-danger" id="email-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label" th:text="#{common.password}">Password</label>
-                        <input type="password" class="form-control" id="password" th:field="*{password}">
-                        <div class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        <input type="password" class="form-control" id="password" th:field="*{password}" th:errorclass="is-invalid"
+                               th:aria-invalid="${#fields.hasErrors('password')} ? 'true'" th:aria-describedby="${#fields.hasErrors('password')} ? 'password-error'">
+                        <div class="text-danger" id="password-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                     </div>
                     <div class="mb-3">
                         <label for="confirmPassword" class="form-label" th:text="#{register.confirmPassword}">Confirm Password</label>
-                        <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}">
-                        <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                        <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}" th:errorclass="is-invalid"
+                               th:aria-invalid="${#fields.hasErrors('confirmPassword')} ? 'true'" th:aria-describedby="${#fields.hasErrors('confirmPassword')} ? 'confirmPassword-error'">
+                        <div class="text-danger" id="confirmPassword-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100" th:text="#{register.submit}">Register</button>
                 </form>

@@ -15,6 +15,8 @@ import com.volunteerportal.app.model.Grade;
 import com.volunteerportal.app.service.GradeService;
 import com.volunteerportal.app.service.NotificationService;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -58,7 +61,9 @@ class GradeControllerTest {
         mockMvc.perform(get("/admin/grades/new"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/grades/form"))
-                .andExpect(model().attributeExists("gradeForm"));
+                .andExpect(model().attributeExists("gradeForm"))
+                // no error yet, so nothing is marked invalid
+                .andExpect(content().string(not(containsString("aria-invalid"))));
     }
 
     @Test
@@ -68,7 +73,11 @@ class GradeControllerTest {
                         .param("name", ""))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/grades/form"))
-                .andExpect(model().attributeHasFieldErrors("gradeForm", "name"));
+                .andExpect(model().attributeHasFieldErrors("gradeForm", "name"))
+                // the field is marked invalid and points screen readers at its message
+                .andExpect(content().string(containsString(
+                        "class=\"form-control is-invalid\" id=\"name\" aria-invalid=\"true\" aria-describedby=\"name-error\"")))
+                .andExpect(content().string(containsString("<div class=\"text-danger\" id=\"name-error\">")));
 
         verify(gradeService, never()).create(any());
     }

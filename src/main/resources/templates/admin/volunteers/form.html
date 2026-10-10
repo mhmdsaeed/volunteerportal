@@ -25,8 +25,9 @@
 
             <div class="mb-3">
                 <label for="points" class="form-label" th:text="#{common.points}">Points</label>
-                <input type="number" min="0" class="form-control" id="points" th:field="*{points}">
-                <div class="text-danger" th:if="${#fields.hasErrors('points')}" th:errors="*{points}"></div>
+                <input type="number" min="0" class="form-control" id="points" th:field="*{points}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('points')} ? 'true'" th:aria-describedby="${#fields.hasErrors('points')} ? 'points-error'">
+                <div class="text-danger" id="points-error" th:if="${#fields.hasErrors('points')}" th:errors="*{points}"></div>
             </div>
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>

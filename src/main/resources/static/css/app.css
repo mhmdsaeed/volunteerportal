@@ -80,6 +80,8 @@
     --bs-border-radius-sm: 4px;
     --bs-border-radius-lg: 10px;
     --bs-danger-rgb: 179, 65, 47;
+    --bs-form-invalid-color: var(--vp-brick-ink);
+    --bs-form-invalid-border-color: var(--vp-brick);
     --bs-success-rgb: 47, 125, 79;
 }
 
@@ -150,6 +152,13 @@ a {
 .form-select:focus,
 .form-check-input:focus {
     border-color: var(--vp-ink);
+    box-shadow: var(--vp-focus-ring);
+}
+
+/* A field with an error keeps its red border while focused, with the usual yellow focus ring */
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    border-color: var(--bs-form-invalid-border-color);
     box-shadow: var(--vp-focus-ring);
 }
 

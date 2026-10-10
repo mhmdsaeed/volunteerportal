@@ -28,8 +28,9 @@
 
             <div class="mb-3">
                 <label for="name" class="form-label" th:text="#{common.name}">Name</label>
-                <input type="text" class="form-control" id="name" th:field="*{name}">
-                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                <input type="text" class="form-control" id="name" th:field="*{name}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('name')} ? 'true'" th:aria-describedby="${#fields.hasErrors('name')} ? 'name-error'">
+                <div class="text-danger" id="name-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
             </div>
 
             <div class="row g-3 mb-3">
@@ -45,8 +46,9 @@
 
             <div class="mb-3">
                 <label for="locUrl" class="form-label" th:text="#{events.locationUrl}">Location URL</label>
-                <input type="text" class="form-control" id="locUrl" th:field="*{locUrl}" placeholder="https://maps.example.com/..." dir="ltr">
-                <div class="text-danger" th:if="${#fields.hasErrors('locUrl')}" th:errors="*{locUrl}"></div>
+                <input type="text" class="form-control" id="locUrl" th:field="*{locUrl}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('locUrl')} ? 'true'" th:aria-describedby="${#fields.hasErrors('locUrl')} ? 'locUrl-error'" placeholder="https://maps.example.com/..." dir="ltr">
+                <div class="text-danger" id="locUrl-error" th:if="${#fields.hasErrors('locUrl')}" th:errors="*{locUrl}"></div>
             </div>
 
             <div class="row g-3 mb-3">

@@ -31,22 +31,24 @@
 
             <div class="mb-3">
                 <label for="volunteerInitiativeId" class="form-label" th:text="#{common.volunteer}">Volunteer</label>
-                <select class="form-select" id="volunteerInitiativeId" th:field="*{volunteerInitiativeId}">
+                <select class="form-select" id="volunteerInitiativeId" th:field="*{volunteerInitiativeId}" th:errorclass="is-invalid"
+                        th:aria-invalid="${#fields.hasErrors('volunteerInitiativeId')} ? 'true'" th:aria-describedby="${#fields.hasErrors('volunteerInitiativeId')} ? 'volunteerInitiativeId-error'">
                     <option value="" th:text="#{common.select}">-- Select --</option>
                     <option th:each="vi : ${volunteerInitiatives}" th:value="${vi.id}"
                             th:text="${vi.user != null ? vi.user.username : #messages.msg('attendance.volunteerFallback', vi.id)}"></option>
                 </select>
                 <div class="form-text" th:text="#{attendance.onlyApprovedHint}">Only volunteers whose join request was approved are listed.</div>
-                <div class="text-danger" th:if="${#fields.hasErrors('volunteerInitiativeId')}" th:errors="*{volunteerInitiativeId}"></div>
+                <div class="text-danger" id="volunteerInitiativeId-error" th:if="${#fields.hasErrors('volunteerInitiativeId')}" th:errors="*{volunteerInitiativeId}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="attendInOut" class="form-label" th:text="#{common.type}">Type</label>
-                <select class="form-select" id="attendInOut" th:field="*{attendInOut}">
+                <select class="form-select" id="attendInOut" th:field="*{attendInOut}" th:errorclass="is-invalid"
+                        th:aria-invalid="${#fields.hasErrors('attendInOut')} ? 'true'" th:aria-describedby="${#fields.hasErrors('attendInOut')} ? 'attendInOut-error'">
                     <option value="1" th:text="#{attend.type.1}">Check-in</option>
                     <option value="2" th:text="#{attend.type.2}">Check-out</option>
                 </select>
-                <div class="text-danger" th:if="${#fields.hasErrors('attendInOut')}" th:errors="*{attendInOut}"></div>
+                <div class="text-danger" id="attendInOut-error" th:if="${#fields.hasErrors('attendInOut')}" th:errors="*{attendInOut}"></div>
             </div>
 
             <div class="mb-3">
@@ -56,8 +58,9 @@
 
             <div class="mb-3">
                 <label for="note" class="form-label" th:text="#{common.note}">Note</label>
-                <input type="text" class="form-control" id="note" th:field="*{note}">
-                <div class="text-danger" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></div>
+                <input type="text" class="form-control" id="note" th:field="*{note}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('note')} ? 'true'" th:aria-describedby="${#fields.hasErrors('note')} ? 'note-error'">
+                <div class="text-danger" id="note-error" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></div>
             </div>
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>

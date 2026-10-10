@@ -18,14 +18,16 @@
 
             <div class="mb-3">
                 <label for="name" class="form-label" th:text="#{common.name}">Name</label>
-                <input type="text" class="form-control" id="name" th:field="*{name}">
-                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                <input type="text" class="form-control" id="name" th:field="*{name}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('name')} ? 'true'" th:aria-describedby="${#fields.hasErrors('name')} ? 'name-error'">
+                <div class="text-danger" id="name-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="description" class="form-label" th:text="#{common.description}">Description</label>
-                <textarea class="form-control" id="description" rows="3" th:field="*{description}"></textarea>
-                <div class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                <textarea class="form-control" id="description" rows="3" th:field="*{description}" th:errorclass="is-invalid"
+                          th:aria-invalid="${#fields.hasErrors('description')} ? 'true'" th:aria-describedby="${#fields.hasErrors('description')} ? 'description-error'"></textarea>
+                <div class="text-danger" id="description-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
             </div>
 
             <div class="mb-3">

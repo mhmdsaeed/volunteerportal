@@ -21,32 +21,37 @@
         <form th:action="@{/profile}" th:object="${profileForm}" method="post">
             <div class="mb-3">
                 <label for="firstName" class="form-label" th:text="#{profile.firstName}">First Name</label>
-                <input type="text" class="form-control" id="firstName" th:field="*{firstName}" autocomplete="given-name">
-                <div class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                <input type="text" class="form-control" id="firstName" th:field="*{firstName}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('firstName')} ? 'true'" th:aria-describedby="${#fields.hasErrors('firstName')} ? 'firstName-error'" autocomplete="given-name">
+                <div class="text-danger" id="firstName-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="lastName" class="form-label" th:text="#{profile.lastName}">Last Name</label>
-                <input type="text" class="form-control" id="lastName" th:field="*{lastName}" autocomplete="family-name">
-                <div class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                <input type="text" class="form-control" id="lastName" th:field="*{lastName}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('lastName')} ? 'true'" th:aria-describedby="${#fields.hasErrors('lastName')} ? 'lastName-error'" autocomplete="family-name">
+                <div class="text-danger" id="lastName-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="mobile" class="form-label" th:text="#{profile.mobile}">Mobile</label>
-                <input type="tel" class="form-control" id="mobile" th:field="*{mobile}" autocomplete="tel" dir="ltr">
-                <div class="text-danger" th:if="${#fields.hasErrors('mobile')}" th:errors="*{mobile}"></div>
+                <input type="tel" class="form-control" id="mobile" th:field="*{mobile}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('mobile')} ? 'true'" th:aria-describedby="${#fields.hasErrors('mobile')} ? 'mobile-error'" autocomplete="tel" dir="ltr">
+                <div class="text-danger" id="mobile-error" th:if="${#fields.hasErrors('mobile')}" th:errors="*{mobile}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="city" class="form-label" th:text="#{profile.city}">City</label>
-                <input type="text" class="form-control" id="city" th:field="*{city}" autocomplete="address-level2">
-                <div class="text-danger" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
+                <input type="text" class="form-control" id="city" th:field="*{city}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('city')} ? 'true'" th:aria-describedby="${#fields.hasErrors('city')} ? 'city-error'" autocomplete="address-level2">
+                <div class="text-danger" id="city-error" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="address" class="form-label" th:text="#{profile.address}">Address</label>
-                <input type="text" class="form-control" id="address" th:field="*{address}" autocomplete="street-address">
-                <div class="text-danger" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                <input type="text" class="form-control" id="address" th:field="*{address}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('address')} ? 'true'" th:aria-describedby="${#fields.hasErrors('address')} ? 'address-error'" autocomplete="street-address">
+                <div class="text-danger" id="address-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
             </div>
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
@@ -62,22 +67,25 @@
             <form th:action="@{/profile/password}" th:object="${passwordForm}" method="post">
                 <div class="mb-3">
                     <label for="currentPassword" class="form-label" th:text="#{profile.password.current}">Current password</label>
-                    <input type="password" class="form-control" id="currentPassword" th:field="*{currentPassword}"
+                    <input type="password" class="form-control" id="currentPassword" th:field="*{currentPassword}" th:errorclass="is-invalid"
+                           th:aria-invalid="${#fields.hasErrors('currentPassword')} ? 'true'" th:aria-describedby="${#fields.hasErrors('currentPassword')} ? 'currentPassword-error'"
                            autocomplete="current-password" required>
-                    <div class="text-danger" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+                    <div class="text-danger" id="currentPassword-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
                 </div>
                 <div class="mb-3">
                     <label for="newPassword" class="form-label" th:text="#{profile.password.new}">New password</label>
-                    <input type="password" class="form-control" id="newPassword" th:field="*{newPassword}"
-                           autocomplete="new-password" required aria-describedby="newPasswordHelp">
+                    <input type="password" class="form-control" id="newPassword" th:field="*{newPassword}" th:errorclass="is-invalid"
+                           th:aria-invalid="${#fields.hasErrors('newPassword')} ? 'true'" th:aria-describedby="${#fields.hasErrors('newPassword')} ? 'newPasswordHelp newPassword-error' : 'newPasswordHelp'"
+                           autocomplete="new-password" required>
                     <div class="form-text" id="newPasswordHelp" th:text="#{profile.password.help}">At least 8 characters.</div>
-                    <div class="text-danger" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                    <div class="text-danger" id="newPassword-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
                 </div>
                 <div class="mb-3">
                     <label for="confirmPassword" class="form-label" th:text="#{profile.password.confirm}">Confirm new password</label>
-                    <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}"
+                    <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}" th:errorclass="is-invalid"
+                           th:aria-invalid="${#fields.hasErrors('confirmPassword')} ? 'true'" th:aria-describedby="${#fields.hasErrors('confirmPassword')} ? 'confirmPassword-error'"
                            autocomplete="new-password" required>
-                    <div class="text-danger" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                    <div class="text-danger" id="confirmPassword-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
                 </div>
                 <button type="submit" class="btn btn-primary" th:text="#{profile.password.submit}">Change password</button>
             </form>

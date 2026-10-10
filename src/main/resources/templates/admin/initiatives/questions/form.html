@@ -42,19 +42,21 @@
 
             <div class="mb-3">
                 <label for="questionText" class="form-label" th:text="#{common.question}">Question</label>
-                <textarea class="form-control" id="questionText" rows="2" th:field="*{questionText}"></textarea>
-                <div class="text-danger" th:if="${#fields.hasErrors('questionText')}" th:errors="*{questionText}"></div>
+                <textarea class="form-control" id="questionText" rows="2" th:field="*{questionText}" th:errorclass="is-invalid"
+                          th:aria-invalid="${#fields.hasErrors('questionText')} ? 'true'" th:aria-describedby="${#fields.hasErrors('questionText')} ? 'questionText-error'"></textarea>
+                <div class="text-danger" id="questionText-error" th:if="${#fields.hasErrors('questionText')}" th:errors="*{questionText}"></div>
             </div>
 
             <div class="mb-3">
                 <label for="questionTypeId" class="form-label" th:text="#{common.type}">Type</label>
-                <select class="form-select" id="questionTypeId" th:field="*{questionTypeId}">
+                <select class="form-select" id="questionTypeId" th:field="*{questionTypeId}" th:errorclass="is-invalid"
+                        th:aria-invalid="${#fields.hasErrors('questionTypeId')} ? 'true'" th:aria-describedby="${#fields.hasErrors('questionTypeId')} ? 'questionTypeId-error'">
                     <option value="1" th:text="#{questionType.1}">True / False</option>
                     <option value="2" th:text="#{questionType.2}">Single choice</option>
                     <option value="3" th:text="#{questionType.3}">Multiple choice</option>
                     <option value="4" th:text="#{questionType.4}">Free text</option>
                 </select>
-                <div class="text-danger" th:if="${#fields.hasErrors('questionTypeId')}" th:errors="*{questionTypeId}"></div>
+                <div class="text-danger" id="questionTypeId-error" th:if="${#fields.hasErrors('questionTypeId')}" th:errors="*{questionTypeId}"></div>
             </div>
 
             <div class="mb-3">
@@ -65,9 +67,10 @@
 
             <div class="mb-3">
                 <label for="questionChoicesText" class="form-label" th:text="#{common.choices}">Choices</label>
-                <input type="text" class="form-control" id="questionChoicesText" th:field="*{questionChoicesText}"
+                <input type="text" class="form-control" id="questionChoicesText" th:field="*{questionChoicesText}" th:errorclass="is-invalid"
+                       th:aria-invalid="${#fields.hasErrors('questionChoicesText')} ? 'true'" th:aria-describedby="${#fields.hasErrors('questionChoicesText')} ? 'questionChoicesText-error'"
                        th:placeholder="#{question.choicesPlaceholder}">
-                <div class="text-danger" th:if="${#fields.hasErrors('questionChoicesText')}" th:errors="*{questionChoicesText}"></div>
+                <div class="text-danger" id="questionChoicesText-error" th:if="${#fields.hasErrors('questionChoicesText')}" th:errors="*{questionChoicesText}"></div>
             </div>
 
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
