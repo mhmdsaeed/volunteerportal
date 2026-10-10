@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../api/api_client.dart';
 import '../api/models.dart';
 import '../app_scope.dart';
+import '../app_state.dart';
 import '../l10n/app_localizations.dart';
 import '../theme.dart';
 import 'widgets.dart';
@@ -19,9 +21,9 @@ class EventsScreen extends StatelessWidget {
       key: const PageStorageKey('events'),
       load: () async {
         final state = AppScope.read(context);
-        final events = state.api.events();
-        await state.refreshMe();
-        return events;
+        // Both at once; Future.wait also handles an error from either, so neither is left unawaited
+        final results = await Future.wait<Object?>([state.api.events(), _refreshStanding(state)]);
+        return results.first as List<EventItem>;
       },
       headerBuilder: (context, _) => const _Standing(),
       emptyText: t.noEvents,
@@ -42,6 +44,18 @@ class EventsScreen extends StatelessWidget {
         trailing: StatusPillFor(event.status),
       ),
     );
+  }
+}
+
+/// Refreshes my grade and points with the events. An expired login still logs out (as everywhere); any other
+/// failure keeps the grade and points already shown, so the events don't disappear behind an error.
+Future<void> _refreshStanding(AppState state) async {
+  try {
+    await state.refreshMe();
+  } on UnauthorizedException {
+    rethrow;
+  } on ApiException {
+    // Keep what we have
   }
 }
 

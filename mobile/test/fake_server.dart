@@ -95,6 +95,9 @@ class FakeServer {
         password = body['newPassword'] as String;
         return http.Response('', 204);
       case '/api/me':
+        if (meFails) {
+          return _error(500, 'server_error');
+        }
         return _json(_me);
       case '/api/initiatives':
         return _json(initiatives);
@@ -182,6 +185,9 @@ class FakeServer {
   /// My grade (null: unranked) and points, which an admin may change while the app is open.
   String? grade;
   int points = 0;
+
+  /// Makes GET /api/me fail with a server error, as a broken or overloaded server would.
+  bool meFails = false;
 
   Map<String, Object?> get _me => {
         'id': 648,

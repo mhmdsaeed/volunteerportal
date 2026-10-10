@@ -561,4 +561,33 @@ void main() {
     expect(find.descendant(of: find.byKey(const Key('grade')), matching: find.text('بدون درجة')), findsOneWidget);
     expect(find.descendant(of: find.byKey(const Key('points')), matching: find.text('35')), findsOneWidget);
   });
+
+  testWidgets('if refreshing grade and points fails, the events still show, with the last known standing', (tester) async {
+    server.grade = 'Bronze';
+    server.points = 120;
+    await startApp(tester);
+    await logIn(tester);
+
+    server.meFails = true;
+    server.points = 999;
+    await tester.fling(find.byType(ListView).first, const Offset(0, 400), 1000);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('event-112')), findsOneWidget);
+    expect(find.text('Something went wrong'), findsNothing);
+    expect(find.descendant(of: find.byKey(const Key('points')), matching: find.text('120')), findsOneWidget);
+  });
+
+  testWidgets('an expired login on the main page still logs out with an explanation', (tester) async {
+    await startApp(tester);
+    await logIn(tester);
+
+    server.tokenRevoked = true;
+    await tester.fling(find.byType(ListView).first, const Offset(0, 400), 1000);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('loginButton')), findsOneWidget);
+    expect(find.text('Your session has ended. Please log in again.'), findsOneWidget);
+    expect(tester.takeException(), isNull); // no unhandled error from either request
+  });
 }
