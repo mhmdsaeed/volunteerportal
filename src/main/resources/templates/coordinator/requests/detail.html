@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" th:with="initiativeRequests=${'/coordinator/initiatives/' + request.initiative.id + '/requests'},
+    <main class="container" th:with="initiativeRequests=${'/coordinator/initiatives/' + request.initiative.id + '/requests'},
                                     pending=${request.responseJoinDttm == null}">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <th:block th:if="${fromInitiative}">
@@ -17,13 +17,13 @@
             <li th:replace="~{fragments/layout :: crumbHere(#{requestDetail.title})}"></li>
         </ol></nav>
 
-        <h2 class="mb-3" th:text="#{requestDetail.heading(${request.user != null ? request.user.username : '-'})}">Join request from sara</h2>
+        <h1 class="mb-3" th:text="#{requestDetail.heading(${request.user != null ? request.user.username : '-'})}">Join request from sara</h1>
 
         <dl class="row mb-4 vp-request-facts">
             <dt class="col-sm-3" th:text="#{common.initiative}">Initiative</dt>
             <dd class="col-sm-9"><a th:href="@{${initiativeRequests}}" th:text="${request.initiative.name}"></a></dd>
             <dt class="col-sm-3" th:if="${request.user != null and request.user.email != null}" th:text="#{common.email}">Email</dt>
-            <dd class="col-sm-9" th:if="${request.user != null and request.user.email != null}"><span dir="ltr" th:text="${request.user.email}"></span></dd>
+            <dd class="col-sm-9" th:if="${request.user != null and request.user.email != null}"><span class="vp-break" dir="ltr" th:text="${request.user.email}"></span></dd>
             <dt class="col-sm-3" th:text="#{common.requested}">Requested</dt>
             <dd class="col-sm-9" th:text="${request.requestJoinDttm != null ? #temporals.format(request.requestJoinDttm, 'yyyy-MM-dd HH:mm') : '-'}"></dd>
             <dt class="col-sm-3" th:text="#{common.status}">Status</dt>
@@ -34,15 +34,15 @@
             </dd>
         </dl>
 
-        <h3 class="h5 mb-3" th:text="#{common.answers}">Answers</h3>
+        <h2 class="h5 mb-3" th:text="#{common.answers}">Answers</h2>
         <p th:if="${#lists.isEmpty(answers)}" class="text-muted" th:text="#{requestDetail.noQuestions}">This initiative has no questions.</p>
         <ol th:unless="${#lists.isEmpty(answers)}" class="list-group list-group-numbered mb-4 vp-answers">
             <li class="list-group-item" th:each="row : ${answers}">
-                <div class="vp-answer-question" th:text="${row.question}" dir="auto">Are you over 18?</div>
+                <div class="vp-answer-question"><bdi th:text="${row.question}">Are you over 18?</bdi></div>
                 <div th:if="${row.answer == null}" class="text-muted" th:text="#{requestDetail.notAnswered}">Not answered</div>
                 <div th:if="${row.answer != null and row.typeId == 1}" class="vp-answer"
                      th:text="${row.choiceNumber == 1} ? #{common.yes} : #{common.no}">Yes</div>
-                <div th:if="${row.answer != null and row.typeId != 1}" class="vp-answer" th:text="${row.answer}" dir="auto">An answer</div>
+                <div th:if="${row.answer != null and row.typeId != 1}" class="vp-answer"><bdi th:text="${row.answer}">An answer</bdi></div>
             </li>
         </ol>
 
@@ -59,7 +59,7 @@
                 <button type="submit" class="btn btn-danger" th:text="#{joinRequests.reject}">Reject</button>
             </form>
         </div>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

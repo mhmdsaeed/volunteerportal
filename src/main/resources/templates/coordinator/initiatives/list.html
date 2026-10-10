@@ -4,34 +4,36 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container">
-        <h2 class="mb-4" th:text="#{coordinator.heading}">Your Initiatives</h2>
+    <main class="container">
+        <h1 class="mb-4" th:text="#{coordinator.heading}">Your Initiatives</h1>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th th:text="#{common.name}">Name</th>
-                    <th th:text="#{common.office}">Office</th>
-                    <th th:text="#{common.enabled}">Enabled</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="initiative : ${initiatives}">
-                    <td th:text="${initiative.name}"></td>
-                    <td th:text="${initiative.office != null ? initiative.office.name : '-'}"></td>
-                    <td th:text="${initiative.enabled != null and initiative.enabled} ? #{common.yes} : #{common.no}"></td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/coordinator/initiatives/{id}/events(id=${initiative.id})}" th:text="#{adminInitiatives.events}">Events</a>
-                        <a class="btn btn-sm btn-outline-primary" th:href="@{/coordinator/initiatives/{id}/requests(id=${initiative.id})}" th:text="#{coordinator.joinRequests}">Join Requests</a>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(initiatives)}">
-                    <td colspan="4" class="text-muted" th:text="#{coordinator.empty}">No initiatives assigned to you.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th th:text="#{common.name}">Name</th>
+                        <th th:text="#{common.office}">Office</th>
+                        <th th:text="#{common.enabled}">Enabled</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="initiative : ${initiatives}">
+                        <td><bdi th:text="${initiative.name}"></bdi></td>
+                        <td><bdi th:text="${initiative.office != null ? initiative.office.name : '-'}"></bdi></td>
+                        <td th:text="${initiative.enabled != null and initiative.enabled} ? #{common.yes} : #{common.no}"></td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/coordinator/initiatives/{id}/events(id=${initiative.id})}" th:text="#{adminInitiatives.events}">Events</a>
+                            <a class="btn btn-sm btn-outline-primary" th:href="@{/coordinator/initiatives/{id}/requests(id=${initiative.id})}" th:text="#{coordinator.joinRequests}">Join Requests</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(initiatives)}">
+                        <td colspan="4" class="text-muted" th:text="#{coordinator.empty}">No initiatives assigned to you.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
