@@ -4,12 +4,13 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 640px;">
-        <p><a th:href="@{/initiatives}">&laquo; <span th:text="#{initiatives.back}">Back to Initiatives</span></a></p>
+    <main class="container" style="max-width: 640px;">
+        <p><a th:href="@{/initiatives}"><i class="bi bi-arrow-left bi-flip-rtl" aria-hidden="true"></i>
+            <span th:text="#{initiatives.back}">Back to Initiatives</span></a></p>
 
-        <h2 th:text="${initiative.name}"></h2>
-        <p class="text-muted" th:text="${initiative.description}"></p>
-        <p th:if="${initiative.office != null}"><strong th:text="#{common.office} + ':'">Office:</strong> <span th:text="${initiative.office.name}"></span></p>
+        <h1><bdi th:text="${initiative.name}">Initiative</bdi></h1>
+        <p class="text-muted" th:if="${initiative.description != null}"><bdi th:text="${initiative.description}">Description</bdi></p>
+        <p th:if="${initiative.office != null}"><strong th:text="#{common.office} + ':'">Office:</strong> <bdi th:text="${initiative.office.name}">Office</bdi></p>
 
         <div th:if="${membership != null}" class="alert alert-info">
             <p class="mb-1" th:text="#{initiatives.requestedOn(${#temporals.format(membership.requestJoinDttm, 'yyyy-MM-dd HH:mm')})}">You requested to join on ...</p>
@@ -19,12 +20,12 @@
             <p class="mb-0 mt-2 small" th:if="${membership.responseJoinDttm == null}" th:text="#{initiatives.pendingHint}">Once approved, you can attend this initiative's events.</p>
         </div>
 
-        <div th:if="${membership != null and membership.enabled == true}" class="mb-4">
-            <h4 class="mt-4" th:text="#{initiatives.eventsHeading}">Events</h4>
+        <section th:if="${membership != null and membership.enabled == true}" class="mb-4" aria-labelledby="eventsHeading">
+            <h2 class="h4 mt-4" id="eventsHeading" th:text="#{initiatives.eventsHeading}">Events</h2>
             <p class="small text-muted" th:text="#{initiatives.checkinHint}">At the event, scan the check-in QR code shown by the coordinator.</p>
             <div class="list-group">
                 <div class="list-group-item" th:each="event : ${events}">
-                    <div class="fw-semibold" th:text="${event.name}"></div>
+                    <div class="fw-semibold"><bdi th:text="${event.name}">Event</bdi></div>
                     <div class="small text-muted">
                         <span th:text="${event.fromDttm != null ? #temporals.format(event.fromDttm, 'yyyy-MM-dd HH:mm') : '-'}"></span>
                         <span th:if="${event.toDttm != null}"> &ndash; <span th:text="${#temporals.format(event.toDttm, 'yyyy-MM-dd HH:mm')}"></span></span>
@@ -34,7 +35,7 @@
                 </div>
                 <p th:if="${#lists.isEmpty(events)}" class="text-muted" th:text="#{initiatives.noEvents}">No events scheduled yet.</p>
             </div>
-        </div>
+        </section>
 
         <form th:if="${membership != null and membership.responseJoinDttm == null}"
               th:action="@{/initiatives/{id}/withdraw(id=${initiative.id})}" method="post"
@@ -44,48 +45,53 @@
 
         <form th:if="${membership == null}" th:action="@{/initiatives/{id}/join(id=${initiative.id})}" method="post">
             <div class="mb-4" th:each="question : ${questions}"
-                 th:with="choices=${question.questionChoicesText != null ? #strings.arraySplit(question.questionChoicesText, ',') : {}}">
-                <label class="form-label" th:text="${question.questionText}"></label>
+                 th:with="choices=${question.questionChoicesText != null ? #strings.arraySplit(question.questionChoicesText, ',') : {}},
+                          choiceQuestion=${question.questionTypeId != null and question.questionTypeId >= 1 and question.questionTypeId <= 3}">
+                <!-- Yes/no and choice questions: a fieldset, so screen readers say the question with each option -->
+                <fieldset th:if="${choiceQuestion}">
+                    <legend class="form-label fs-6"><bdi th:text="${question.questionText}">Question</bdi></legend>
 
-                <div th:switch="${question.questionTypeId}">
-                    <div th:case="1">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" th:name="'answer_' + ${question.id}" value="1"
-                                   th:id="'q' + ${question.id} + '-yes'">
-                            <label class="form-check-label" th:for="'q' + ${question.id} + '-yes'" th:text="#{common.yes}">Yes</label>
+                    <div th:switch="${question.questionTypeId}">
+                        <div th:case="1">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" th:name="'answer_' + ${question.id}" value="1"
+                                       th:id="'q' + ${question.id} + '-yes'">
+                                <label class="form-check-label" th:for="'q' + ${question.id} + '-yes'" th:text="#{common.yes}">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" th:name="'answer_' + ${question.id}" value="0"
+                                       th:id="'q' + ${question.id} + '-no'">
+                                <label class="form-check-label" th:for="'q' + ${question.id} + '-no'" th:text="#{common.no}">No</label>
+                            </div>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" th:name="'answer_' + ${question.id}" value="0"
-                                   th:id="'q' + ${question.id} + '-no'">
-                            <label class="form-check-label" th:for="'q' + ${question.id} + '-no'" th:text="#{common.no}">No</label>
+
+                        <div th:case="2">
+                            <div class="form-check" th:each="choice, iter : ${choices}">
+                                <input class="form-check-input" type="radio" th:name="'answer_' + ${question.id}"
+                                       th:value="${iter.count}" th:id="'q' + ${question.id} + '-' + ${iter.count}">
+                                <label class="form-check-label" th:for="'q' + ${question.id} + '-' + ${iter.count}" th:text="${#strings.trim(choice)}"></label>
+                            </div>
+                        </div>
+
+                        <div th:case="3">
+                            <div class="form-check" th:each="choice, iter : ${choices}">
+                                <input class="form-check-input" type="checkbox" th:name="'answer_' + ${question.id}"
+                                       th:value="${iter.count}" th:id="'q' + ${question.id} + '-' + ${iter.count}">
+                                <label class="form-check-label" th:for="'q' + ${question.id} + '-' + ${iter.count}" th:text="${#strings.trim(choice)}"></label>
+                            </div>
                         </div>
                     </div>
+                </fieldset>
 
-                    <div th:case="2">
-                        <div class="form-check" th:each="choice, iter : ${choices}">
-                            <input class="form-check-input" type="radio" th:name="'answer_' + ${question.id}"
-                                   th:value="${iter.count}" th:id="'q' + ${question.id} + '-' + ${iter.count}">
-                            <label class="form-check-label" th:for="'q' + ${question.id} + '-' + ${iter.count}" th:text="${#strings.trim(choice)}"></label>
-                        </div>
-                    </div>
-
-                    <div th:case="3">
-                        <div class="form-check" th:each="choice, iter : ${choices}">
-                            <input class="form-check-input" type="checkbox" th:name="'answer_' + ${question.id}"
-                                   th:value="${iter.count}" th:id="'q' + ${question.id} + '-' + ${iter.count}">
-                            <label class="form-check-label" th:for="'q' + ${question.id} + '-' + ${iter.count}" th:text="${#strings.trim(choice)}"></label>
-                        </div>
-                    </div>
-
-                    <div th:case="*">
-                        <textarea class="form-control" th:name="'answer_' + ${question.id}" rows="2" dir="auto"></textarea>
-                    </div>
-                </div>
+                <th:block th:unless="${choiceQuestion}">
+                    <label class="form-label" th:for="'q' + ${question.id}"><bdi th:text="${question.questionText}">Question</bdi></label>
+                    <textarea class="form-control" th:id="'q' + ${question.id}" th:name="'answer_' + ${question.id}" rows="2" dir="auto"></textarea>
+                </th:block>
             </div>
 
             <button type="submit" class="btn btn-primary" th:text="#{initiatives.join}">Request to Join</button>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

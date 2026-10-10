@@ -15,8 +15,8 @@
         <!-- The next event, as a lanyard pass -->
         <section th:if="${nextEvent != null}" class="vp-pass vp-lanyard" aria-labelledby="nextEventTitle">
             <p class="vp-pass-label" th:text="#{home.nextEvent}">Your next event</p>
-            <h2 class="vp-pass-title" id="nextEventTitle" th:text="${nextEvent.name}">Beach clean-up</h2>
-            <p class="vp-pass-initiative" th:text="${nextEvent.initiative}">Coast initiative</p>
+            <h2 class="vp-pass-title" id="nextEventTitle"><bdi th:text="${nextEvent.name}">Beach clean-up</bdi></h2>
+            <p class="vp-pass-initiative"><bdi th:text="${nextEvent.initiative}">Coast initiative</bdi></p>
             <div class="vp-pass-when">
                 <span>
                     <span th:text="${#temporals.format(nextEvent.from, #messages.msg('home.dateTime'))}">Saturday 11 October, 08:00</span><th:block th:if="${nextEvent.to != null}">–<span
@@ -54,8 +54,8 @@
                     <ul class="vp-list">
                         <li th:each="event : ${laterEvents}">
                             <span>
-                                <span th:text="${event.name}">Food bank shift</span>
-                                <span class="vp-list-meta d-block" th:text="${event.initiative}">Coast initiative</span>
+                                <bdi th:text="${event.name}">Food bank shift</bdi>
+                                <span class="vp-list-meta d-block"><bdi th:text="${event.initiative}">Coast initiative</bdi></span>
                             </span>
                             <span class="vp-list-meta" th:text="${#temporals.format(event.from, #messages.msg('home.dateTimeShort'))}">Sat 18 Oct, 09:00</span>
                         </li>
@@ -66,7 +66,7 @@
                     <h2 class="vp-section-title" th:text="#{home.yourRequests}">Your join requests</h2>
                     <ul class="vp-list" th:unless="${#lists.isEmpty(requests)}">
                         <li th:each="request : ${requests}">
-                            <a th:href="@{/initiatives/{id}(id=${request.id})}" th:text="${request.name}">Coast initiative</a>
+                            <a th:href="@{/initiatives/{id}(id=${request.id})}"><bdi th:text="${request.name}">Coast initiative</bdi></a>
                             <span th:switch="${request.membership}">
                                 <span th:case="'PENDING'" class="badge text-bg-warning" th:text="#{status.pending}">Pending</span>
                                 <span th:case="'APPROVED'" class="badge text-bg-success" th:text="#{status.approved}">Approved</span>

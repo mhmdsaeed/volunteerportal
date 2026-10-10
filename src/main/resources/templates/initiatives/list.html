@@ -4,8 +4,8 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container">
-        <h2 class="mb-3" th:text="#{initiatives.title}">Initiatives</h2>
+    <main class="container">
+        <h1 class="mb-3" th:text="#{initiatives.title}">Initiatives</h1>
 
         <div class="vp-filters mb-4">
             <nav th:aria-label="#{initiatives.filter.label}">
@@ -42,16 +42,16 @@
 
         <section class="vp-office-group" th:each="group : ${groups}"
                  th:with="officeName=${group.office() != null ? group.office().name : #messages.msg('initiatives.office.none')}">
-            <h3 class="vp-office-heading">
+            <h2 class="vp-office-heading">
                 <i class="bi bi-building" aria-hidden="true"></i>
                 <bdi th:text="${officeName}">Office</bdi>
                 <span class="vp-filter-count" th:text="${#lists.size(group.initiatives())}">0</span>
-            </h3>
+            </h2>
             <div class="row row-cols-1 row-cols-md-2 g-3">
                 <div class="col" th:each="initiative : ${group.initiatives()}">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title"><bdi th:text="${initiative.name}">Name</bdi></h5>
+                            <h3 class="h5 card-title"><bdi th:text="${initiative.name}">Name</bdi></h3>
                             <p class="vp-card-office" th:if="${initiative.office != null}">
                                 <i class="bi bi-building" aria-hidden="true"></i>
                                 <span class="visually-hidden" th:text="#{common.office} + ':'">Office:</span>
@@ -78,7 +78,7 @@
                                 <span th:if="${membership != null and membership.responseJoinDttm != null and membership.enabled == false}" class="badge text-bg-danger" th:text="#{status.notApproved}">Not approved</span>
                             </p>
 
-                            <a class="btn btn-primary btn-sm" th:href="@{/initiatives/{id}(id=${initiative.id})}" th:text="#{common.view}">View</a>
+                            <a class="btn btn-primary btn-sm" th:href="@{/initiatives/{id}(id=${initiative.id})}"><span th:text="#{common.view}">View</span><span class="visually-hidden">: <bdi th:text="${initiative.name}">Name</bdi></span></a>
                         </div>
                     </div>
                 </div>
@@ -94,7 +94,7 @@
             <p th:case="'ALL'" class="text-muted" th:text="#{initiatives.empty}">No initiatives are open right now.</p>
             <p th:case="*" class="text-muted" th:text="#{initiatives.emptyFilter}">No initiatives here.</p>
         </div>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

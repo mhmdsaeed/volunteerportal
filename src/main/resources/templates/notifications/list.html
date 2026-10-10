@@ -4,9 +4,9 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 640px;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 th:text="#{notifications.title}">Notifications</h2>
+    <main class="container" style="max-width: 640px;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 th:text="#{notifications.title}">Notifications</h1>
             <form th:if="${!#lists.isEmpty(notifications)}" th:action="@{/notifications/read-all}" method="post">
                 <button type="submit" class="btn btn-outline-secondary btn-sm" th:text="#{notifications.markAllRead}">Mark all as read</button>
             </form>
@@ -15,20 +15,22 @@
         <div class="list-group">
             <div class="list-group-item" th:each="notification : ${notifications}"
                  th:classappend="${notification.read} ? '' : 'vp-unread'">
-                <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex justify-content-between align-items-start gap-3">
                     <div>
-                        <p class="mb-1" dir="auto" th:text="${texts[notification.id]}"></p>
+                        <!-- The unread bar is only visual, so say it too -->
+                        <span class="visually-hidden" th:unless="${notification.read}" th:text="#{notifications.unread} + ':'">Unread:</span>
+                        <p class="mb-1" th:text="${texts[notification.id]}"></p>
                         <a th:if="${notification.link != null}" th:href="${notification.link}" class="small" th:text="#{common.view}">View</a>
                         <p class="mb-0 text-muted small" th:text="${#temporals.format(notification.createdDttm, 'yyyy-MM-dd HH:mm')}"></p>
                     </div>
-                    <form th:if="${!notification.read}" th:action="@{/notifications/{id}/read(id=${notification.id})}" method="post">
-                        <button type="submit" class="btn btn-sm btn-outline-secondary" th:text="#{notifications.markRead}">Mark read</button>
+                    <form class="flex-shrink-0" th:if="${!notification.read}" th:action="@{/notifications/{id}/read(id=${notification.id})}" method="post">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary text-nowrap" th:text="#{notifications.markRead}">Mark read</button>
                     </form>
                 </div>
             </div>
             <p th:if="${#lists.isEmpty(notifications)}" class="text-muted" th:text="#{notifications.empty}">No notifications yet.</p>
         </div>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

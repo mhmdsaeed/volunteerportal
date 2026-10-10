@@ -4,8 +4,8 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container text-center" style="max-width: 480px;">
-        <h2 class="mb-1" th:text="${event.name}">Event</h2>
+    <main class="container text-center" style="max-width: 480px;">
+        <h1 class="mb-1" th:text="${event.name}">Event</h1>
         <p class="text-muted" th:if="${event.initiative != null}" th:text="${event.initiative.name}">Initiative</p>
 
         <div th:if="${!codeValid}" class="alert alert-warning" th:text="#{checkin.result.INVALID_CODE}">Code expired.</div>
@@ -27,14 +27,15 @@
 
             <button type="submit" class="btn btn-lg w-100" id="checkinButton"
                     th:classappend="${action.name() == 'CHECK_IN'} ? 'btn-success' : 'btn-primary'">
-                <i class="bi" th:classappend="${action.name() == 'CHECK_IN'} ? 'bi-box-arrow-in-right bi-flip-rtl' : 'bi-box-arrow-right bi-flip-rtl'"></i>
+                <i class="bi" th:classappend="${action.name() == 'CHECK_IN'} ? 'bi-box-arrow-in-right bi-flip-rtl' : 'bi-box-arrow-right bi-flip-rtl'" aria-hidden="true"></i>
                 <span th:text="${action.name() == 'CHECK_IN'} ? #{checkin.actionIn} : #{checkin.actionOut}">Check in</span>
             </button>
-            <p class="small text-muted mt-2 d-none" id="locating" th:text="#{checkin.locating}">Getting your location…</p>
+            <!-- Filled in when the location is requested; role="status" has screen readers announce it -->
+            <p class="small text-muted mt-2" id="locating" role="status" th:data-text="#{checkin.locating}"></p>
         </form>
 
         <p class="mt-4"><a th:href="@{/home}" th:text="#{checkin.backHome}">Go to Home</a></p>
-    </div>
+    </main>
 
     <script>
         (function () {
@@ -49,7 +50,8 @@
                 }
                 e.preventDefault();
                 document.getElementById('checkinButton').disabled = true;
-                document.getElementById('locating').classList.remove('d-none');
+                var locating = document.getElementById('locating');
+                locating.textContent = locating.dataset.text;
                 var submit = function () { sent = true; form.submit(); };
                 navigator.geolocation.getCurrentPosition(function (position) {
                     document.getElementById('latitude').value = position.coords.latitude;
