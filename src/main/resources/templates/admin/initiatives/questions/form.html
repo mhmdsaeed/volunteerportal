@@ -17,10 +17,10 @@
 
         <div class="card mb-4" th:if="${questionId == null and libraryCategories != null}">
             <div class="card-body">
-                <h6 class="card-title" th:text="#{initiativeQuestions.copyFromLibrary}">Copy from Question Library</h6>
+                <h3 class="h6 card-title" id="copyFromLibrary" th:text="#{initiativeQuestions.copyFromLibrary}">Copy from Question Library</h3>
                 <form th:action="@{/admin/initiatives/{id}/questions/new(id=${initiative.id})}" method="get" class="row g-2 align-items-center">
                     <div class="col-auto">
-                        <select class="form-select" name="fromLibrary">
+                        <select class="form-select" name="fromLibrary" aria-labelledby="copyFromLibrary">
                             <option value="" th:text="#{initiativeQuestions.selectLibraryQuestion}">-- Select a library question --</option>
                             <optgroup th:each="category : ${libraryCategories}" th:label="${category.name}">
                                 <option th:each="question : ${libraryQuestions}" th:if="${question.questionLibCat != null and question.questionLibCat.id == category.id}"

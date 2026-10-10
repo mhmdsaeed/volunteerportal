@@ -10,36 +10,38 @@
             <li th:replace="~{fragments/layout :: crumbHere(#{config.title})}"></li>
         </ol></nav>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h2 th:text="#{config.title}">Config</h2>
             <a class="btn btn-primary" th:href="@{/admin/config/new}" th:text="#{config.newEntry}">New Entry</a>
         </div>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th th:text="#{common.key}">Key</th>
-                    <th th:text="#{common.value}">Value</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="config : ${configs}">
-                    <td th:text="${config.configsetKey}" dir="ltr"></td>
-                    <td th:text="${config.configsetValue}" dir="auto"></td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/config/{id}/edit(id=${config.id})}" th:text="#{common.edit}">Edit</a>
-                        <form th:action="@{/admin/config/{id}/delete(id=${config.id})}" method="post" class="d-inline"
-                              th:data-confirm="#{config.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(configs)}">
-                    <td colspan="3" class="text-muted" th:text="#{config.empty}">No config entries yet.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th th:text="#{common.key}">Key</th>
+                        <th th:text="#{common.value}">Value</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="config : ${configs}">
+                        <td><span dir="ltr" th:text="${config.configsetKey}"></span></td>
+                        <td><bdi th:text="${config.configsetValue}"></bdi></td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/config/{id}/edit(id=${config.id})}" th:text="#{common.edit}">Edit</a>
+                            <form th:action="@{/admin/config/{id}/delete(id=${config.id})}" method="post" class="d-inline"
+                                  th:data-confirm="#{config.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(configs)}">
+                        <td colspan="3" class="text-muted" th:text="#{config.empty}">No config entries yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

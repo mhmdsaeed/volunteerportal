@@ -10,38 +10,40 @@
             <li th:replace="~{fragments/layout :: crumbHere(#{offices.title})}"></li>
         </ol></nav>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h2 th:text="#{offices.title}">Offices</h2>
             <a class="btn btn-primary" th:href="@{/admin/offices/new}" th:text="#{offices.new}">New Office</a>
         </div>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th th:text="#{common.name}">Name</th>
-                    <th th:text="#{common.role}">Role</th>
-                    <th th:text="#{common.user}">User</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="office : ${offices}">
-                    <td th:text="${office.name}"></td>
-                    <td th:text="${office.role != null ? office.role.name : '-'}"></td>
-                    <td th:text="${office.user != null ? office.user.username : '-'}"></td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/offices/{id}/edit(id=${office.id})}" th:text="#{common.edit}">Edit</a>
-                        <form th:action="@{/admin/offices/{id}/delete(id=${office.id})}" method="post" class="d-inline"
-                              th:data-confirm="#{offices.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(offices)}">
-                    <td colspan="4" class="text-muted" th:text="#{offices.empty}">No offices yet.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th th:text="#{common.name}">Name</th>
+                        <th th:text="#{common.role}">Role</th>
+                        <th th:text="#{common.user}">User</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="office : ${offices}">
+                        <td><bdi th:text="${office.name}"></bdi></td>
+                        <td th:text="${office.role == null ? '-' : (#messages.msgOrNull('role.' + office.role.name) ?: office.role.name)}"></td>
+                        <td><bdi th:text="${office.user != null ? office.user.username : '-'}"></bdi></td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/offices/{id}/edit(id=${office.id})}" th:text="#{common.edit}">Edit</a>
+                            <form th:action="@{/admin/offices/{id}/delete(id=${office.id})}" method="post" class="d-inline"
+                                  th:data-confirm="#{offices.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(offices)}">
+                        <td colspan="4" class="text-muted" th:text="#{offices.empty}">No offices yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

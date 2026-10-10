@@ -13,27 +13,29 @@
 
         <h2 class="mb-4" th:text="#{reports.volunteers}">Volunteer Leaderboard</h2>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th th:text="#{common.volunteer}">Volunteer</th>
-                    <th th:text="#{common.grade}">Grade</th>
-                    <th th:text="#{common.points}">Points</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="row, iter : ${rows}">
-                    <td th:text="${iter.count}"></td>
-                    <td th:text="${row.username}"></td>
-                    <td th:text="${row.gradeName != null ? row.gradeName : #messages.msg('grade.unranked')}"></td>
-                    <td th:text="${row.points}"></td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="4" class="text-muted" th:text="#{reports.noVolunteers}">No volunteers yet.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th th:text="#{common.volunteer}">Volunteer</th>
+                        <th th:text="#{common.grade}">Grade</th>
+                        <th th:text="#{common.points}">Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row, iter : ${rows}">
+                        <td th:text="${iter.count}"></td>
+                        <td><bdi th:text="${row.username}"></bdi></td>
+                        <td><bdi th:text="${row.gradeName != null ? row.gradeName : #messages.msg('grade.unranked')}"></bdi></td>
+                        <td th:text="${row.points}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(rows)}">
+                        <td colspan="4" class="text-muted" th:text="#{reports.noVolunteers}">No volunteers yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

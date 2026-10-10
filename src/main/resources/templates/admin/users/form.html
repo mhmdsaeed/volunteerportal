@@ -12,7 +12,7 @@
         </ol></nav>
 
         <h2 class="mb-1" th:text="#{users.editHeading(${user.username})}">Roles</h2>
-        <p class="text-muted" th:text="${user.email}" dir="ltr"></p>
+        <p class="text-muted"><span class="vp-break" dir="ltr" th:text="${user.email}"></span></p>
 
         <div class="alert alert-danger" th:if="${errorKey != null}" th:text="${#messages.msg(errorKey)}">Error.</div>
 

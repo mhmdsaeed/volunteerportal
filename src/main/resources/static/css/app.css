@@ -735,6 +735,41 @@ html.sidebar-collapsed .sidebar .nav-link .badge {
     font-variant-numeric: tabular-nums;
 }
 
+/* A list of links to other pages (the admin dashboard, reports): icon, label, one line on what it's for */
+.vp-link-list {
+    --bs-list-group-action-color: var(--vp-ink);
+    --bs-list-group-action-hover-color: var(--vp-ink);
+    --bs-list-group-action-hover-bg: var(--vp-paper);
+    --bs-list-group-action-active-color: var(--vp-ink);
+    --bs-list-group-action-active-bg: var(--vp-ink-tint);
+}
+
+.vp-link-list .list-group-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+}
+
+.vp-link-list .list-group-item > .bi {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    color: var(--vp-ink);
+}
+
+.vp-link-label {
+    font-weight: 500;
+}
+
+.vp-link-list-narrow {
+    max-width: 46rem;
+}
+
+/* A long unbroken value (an email address) wraps instead of running off a phone screen */
+.vp-break {
+    overflow-wrap: anywhere;
+}
+
 .vp-empty {
     background-color: var(--vp-surface);
     border: 1px dashed var(--vp-line);

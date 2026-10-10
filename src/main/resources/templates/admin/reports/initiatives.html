@@ -13,33 +13,35 @@
 
         <h2 class="mb-4" th:text="#{reports.initiatives}">Initiative Participation</h2>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th th:text="#{common.initiative}">Initiative</th>
-                    <th th:text="#{common.office}">Office</th>
-                    <th th:text="#{common.supervisor}">Supervisor</th>
-                    <th th:text="#{status.approved}">Approved</th>
-                    <th th:text="#{status.pending}">Pending</th>
-                    <th th:text="#{status.rejected}">Rejected</th>
-                    <th th:text="#{common.total}">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="row : ${rows}">
-                    <td th:text="${row.initiativeName}"></td>
-                    <td th:text="${row.officeName != null ? row.officeName : '-'}"></td>
-                    <td th:text="${row.supervisorUsername != null ? row.supervisorUsername : '-'}"></td>
-                    <td th:text="${row.approvedCount}"></td>
-                    <td th:text="${row.pendingCount}"></td>
-                    <td th:text="${row.rejectedCount}"></td>
-                    <td th:text="${row.totalCount}"></td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="7" class="text-muted" th:text="#{reports.noInitiatives}">No initiatives yet.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th th:text="#{common.initiative}">Initiative</th>
+                        <th th:text="#{common.office}">Office</th>
+                        <th th:text="#{common.supervisor}">Supervisor</th>
+                        <th th:text="#{status.approved}">Approved</th>
+                        <th th:text="#{status.pending}">Pending</th>
+                        <th th:text="#{status.rejected}">Rejected</th>
+                        <th th:text="#{common.total}">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${rows}">
+                        <td><bdi th:text="${row.initiativeName}"></bdi></td>
+                        <td><bdi th:text="${row.officeName != null ? row.officeName : '-'}"></bdi></td>
+                        <td><bdi th:text="${row.supervisorUsername != null ? row.supervisorUsername : '-'}"></bdi></td>
+                        <td th:text="${row.approvedCount}"></td>
+                        <td th:text="${row.pendingCount}"></td>
+                        <td th:text="${row.rejectedCount}"></td>
+                        <td th:text="${row.totalCount}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(rows)}">
+                        <td colspan="7" class="text-muted" th:text="#{reports.noInitiatives}">No initiatives yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

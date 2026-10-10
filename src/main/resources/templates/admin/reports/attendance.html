@@ -13,29 +13,31 @@
 
         <h2 class="mb-4" th:text="#{reports.attendance}">Event Attendance</h2>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th th:text="#{common.initiative}">Initiative</th>
-                    <th th:text="#{common.event}">Event</th>
-                    <th th:text="#{common.from}">From</th>
-                    <th th:text="#{reports.checkedIn}">Checked In</th>
-                    <th th:text="#{reports.checkedOut}">Checked Out</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="row : ${rows}">
-                    <td th:text="${row.initiativeName != null ? row.initiativeName : '-'}"></td>
-                    <td th:text="${row.eventName}"></td>
-                    <td th:text="${row.fromDttm != null ? #temporals.format(row.fromDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
-                    <td th:text="${row.checkInCount}"></td>
-                    <td th:text="${row.checkOutCount}"></td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="5" class="text-muted" th:text="#{reports.noEvents}">No events yet.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th th:text="#{common.initiative}">Initiative</th>
+                        <th th:text="#{common.event}">Event</th>
+                        <th th:text="#{common.from}">From</th>
+                        <th th:text="#{reports.checkedIn}">Checked In</th>
+                        <th th:text="#{reports.checkedOut}">Checked Out</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="row : ${rows}">
+                        <td><bdi th:text="${row.initiativeName != null ? row.initiativeName : '-'}"></bdi></td>
+                        <td><bdi th:text="${row.eventName}"></bdi></td>
+                        <td th:text="${row.fromDttm != null ? #temporals.format(row.fromDttm, 'yyyy-MM-dd HH:mm') : '-'}"></td>
+                        <td th:text="${row.checkInCount}"></td>
+                        <td th:text="${row.checkOutCount}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(rows)}">
+                        <td colspan="5" class="text-muted" th:text="#{reports.noEvents}">No events yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

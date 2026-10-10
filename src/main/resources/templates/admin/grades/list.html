@@ -10,34 +10,36 @@
             <li th:replace="~{fragments/layout :: crumbHere(#{grades.title})}"></li>
         </ol></nav>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h2 th:text="#{grades.title}">Grades</h2>
             <a class="btn btn-primary" th:href="@{/admin/grades/new}" th:text="#{grades.new}">New Grade</a>
         </div>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th th:text="#{common.name}">Name</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="grade : ${grades}">
-                    <td th:text="${grade.name}"></td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/grades/{id}/edit(id=${grade.id})}" th:text="#{common.edit}">Edit</a>
-                        <form th:action="@{/admin/grades/{id}/delete(id=${grade.id})}" method="post" class="d-inline"
-                              th:data-confirm="#{grades.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(grades)}">
-                    <td colspan="2" class="text-muted" th:text="#{grades.empty}">No grades yet.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th th:text="#{common.name}">Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="grade : ${grades}">
+                        <td><bdi th:text="${grade.name}"></bdi></td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/grades/{id}/edit(id=${grade.id})}" th:text="#{common.edit}">Edit</a>
+                            <form th:action="@{/admin/grades/{id}/delete(id=${grade.id})}" method="post" class="d-inline"
+                                  th:data-confirm="#{grades.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(grades)}">
+                        <td colspan="2" class="text-muted" th:text="#{grades.empty}">No grades yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

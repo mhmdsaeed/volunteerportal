@@ -10,37 +10,39 @@
             <li th:replace="~{fragments/layout :: crumbHere(#{questionLibrary.title})}"></li>
         </ol></nav>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h2 th:text="#{questionLibrary.title}">Question Library</h2>
             <a class="btn btn-primary" th:href="@{/admin/question-library/new}" th:text="#{questionLibrary.newCategory}">New Category</a>
         </div>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th th:text="#{common.name}">Name</th>
-                    <th th:text="#{common.description}">Description</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="category : ${categories}">
-                    <td th:text="${category.name}"></td>
-                    <td th:text="${category.description}"></td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/question-library/{id}/questions(id=${category.id})}" th:text="#{common.questions}">Questions</a>
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/question-library/{id}/edit(id=${category.id})}" th:text="#{common.edit}">Edit</a>
-                        <form th:action="@{/admin/question-library/{id}/delete(id=${category.id})}" method="post" class="d-inline"
-                              th:data-confirm="#{questionLibrary.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(categories)}">
-                    <td colspan="3" class="text-muted" th:text="#{questionLibrary.empty}">No categories yet.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th th:text="#{common.name}">Name</th>
+                        <th th:text="#{common.description}">Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="category : ${categories}">
+                        <td><bdi th:text="${category.name}"></bdi></td>
+                        <td><bdi th:text="${category.description}"></bdi></td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/question-library/{id}/questions(id=${category.id})}" th:text="#{common.questions}">Questions</a>
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/question-library/{id}/edit(id=${category.id})}" th:text="#{common.edit}">Edit</a>
+                            <form th:action="@{/admin/question-library/{id}/delete(id=${category.id})}" method="post" class="d-inline"
+                                  th:data-confirm="#{questionLibrary.confirmDelete}" onsubmit="return confirm(this.dataset.confirm);">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(categories)}">
+                        <td colspan="3" class="text-muted" th:text="#{questionLibrary.empty}">No categories yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>

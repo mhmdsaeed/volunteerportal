@@ -32,7 +32,7 @@
                 <label for="roleId" class="form-label" th:text="#{common.role}">Role</label>
                 <select class="form-select" id="roleId" th:field="*{roleId}">
                     <option value="" th:text="#{common.none}">-- None --</option>
-                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${#messages.msgOrNull('role.' + role.name) ?: role.name}"></option>
                 </select>
             </div>
 

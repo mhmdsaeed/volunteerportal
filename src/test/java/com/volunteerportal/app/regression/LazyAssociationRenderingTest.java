@@ -120,7 +120,8 @@ class LazyAssociationRenderingTest {
             mockMvc.perform(get("/admin/offices").with(user(adminPrincipal())))
                     .andExpect(status().isOk())
                     .andExpect(content().string(containsString(office.getName())))
-                    .andExpect(content().string(containsString("COORDINATOR")))
+                    // the role's translated name in its cell ("Coordinator" alone would also match the sidebar)
+                    .andExpect(content().string(containsString("<td>Coordinator</td>")))
                     .andExpect(content().string(containsString(owner.getUsername())));
         } finally {
             officeRepository.delete(office);
