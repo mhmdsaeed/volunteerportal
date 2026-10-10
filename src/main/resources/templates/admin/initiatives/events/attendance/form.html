@@ -5,7 +5,7 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <!-- Shared by the admin area and the coordinator pages: attendancePath/eventsPath default to the admin URLs -->
-    <div class="container" style="max-width: 560px;"
+    <main id="main" class="container" style="max-width: 560px;"
          th:with="eventsPath=${eventsPath != null ? eventsPath : '/admin/initiatives/' + initiative.id + '/events'},
                   attendancePath=${attendancePath != null ? attendancePath : eventsPath + '/' + event.id + '/attendance'}">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb" th:with="fromCoordinator=${#strings.startsWith(eventsPath, '/coordinator')}">
@@ -24,7 +24,7 @@
             <li th:replace="~{fragments/layout :: crumbHere(${attendId} != null ? #{attendance.edit} : #{attendance.record})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${attendId} != null ? #{attendance.editHeading(${event.name})} : #{attendance.recordHeading(${event.name})}">Attendance</h2>
+        <h1 class="mb-4" th:text="${attendId} != null ? #{attendance.editHeading(${event.name})} : #{attendance.recordHeading(${event.name})}">Attendance</h1>
 
         <form th:action="${attendId} != null ? @{|${attendancePath}/${attendId}|} : @{${attendancePath}}"
               th:object="${attendForm}" method="post">
@@ -64,7 +64,7 @@
             <a class="btn btn-outline-secondary"
                th:href="@{${attendancePath}}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

@@ -4,14 +4,14 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 560px;">
+    <main id="main" class="container" style="max-width: 560px;">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumb(#{offices.title}, '/admin/offices')}"></li>
             <li th:replace="~{fragments/layout :: crumbHere(${officeId} != null ? #{offices.edit} : #{offices.new})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${officeId} != null ? #{offices.edit} : #{offices.new}">Office</h2>
+        <h1 class="mb-4" th:text="${officeId} != null ? #{offices.edit} : #{offices.new}">Office</h1>
 
         <form th:action="${officeId} != null ? @{/admin/offices/{id}(id=${officeId})} : @{/admin/offices}"
               th:object="${officeForm}" method="post">
@@ -47,7 +47,7 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{/admin/offices}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

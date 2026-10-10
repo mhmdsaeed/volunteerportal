@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <main class="container" th:with="initiativeRequests=${'/coordinator/initiatives/' + request.initiative.id + '/requests'},
+    <main id="main" class="container" th:with="initiativeRequests=${'/coordinator/initiatives/' + request.initiative.id + '/requests'},
                                     pending=${request.responseJoinDttm == null}">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <th:block th:if="${fromInitiative}">

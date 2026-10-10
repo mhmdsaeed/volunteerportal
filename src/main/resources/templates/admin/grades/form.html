@@ -4,14 +4,14 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 480px;">
+    <main id="main" class="container" style="max-width: 480px;">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumb(#{grades.title}, '/admin/grades')}"></li>
             <li th:replace="~{fragments/layout :: crumbHere(${gradeId} != null ? #{grades.edit} : #{grades.new})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${gradeId} != null ? #{grades.edit} : #{grades.new}">Grade</h2>
+        <h1 class="mb-4" th:text="${gradeId} != null ? #{grades.edit} : #{grades.new}">Grade</h1>
 
         <form th:action="${gradeId} != null ? @{/admin/grades/{id}(id=${gradeId})} : @{/admin/grades}"
               th:object="${gradeForm}" method="post">
@@ -25,7 +25,7 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{/admin/grades}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

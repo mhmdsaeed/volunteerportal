@@ -5,7 +5,7 @@
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
     <!-- Shared by the admin area and the coordinator pages: eventsPath is the events list URL (defaults to the admin one) -->
-    <div class="container" style="max-width: 560px;"
+    <main id="main" class="container" style="max-width: 560px;"
          th:with="eventsPath=${eventsPath != null ? eventsPath : '/admin/initiatives/' + initiative.id + '/events'}">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb" th:with="fromCoordinator=${#strings.startsWith(eventsPath, '/coordinator')}">
             <th:block th:if="${fromCoordinator}">
@@ -21,7 +21,7 @@
             <li th:replace="~{fragments/layout :: crumbHere(${eventId} != null ? #{events.edit} : #{events.new})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${eventId} != null ? #{events.editHeading(${initiative.name})} : #{events.newHeading(${initiative.name})}">Event</h2>
+        <h1 class="mb-4" th:text="${eventId} != null ? #{events.editHeading(${initiative.name})} : #{events.newHeading(${initiative.name})}">Event</h1>
 
         <form th:action="${eventId} != null ? @{|${eventsPath}/${eventId}|} : @{${eventsPath}}"
               th:object="${eventForm}" method="post">
@@ -68,7 +68,7 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{${eventsPath}}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

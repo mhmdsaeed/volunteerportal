@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 560px;">
+    <main id="main" class="container" style="max-width: 560px;">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumb(#{questionLibrary.title}, '/admin/question-library')}"></li>
@@ -12,7 +12,7 @@
             <li th:replace="~{fragments/layout :: crumbHere(${questionId} != null ? #{initiativeQuestions.edit} : #{initiativeQuestions.new})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${questionId} != null ? #{questionLibrary.editQuestionHeading(${category.name})} : #{questionLibrary.newQuestionHeading(${category.name})}">Question</h2>
+        <h1 class="mb-4" th:text="${questionId} != null ? #{questionLibrary.editQuestionHeading(${category.name})} : #{questionLibrary.newQuestionHeading(${category.name})}">Question</h1>
 
         <form th:action="${questionId} != null
                     ? @{/admin/question-library/{categoryId}/questions/{id}(categoryId=${category.id},id=${questionId})}
@@ -52,7 +52,7 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{/admin/question-library/{id}/questions(id=${category.id})}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

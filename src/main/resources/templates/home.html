@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <main class="container">
+    <main id="main" class="container">
         <h1 class="vp-greeting" th:text="#{home.greeting(${me.username})}">Good to see you, sara</h1>
 
         <p class="alert alert-warning" th:if="${pendingJoinRequestCount != null and pendingJoinRequestCount > 0}">

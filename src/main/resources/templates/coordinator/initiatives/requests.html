@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <main class="container">
+    <main id="main" class="container">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{nav.coordinator}, '/coordinator/initiatives')}"></li>
             <li th:replace="~{fragments/layout :: crumbText(${initiative.name})}"></li>

@@ -4,14 +4,14 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container">
+    <main id="main" class="container">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumbHere(#{initiatives.title})}"></li>
         </ol></nav>
 
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <h2 th:text="#{initiatives.title}">Initiatives</h2>
+            <h1 th:text="#{initiatives.title}">Initiatives</h1>
             <a class="btn btn-primary" th:href="@{/admin/initiatives/new}" th:text="#{adminInitiatives.new}">New Initiative</a>
         </div>
 
@@ -52,7 +52,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

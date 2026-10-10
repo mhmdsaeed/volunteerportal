@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <main class="container" style="max-width: 640px;">
+    <main id="main" class="container" style="max-width: 640px;">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h1 th:text="#{notifications.title}">Notifications</h1>
             <form th:if="${!#lists.isEmpty(notifications)}" th:action="@{/notifications/read-all}" method="post">

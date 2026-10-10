@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <main class="container text-center" style="max-width: 480px;"
+    <main id="main" class="container text-center" style="max-width: 480px;"
          th:with="success=${result == 'CHECKED_IN' or result == 'CHECKED_OUT'}">
         <div class="display-1 mb-2" th:classappend="${success} ? 'text-success' : 'text-warning'">
             <i class="bi" th:classappend="${success} ? 'bi-check-circle' : 'bi-exclamation-circle'" aria-hidden="true"></i>

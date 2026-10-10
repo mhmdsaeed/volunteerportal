@@ -4,14 +4,14 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 560px;">
+    <main id="main" class="container" style="max-width: 560px;">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumb(#{questionLibrary.title}, '/admin/question-library')}"></li>
             <li th:replace="~{fragments/layout :: crumbHere(${categoryId} != null ? #{questionLibrary.editCategory} : #{questionLibrary.newCategory})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${categoryId} != null ? #{questionLibrary.editCategory} : #{questionLibrary.newCategory}">Category</h2>
+        <h1 class="mb-4" th:text="${categoryId} != null ? #{questionLibrary.editCategory} : #{questionLibrary.newCategory}">Category</h1>
 
         <form th:action="${categoryId} != null ? @{/admin/question-library/{id}(id=${categoryId})} : @{/admin/question-library}"
               th:object="${categoryForm}" method="post">
@@ -31,7 +31,7 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{/admin/question-library}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

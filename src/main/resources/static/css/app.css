@@ -404,6 +404,26 @@ a {
     transition: width var(--sidebar-transition);
 }
 
+/* "Skip to main content": out of sight until a keyboard user tabs onto it, then shown over the page corner.
+   Yellow because it is what has focus. */
+.vp-skip-link {
+    position: fixed;
+    top: 0.5rem;
+    inset-inline-start: 0.5rem;
+    z-index: 1;
+    padding: 0.5rem 1rem;
+    border-radius: var(--bs-border-radius);
+    background-color: var(--vp-vest);
+    color: var(--vp-ink);
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-200%);
+}
+
+.vp-skip-link:focus {
+    transform: none;
+}
+
 .sidebar-header {
     display: flex;
     align-items: center;
@@ -843,7 +863,7 @@ html.sidebar-collapsed .sidebar .nav-link .badge {
     padding: 2.5rem 2rem;
 }
 
-.vp-auth-form h2 {
+.vp-auth-form h1 {
     margin-bottom: 1.5rem;
 }
 

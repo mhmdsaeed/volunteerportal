@@ -4,14 +4,14 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container">
+    <main id="main" class="container">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumb(#{reports.title}, '/admin/reports')}"></li>
             <li th:replace="~{fragments/layout :: crumbHere(#{reports.attendance})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="#{reports.attendance}">Event Attendance</h2>
+        <h1 class="mb-4" th:text="#{reports.attendance}">Event Attendance</h1>
 
         <div class="table-responsive">
             <table class="table table-striped">
@@ -38,7 +38,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

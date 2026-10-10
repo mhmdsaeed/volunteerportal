@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <main class="container text-center" style="max-width: 640px;"
+    <main id="main" class="container text-center" style="max-width: 640px;"
          th:with="basePath=${'/coordinator/initiatives/' + initiative.id + '/events/' + event.id + '/checkin'}">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{nav.coordinator}, '/coordinator/initiatives')}"></li>

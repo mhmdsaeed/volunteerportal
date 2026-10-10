@@ -4,14 +4,14 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 560px;">
+    <main id="main" class="container" style="max-width: 560px;">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumb(#{initiatives.title}, '/admin/initiatives')}"></li>
             <li th:replace="~{fragments/layout :: crumbHere(${initiativeId} != null ? #{adminInitiatives.edit} : #{adminInitiatives.new})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${initiativeId} != null ? #{adminInitiatives.edit} : #{adminInitiatives.new}">Initiative</h2>
+        <h1 class="mb-4" th:text="${initiativeId} != null ? #{adminInitiatives.edit} : #{adminInitiatives.new}">Initiative</h1>
 
         <form th:action="${initiativeId} != null ? @{/admin/initiatives/{id}(id=${initiativeId})} : @{/admin/initiatives}"
               th:object="${initiativeForm}" method="post">
@@ -55,7 +55,7 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{/admin/initiatives}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>

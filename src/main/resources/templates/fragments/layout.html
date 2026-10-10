@@ -27,6 +27,8 @@
 </head>
 <body>
     <nav th:fragment="navbar" class="sidebar" data-bs-theme="dark" th:aria-label="#{nav.menu}">
+        <!-- First stop for keyboard users: jumps past the menu to the page's <main id="main"> (every page has one) -->
+        <a class="vp-skip-link" href="#main" th:text="#{nav.skipToContent}">Skip to main content</a>
         <div class="sidebar-header">
             <a class="sidebar-brand" th:href="@{/}" th:text="#{app.name}">Volunteer Portal</a>
             <button type="button" class="btn btn-sm btn-outline-light sidebar-toggle" id="sidebarToggle"

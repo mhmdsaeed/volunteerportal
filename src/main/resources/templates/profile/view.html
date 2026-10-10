@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <main class="container" style="max-width: 560px;">
+    <main id="main" class="container" style="max-width: 560px;">
         <h1 class="mb-4" th:text="#{profile.title}">My Profile</h1>
 
         <div class="alert alert-success" th:if="${param.saved != null}" th:text="#{profile.saved}">

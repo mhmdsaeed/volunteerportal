@@ -4,7 +4,7 @@
 <body>
     <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <div class="container" style="max-width: 560px;">
+    <main id="main" class="container" style="max-width: 560px;">
         <nav th:aria-label="#{nav.breadcrumb}"><ol class="breadcrumb">
             <li th:replace="~{fragments/layout :: crumb(#{admin.title}, '/admin')}"></li>
             <li th:replace="~{fragments/layout :: crumb(#{initiatives.title}, '/admin/initiatives')}"></li>
@@ -13,11 +13,11 @@
             <li th:replace="~{fragments/layout :: crumbHere(${questionId} != null ? #{initiativeQuestions.edit} : #{initiativeQuestions.new})}"></li>
         </ol></nav>
 
-        <h2 class="mb-4" th:text="${questionId} != null ? #{initiativeQuestions.editHeading(${initiative.name})} : #{initiativeQuestions.newHeading(${initiative.name})}">Question</h2>
+        <h1 class="mb-4" th:text="${questionId} != null ? #{initiativeQuestions.editHeading(${initiative.name})} : #{initiativeQuestions.newHeading(${initiative.name})}">Question</h1>
 
         <div class="card mb-4" th:if="${questionId == null and libraryCategories != null}">
             <div class="card-body">
-                <h3 class="h6 card-title" id="copyFromLibrary" th:text="#{initiativeQuestions.copyFromLibrary}">Copy from Question Library</h3>
+                <h2 class="h6 card-title" id="copyFromLibrary" th:text="#{initiativeQuestions.copyFromLibrary}">Copy from Question Library</h2>
                 <form th:action="@{/admin/initiatives/{id}/questions/new(id=${initiative.id})}" method="get" class="row g-2 align-items-center">
                     <div class="col-auto">
                         <select class="form-select" name="fromLibrary" aria-labelledby="copyFromLibrary">
@@ -73,7 +73,7 @@
             <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
             <a class="btn btn-outline-secondary" th:href="@{/admin/initiatives/{id}/questions(id=${initiative.id})}" th:text="#{common.cancel}">Cancel</a>
         </form>
-    </div>
+    </main>
 
     <div th:replace="~{fragments/layout :: scripts}"></div>
 </body>
